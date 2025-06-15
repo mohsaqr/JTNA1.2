@@ -1,0 +1,55 @@
+---
+title: "BuildJamoviPlugin"
+author: "Dylan GIRAULT"
+date: "2025-04-28"
+output: html_document
+---
+
+# TNA_Module
+
+## Configuration
+
+### TNA
+
+```{r}
+# DOWNLOAD TNA PACKAGE
+
+#devtools::install_github("sonsoleslp/tna", force=TRUE)
+library("tna")
+```
+### Configure installation for Module
+
+```{r}
+# INITIATION TO INSTALL IN JAMOVI
+
+#install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))
+options(jamovi_home="/Applications/jamovi.app")
+jmvtools::check()
+
+```
+
+### Update/Install module
+    
+```{r}
+# INSTALL INTO JAMOVI
+
+setwd("/Users/mohammedsaqr/Documents/TNAModule_latest_refactored/TNAModule")
+jmvtools::install()
+
+```
+
+```{r}
+Model <- tna(group_regulation)
+Groups <-c(rep("C", 500), rep("B", 600),rep ("A", 900))
+
+plot_sequences(Model, group = Groups) + 
+
+
+```
+
+
+
+
+
+
+
