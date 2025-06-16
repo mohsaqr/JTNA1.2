@@ -114,7 +114,6 @@ JTNA/
 - **TNA Basics**: [Introduction to Transition Network Analysis](https://lamethods.org/book2/chapters/ch15-tna/ch15-tna.html)
 - **Frequency-based TNA**: [Advanced TNA Techniques](https://lamethods.org/book2/chapters/ch16-ftna/ch16-ftna.html)
 - **Clustering with TNA**: [Pattern Discovery Methods](https://lamethods.org/book2/chapters/ch17-tna-clusters/ch17-tna-clusters.html)
-- **API Documentation**: [Jamovi Plugin Development](https://dev.jamovi.org/)
 
 ## 📚 Citation
 
@@ -131,9 +130,8 @@ If you use JTNA in your research, please cite:
 ```
 
 ## 👥 Authors & Contributors
-
-- **Mohammed Saqr** - Lead Developer & Researcher
-- **Dylan Girault** - Technical Contributor  
+- **Dylan Girault** - Lead Developer   
+- **Mohammed Saqr** - Development & Research
 - **Santtu Tikka** - Statistical Methods
 - **Sonsoles López-Pernas** - Research & Development
 
@@ -147,7 +145,6 @@ This project is licensed under the MIT License - see the [LICENSE](TNAModule/LIC
 
 - **Issues**: [GitHub Issues](https://github.com/mohsaqr/JTNA1.2/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/mohsaqr/JTNA1.2/discussions)
-- **Support**: [Jamovi Forum](https://forum.jamovi.org/)
 
 ## 🔄 Version History
 
@@ -157,6 +154,4 @@ This project is licensed under the MIT License - see the [LICENSE](TNAModule/LIC
 - 🔧 **Improved**: User interface and workflow
 - 🐛 **Fixed**: Various stability improvements
 
----
 
-**🎉 Ready to explore your sequential data? Install JTNA today and discover hidden patterns in your behavioral sequences!** 
