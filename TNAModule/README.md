@@ -28,7 +28,7 @@ JTNA
 1. Open Jamovi
 2. Go to **Modules > Jamovi library > Sideloap** 
 3. Import the `.jmo` file
-4. Select "TNAModule_x.x.x.jmo"
+4. Select "JTNA1.2.Mac.jmo"
 
 ## Operation
 
