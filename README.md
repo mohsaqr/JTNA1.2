@@ -82,8 +82,8 @@ JTNA/
 │   ├── NAMESPACE               # Function exports
 │   └── JTNA_1.2.0.jmo         # Compiled module file
 │
-├── BuildJamoviPlugin.Rmd       # Build documentation
 └── README.md                   # This file
+
 ```
 
 ## 🎮 Quick Start
