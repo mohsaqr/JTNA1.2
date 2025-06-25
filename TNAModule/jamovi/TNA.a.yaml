@@ -502,10 +502,7 @@ options:
       type: Bool
       default: true
 
-    - name: sequences_show_n
-      title: N
-      type: Bool
-      default: true
+
 
     - name: sequences_tick
       title: Tick

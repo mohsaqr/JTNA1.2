@@ -84,7 +84,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             sequences_scale = "proportion",
             sequences_geom = "bar",
             sequences_include_na = TRUE,
-            sequences_show_n = TRUE,
             sequences_tick = 5,
             sequences_show_plot = FALSE, ...) {
 
@@ -502,10 +501,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "sequences_include_na",
                 sequences_include_na,
                 default=TRUE)
-            private$..sequences_show_n <- jmvcore::OptionBool$new(
-                "sequences_show_n",
-                sequences_show_n,
-                default=TRUE)
             private$..sequences_tick <- jmvcore::OptionInteger$new(
                 "sequences_tick",
                 sequences_tick,
@@ -595,7 +590,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..sequences_scale)
             self$.addOption(private$..sequences_geom)
             self$.addOption(private$..sequences_include_na)
-            self$.addOption(private$..sequences_show_n)
             self$.addOption(private$..sequences_tick)
             self$.addOption(private$..sequences_show_plot)
         }),
@@ -678,7 +672,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         sequences_scale = function() private$..sequences_scale$value,
         sequences_geom = function() private$..sequences_geom$value,
         sequences_include_na = function() private$..sequences_include_na$value,
-        sequences_show_n = function() private$..sequences_show_n$value,
         sequences_tick = function() private$..sequences_tick$value,
         sequences_show_plot = function() private$..sequences_show_plot$value),
     private = list(
@@ -760,7 +753,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..sequences_scale = NA,
         ..sequences_geom = NA,
         ..sequences_include_na = NA,
-        ..sequences_show_n = NA,
         ..sequences_tick = NA,
         ..sequences_show_plot = NA)
 )
@@ -1301,7 +1293,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "sequences_scale",
                     "sequences_geom",
                     "sequences_include_na",
-                    "sequences_show_n",
                     "sequences_tick")))}))
 
 GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -1407,7 +1398,6 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param sequences_scale .
 #' @param sequences_geom .
 #' @param sequences_include_na .
-#' @param sequences_show_n .
 #' @param sequences_tick .
 #' @param sequences_show_plot .
 #' @return A results object containing:
@@ -1536,7 +1526,6 @@ GroupTNA <- function(
     sequences_scale = "proportion",
     sequences_geom = "bar",
     sequences_include_na = TRUE,
-    sequences_show_n = TRUE,
     sequences_tick = 5,
     sequences_show_plot = FALSE) {
 
@@ -1637,7 +1626,6 @@ GroupTNA <- function(
         sequences_scale = sequences_scale,
         sequences_geom = sequences_geom,
         sequences_include_na = sequences_include_na,
-        sequences_show_n = sequences_show_n,
         sequences_tick = sequences_tick,
         sequences_show_plot = sequences_show_plot)
 

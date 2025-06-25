@@ -533,7 +533,7 @@ items:
         - sequences_scale
         - sequences_geom
         - sequences_include_na
-        - sequences_show_n
+
         - sequences_tick
 
 ...

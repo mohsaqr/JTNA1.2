@@ -630,46 +630,29 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             TRUE     
         },
-        .showSequencesPlot=function(image, ...) {
+                .showSequencesPlot=function(image, ...) {
             
             if(self$options$sequences_show_plot) {
                 
-                # Get the TNA data (same as used for histogram and frequencies)
+                # Get the TNA data
                 tna_data <- self$results$buildModelContent$state
                 
                 if(!is.null(tna_data)) {
                     
-                    # Build the plot_sequences function call
-                    plot_args <- list(
-                        x = tna_data,
-                        type = self$options$sequences_type,
-                        scale = self$options$sequences_scale,
-                        geom = self$options$sequences_geom,
-                        include_na = self$options$sequences_include_na,
-                        show_n = self$options$sequences_show_n,
-                        tick = self$options$sequences_tick
-                    )
-                    
-                    # Call the tna::plot_sequences function and print the result
+                    # Call the tna::plot_sequences function directly
                     tryCatch({
-                        plot_result <- do.call(tna::plot_sequences, plot_args)
-                        
-                        # Modify the plot to be more compact if it's a ggplot
-                        if(inherits(plot_result, "ggplot")) {
-                            plot_result <- plot_result + 
-                                ggplot2::theme(
-                                    aspect.ratio = 0.4,  # Make plot shorter
-                                    plot.margin = ggplot2::margin(10, 10, 10, 10),
-                                    strip.text = ggplot2::element_text(size = 8),
-                                    axis.text = ggplot2::element_text(size = 8),
-                                    legend.text = ggplot2::element_text(size = 8),
-                                    axis.title = ggplot2::element_text(size = 8)
-                                )
-                        }
+                        plot_result <- tna::plot_sequences(
+                            x = tna_data,
+                            type = self$options$sequences_type,
+                            scale = self$options$sequences_scale,
+                            geom = self$options$sequences_geom,
+                            include_na = self$options$sequences_include_na,
+                            tick = self$options$sequences_tick
+                        )
                         
                         print(plot_result)
                     }, error = function(e) {
-                        # Fallback to a simple plot if there's an error
+                        # Simple fallback plot
                         plot(1, type="n", main="Sequence Analysis Error", 
                              sub=paste("Error:", e$message))
                     })

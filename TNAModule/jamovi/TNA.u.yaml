@@ -519,9 +519,7 @@ children:
               - type: CheckBox
                 name: sequences_include_na
                 label: Include missing values
-              - type: CheckBox
-                name: sequences_show_n
-                label: N
+
               - type: TextBox
                 name: sequences_tick
                 format: number
