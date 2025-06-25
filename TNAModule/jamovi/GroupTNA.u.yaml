@@ -64,7 +64,7 @@ children:
             children:
               - type: CheckBox
                 name: buildModel_show_matrix
-                label: Show matrix
+                label: Matrix
       - type: LayoutBox
         stretchFactor: 1
         children:
@@ -108,16 +108,16 @@ children:
             children:
               - type: CheckBox
                 name: buildModel_show_plot
-                label: Show TNA plot
+                label: TNA plot
               - type: CheckBox
                 name: buildModel_show_histo
-                label: Show histogram
+                label: Histogram
               - type: CheckBox
                 name: buildModel_show_frequencies
-                label: Show frequencies plot
+                label: Frequencies plot
               - type: CheckBox
                 name: buildModel_show_mosaic
-                label: Show mosaic plot
+                label: Mosaic plot
       - type: LayoutBox
         stretchFactor: 1
         children:
@@ -166,10 +166,10 @@ children:
             children:
               - type: CheckBox
                 name: centrality_show_table
-                label: Show table
+                label: Table
               - type: CheckBox
                 name: centrality_show_plot
-                label: Show plot
+                label: Plot
           - type: Label
             label: Measures
             children:
@@ -230,10 +230,10 @@ children:
             children:
               - type: CheckBox
                 name: community_show_table
-                label: Show table
+                label: Table
               - type: CheckBox
                 name: community_show_plot
-                label: Show plot
+                label: Plot
       - type: LayoutBox
         stretchFactor: 1
         children:
@@ -289,10 +289,10 @@ children:
             children:
               - type: CheckBox
                 name: cliques_show_text
-                label: Show table
+                label: Table
               - type: CheckBox
                 name: cliques_show_plot
-                label: Show plot
+                label: Plot
       - type: LayoutBox
         stretchFactor: 1
         children:
@@ -346,10 +346,10 @@ children:
             children:
               - type: CheckBox
                 name: bootstrap_show_text
-                label: Show table
+                label: Table
               - type: CheckBox
                 name: bootstrap_show_plot
-                label: Show plot
+                label: Plot
       - type: LayoutBox
         stretchFactor: 1
         children:
@@ -429,13 +429,13 @@ children:
             children:
               - type: CheckBox
                 name: compare_show_text
-                label: Show table
+                label: Table
               - type: CheckBox
                 name: compare_show_plot
-                label: Show compare plot
+                label: Compare plot
               - type: CheckBox
                 name: compare_show_TNAplot
-                label: Show TNA plot
+                label: TNA plot
       - type: LayoutBox
         stretchFactor: 1
         children:
@@ -472,10 +472,10 @@ children:
             children:
               - type: CheckBox
                 name: permutation_show_text
-                label: Show table
+                label: Table
               - type: CheckBox
                 name: permutation_show_plot
-                label: Show plot
+                label: Plot
       - type: LayoutBox
         stretchFactor: 1
         children:
@@ -506,7 +506,10 @@ children:
             children:
               - type: CheckBox
                 name: sequences_show_plot
-                label: Show sequence plot
+                label: Sequence plot
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
           - type: Label
             label: Plot Type
             children:
@@ -529,6 +532,9 @@ children:
                 name: sequences_scale_count
                 optionName: sequences_scale
                 optionPart: count
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
           - type: Label
             label: Geometry
             children:
@@ -545,10 +551,10 @@ children:
             children:
               - type: CheckBox
                 name: sequences_include_na
-                label: Include NA values
+                label: Include missing values
               - type: CheckBox
                 name: sequences_show_n
-                label: Show N
+                label: N
               - type: TextBox
                 name: sequences_tick
                 format: number

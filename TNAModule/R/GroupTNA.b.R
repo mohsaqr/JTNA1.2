@@ -12,15 +12,11 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       ### Build Model
 
-      if(is.null(self$options$buildModel_variables_long_action)) {
-        self$results$errorText$setVisible(TRUE)
-        self$results$errorText$setContent("Action should be provided")
-        return()
-      }
-
-      if(is.null(self$options$buildModel_variables_long_group)) {
-        self$results$errorText$setVisible(TRUE)
-        self$results$errorText$setContent("Group should be provided")
+      # Check if required variables are provided, if not, hide error and return early
+      if(is.null(self$options$buildModel_variables_long_action) || 
+         is.null(self$options$buildModel_variables_long_actor) ||
+         is.null(self$options$buildModel_variables_long_group)) {
+        self$results$errorText$setVisible(FALSE)
         return()
       }
 
@@ -276,10 +272,10 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if(!self$results$community_plot$isFilled()) {
               self$results$community_plot$setState(coms)
             }
-            # Text
-            if(!self$results$communityContent$isFilled()) {
-              self$results$communityContent$setContent(coms)
-            }
+                                # Text
+                    if(!self$results$communityContent$isFilled()) {
+                        self$results$communityContent$setContent(coms)
+                    }
           }
 
              

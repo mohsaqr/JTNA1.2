@@ -13,9 +13,9 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             ### Build Model
 
+            # Check if action variable is provided, if not, hide error and return early
             if(is.null(self$options$buildModel_variables_long_action)) {
-                self$results$errorText$setVisible(TRUE)
-                self$results$errorText$setContent("Action should be provided")
+                self$results$errorText$setVisible(FALSE)
                 return()
             }
 
@@ -243,9 +243,14 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     if(!self$results$edgeBetweenness_plot$isFilled()) {
                         self$results$edgeBetweenness_plot$setState(edgeBetwenness)
                     }
-                    # Text
+                    # Text - show only weights
                     if(!self$results$edgeBetweennessContent$isFilled()) {
-                        self$results$edgeBetweennessContent$setContent(edgeBetwenness)
+                        # Show only the weights from edge betweenness result
+                        if(!is.null(edgeBetwenness) && !is.null(edgeBetwenness$weights)) {
+                            self$results$edgeBetweennessContent$setContent(edgeBetwenness$weights)
+                        } else {
+                            self$results$edgeBetweennessContent$setContent("No weights available")
+                        }
                     }
                 }
                 self$results$edgeBetweenness_plot$setVisible(self$options$edgeBetweenness_show_plot)
@@ -377,23 +382,9 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plotData <- self$results$buildModelContent$state
             
             if(!is.null(plotData) && self$options$buildModel_show_plot)  {
-                # Add adaptive layout similar to GroupTNA
-                if(length(plotData) == 1) {
-                    par(mfrow = c(1, 1))
-                } else if(length(plotData) <= 4) {
-                    par(mfrow = c(2, 2))
-                } else if(length(plotData) <= 6) {
-                    par(mfrow = c(2, 3))
-                } else if(length(plotData) <= 9) {
-                    par(mfrow = c(3, 3))
-                } else {
-                    row <- ceiling(sqrt(length(plotData)))
-                    column <- ceiling(length(plotData) / row)
-                    par(mfrow = c(row, column))
-                }
-                
+                # TNA analysis has only one model, so use single plot layout
                 plot(x=plotData, 
-                    cut=0.1, # Default cut level set to 0.1
+                    cut=self$options$buildModel_plot_cut,
                     minimum=self$options$buildModel_plot_min_value,
                     edge.label.cex=self$options$buildModel_plot_edge_label_size,
                     node.width=self$options$buildModel_plot_node_size,
@@ -455,24 +446,10 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plotData <- self$results$edgeBetweenness_plot$state
             
             if(!is.null(plotData) && self$options$edgeBetweenness_show_plot)  {
-                # Add adaptive layout similar to GroupTNA
-                if(length(plotData) == 1) {
-                    par(mfrow = c(1, 1))
-                } else if(length(plotData) <= 4) {
-                    par(mfrow = c(2, 2))
-                } else if(length(plotData) <= 6) {
-                    par(mfrow = c(2, 3))
-                } else if(length(plotData) <= 9) {
-                    par(mfrow = c(3, 3))
-                } else {
-                    row <- ceiling(sqrt(length(plotData)))
-                    column <- ceiling(length(plotData) / row)
-                    par(mfrow = c(row, column))
-                }
-                
+                # Edge betweenness for single TNA model
                 plot(
                     x=plotData,
-                    cut=0.1,
+                    cut=self$options$edgeBetweenness_plot_cut,
                     minimum=self$options$edgeBetweenness_plot_min_value,
                     edge.label.cex=self$options$edgeBetweenness_plot_edge_label_size,
                     node.width=self$options$edgeBetweenness_plot_node_size,
@@ -486,21 +463,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plotData <- self$results$community_plot$state
             
             if(!is.null(plotData) && self$options$community_show_plot)  {
-                # Add adaptive layout similar to GroupTNA
-                if(length(plotData) == 1) {
-                    par(mfrow = c(1, 1))
-                } else if(length(plotData) <= 4) {
-                    par(mfrow = c(2, 2))
-                } else if(length(plotData) <= 6) {
-                    par(mfrow = c(2, 3))
-                } else if(length(plotData) <= 9) {
-                    par(mfrow = c(3, 3))
-                } else {
-                    row <- ceiling(sqrt(length(plotData)))
-                    column <- ceiling(length(plotData) / row)
-                    par(mfrow = c(row, column))
-                }
-                
+                # Community plot for single TNA model
                 methods <- self$options$community_methods
                 plot(x=plotData, method=methods)
             }   
@@ -516,7 +479,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     ask=FALSE, 
                     first=1, 
                     n=1,
-                    cut=0.1,
+                    cut=self$options$cliques_plot_cut,
                     minimum=self$options$cliques_plot_min_value,
                     edge.label.cex=self$options$cliques_plot_edge_label_size,
                     node.width=self$options$cliques_plot_node_size,
@@ -539,7 +502,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     ask=FALSE, 
                     first=2, 
                     n=1,
-                    cut=0.1,
+                    cut=self$options$cliques_plot_cut,
                     minimum=self$options$cliques_plot_min_value,
                     edge.label.cex=self$options$cliques_plot_edge_label_size,
                     node.width=self$options$cliques_plot_node_size,
@@ -562,7 +525,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     ask=FALSE, 
                     first=3, 
                     n=1,
-                    cut=0.1,
+                    cut=self$options$cliques_plot_cut,
                     minimum=self$options$cliques_plot_min_value,
                     edge.label.cex=self$options$cliques_plot_edge_label_size,
                     node.width=self$options$cliques_plot_node_size,
@@ -585,7 +548,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     ask=FALSE, 
                     first=4, 
                     n=1,
-                    cut=0.1,
+                    cut=self$options$cliques_plot_cut,
                     minimum=self$options$cliques_plot_min_value,
                     edge.label.cex=self$options$cliques_plot_edge_label_size,
                     node.width=self$options$cliques_plot_node_size,
@@ -608,7 +571,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     ask=FALSE, 
                     first=5, 
                     n=1,
-                    cut=0.1,
+                    cut=self$options$cliques_plot_cut,
                     minimum=self$options$cliques_plot_min_value,
                     edge.label.cex=self$options$cliques_plot_edge_label_size,
                     node.width=self$options$cliques_plot_node_size,
@@ -631,7 +594,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     ask=FALSE, 
                     first=6, 
                     n=1,
-                    cut=0.1,
+                    cut=self$options$cliques_plot_cut,
                     minimum=self$options$cliques_plot_min_value,
                     edge.label.cex=self$options$cliques_plot_edge_label_size,
                     node.width=self$options$cliques_plot_node_size,
@@ -649,28 +612,14 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plotData <- self$results$bootstrap_plot$state
 
             if(!is.null(plotData) && self$options$bootstrap_show_plot)  {
-                # Add adaptive layout similar to GroupTNA
-                if(length(plotData) == 1) {
-                    par(mfrow = c(1, 1))
-                } else if(length(plotData) <= 4) {
-                    par(mfrow = c(2, 2))
-                } else if(length(plotData) <= 6) {
-                    par(mfrow = c(2, 3))
-                } else if(length(plotData) <= 9) {
-                    par(mfrow = c(3, 3))
-                } else {
-                    row <- ceiling(sqrt(length(plotData)))
-                    column <- ceiling(length(plotData) / row)
-                    par(mfrow = c(row, column))
-                }
-
+                # Bootstrap plot for single TNA model
                 m_sig <- plotData$weights_sig
                 
                 mat_color <- matrix()
                 mat_color[m_sig == 0] <- "red"
                 plot(
                     x=plotData,
-                    cut=0.1,
+                    cut=self$options$bootstrap_plot_cut,
                     minimum=self$options$bootstrap_plot_min_value,
                     edge.label.cex=self$options$bootstrap_plot_edge_label_size,
                     node.width=self$options$bootstrap_plot_node_size,

@@ -10,16 +10,16 @@ options:
       type: Data
 
     - name: buildModel_variables_long_actor
-      title: Actor
+      title: Actor (Optional)
       type: Variable
     - name: buildModel_variables_long_time
-      title: Time
+      title: Time (Optional)
       type: Variable
     - name: buildModel_variables_long_action
       title: Action
       type: Variable
     - name: buildModel_variables_long_order
-      title: Order
+      title: Order (Optional)
       type: Variable
 
     ### BUILD MODEL DATA
@@ -52,7 +52,7 @@ options:
 
       ##### PLOT
     - name: buildModel_show_matrix
-      title: Show matrix
+      title: Matrix
       type: Bool
       default: False
 
@@ -62,7 +62,7 @@ options:
       default: 900
     
     - name: buildModel_show_plot
-      title: Show plot
+      title: Plot
       type: Bool
       default: True
 
@@ -111,15 +111,15 @@ options:
           name: spring
     
     - name: buildModel_show_histo
-      title: Show histogram
+      title: Histogram
       type: Bool
       default: False
     - name: buildModel_show_frequencies
-      title: Show frequencies plot
+      title: Frequencies plot
       type: Bool
       default: False
     - name: buildModel_show_mosaic
-      title: Show mosaic
+      title: Mosaic
       type: Bool
       default: False
 
@@ -142,12 +142,12 @@ options:
       default: False
 
     - name: centrality_show_table
-      title: Show table
+      title: Table
       type: Bool
       default: False
 
     - name: centrality_show_plot
-      title: Show plot
+      title: Plot
       type: Bool
       default: False
 
@@ -200,12 +200,12 @@ options:
     ### EDGE BETWEENNESS
     ##### PLOT
     - name: edgeBetweenness_show_text
-      title: Show text
+      title: Text
       type: Bool
       default: False
     
     - name: edgeBetweenness_show_plot
-      title: Show plot
+      title: Plot
       type: Bool
       default: False
 
@@ -282,11 +282,11 @@ options:
       min: 0
       max: 100
     - name: community_show_table
-      title: Show table
+      title: Table
       type: Bool
       default: False
     - name: community_show_plot
-      title: Show plot
+      title: Plot
       type: Bool
       default: False
 
@@ -307,14 +307,14 @@ options:
       max: 1
 
     - name: cliques_show_text
-      title: Show Text
+      title: Text
       type: Bool
       default: False
 
     ##### PLOT
 
     - name: cliques_show_plot
-      title: Show plot
+      title: Plot
       type: Bool
       default: False
 
@@ -412,12 +412,12 @@ options:
 
     ##### PLOT
     - name: bootstrap_show_text
-      title: Show text
+      title: Text
       type: Bool
       default: False
     
     - name: bootstrap_show_plot
-      title: Show plot
+      title: Plot
       type: Bool
       default: False
 
@@ -498,12 +498,12 @@ options:
           name: area
 
     - name: sequences_include_na
-      title: Include NA
+      title: Include missing values
       type: Bool
       default: true
 
     - name: sequences_show_n
-      title: Show N
+      title: N
       type: Bool
       default: true
 
@@ -515,7 +515,7 @@ options:
       max: 20
 
     - name: sequences_show_plot
-      title: Show Sequence Plot
+      title: Sequence Plot
       type: Bool
       default: false
 
