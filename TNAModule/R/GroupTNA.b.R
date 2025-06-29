@@ -173,52 +173,47 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               vectorCharacter <- append(vectorCharacter, "Clustering")
           }
 
-          # OPTIMIZED: Check if table is already filled before expensive centrality calculation
-          fullTable <- self$results$centralityTable$isFilled()
-
-          # Only add columns if table is not filled
-          if(!fullTable) {
-              self$results$centralityTable$addColumn(name="group", type="text")
-              self$results$centralityTable$addColumn(name="state", type="text")
-
-              if(self$options$centrality_OutStrength) {
-                  self$results$centralityTable$addColumn(name="OutStrength", type="number")
-              }
-              if(self$options$centrality_InStrength) {
-                  self$results$centralityTable$addColumn(name="InStrength", type="number")
-              }
-              if(self$options$centrality_ClosenessIn) {
-                  self$results$centralityTable$addColumn(name="ClosenessIn", type="number")
-              }
-              if(self$options$centrality_ClosenessOut) {
-                  self$results$centralityTable$addColumn(name="ClosenessOut", type="number")
-              }
-              if(self$options$centrality_Closeness) {
-                  self$results$centralityTable$addColumn(name="Closeness", type="number")
-              }
-              if(self$options$centrality_Betweenness) {
-                  self$results$centralityTable$addColumn(name="Betweenness", type="integer")
-              }
-              if(self$options$centrality_BetweennessRSP) {
-                  self$results$centralityTable$addColumn(name="BetweennessRSP", type="number")
-              }
-              if(self$options$centrality_Diffusion) {
-                  self$results$centralityTable$addColumn(name="Diffusion", type="number")
-              }
-              if(self$options$centrality_Clustering) {
-                  self$results$centralityTable$addColumn(name="Clustering", type="number")
-              }
-          }
-
-          # OPTIMIZED: Use state to store centrality results and avoid recalculation
+          # Use state to store centrality results and avoid recalculation, but allow recalculation when needed
           cent <- self$results$centralityTable$state
-          if(length(vectorCharacter) > 0 && !is.null(model) && (!self$results$centrality_plot$isFilled() || !fullTable) ) {
+          if(length(vectorCharacter) > 0 && !is.null(model) && is.null(cent)) {
               cent <- tna::centralities(x=model, loops=centrality_loops, normalize=centrality_normalize, measures=vectorCharacter)
               self$results$centralityTable$setState(cent)
           }
 
-          # OPTIMIZED: Only populate table if we have data and table isn't filled
-          if(!is.null(cent) && !fullTable && length(vectorCharacter) > 0) {
+          # Add columns if needed (jamovi will handle duplicates)
+          self$results$centralityTable$addColumn(name="group", type="text")
+          self$results$centralityTable$addColumn(name="state", type="text")
+
+          if(self$options$centrality_OutStrength) {
+              self$results$centralityTable$addColumn(name="OutStrength", type="number")
+          }
+          if(self$options$centrality_InStrength) {
+              self$results$centralityTable$addColumn(name="InStrength", type="number")
+          }
+          if(self$options$centrality_ClosenessIn) {
+              self$results$centralityTable$addColumn(name="ClosenessIn", type="number")
+          }
+          if(self$options$centrality_ClosenessOut) {
+              self$results$centralityTable$addColumn(name="ClosenessOut", type="number")
+          }
+          if(self$options$centrality_Closeness) {
+              self$results$centralityTable$addColumn(name="Closeness", type="number")
+          }
+          if(self$options$centrality_Betweenness) {
+              self$results$centralityTable$addColumn(name="Betweenness", type="integer")
+          }
+          if(self$options$centrality_BetweennessRSP) {
+              self$results$centralityTable$addColumn(name="BetweennessRSP", type="number")
+          }
+          if(self$options$centrality_Diffusion) {
+              self$results$centralityTable$addColumn(name="Diffusion", type="number")
+          }
+          if(self$options$centrality_Clustering) {
+              self$results$centralityTable$addColumn(name="Clustering", type="number")
+          }
+
+          # Populate table if we have data (either from state or newly calculated)
+          if(!is.null(cent) && length(vectorCharacter) > 0) {
               # Handle Group TNA centrality data structure
               row_count <- 1
               for (group_name in names(cent)) {
@@ -288,15 +283,15 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         community_gamma <- as.numeric(self$options$community_gamma)
         methods <- self$options$community_methods
 
-        # OPTIMIZED: Use state to avoid recalculating community detection
+        # Use state to avoid recalculating community detection, but allow recalculation when needed
         coms <- self$results$community_plot$state
-        if(is.null(coms) || (!self$results$communityContent$isFilled() && self$options$community_show_table)) {
+        if(is.null(coms)) {
           resultComs <- tryCatch({
             coms <- tna::communities(x=model, methods=methods, gamma=community_gamma)
             
             # Store state to avoid recalculation
             self$results$community_plot$setState(coms)
-            if(!self$results$communityContent$isFilled()) {
+            if(self$options$community_show_table) {
                 self$results$communityContent$setContent(coms)
             }
             TRUE
@@ -323,15 +318,15 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       if(!is.null(model) && ( self$options$cliques_show_text || self$options$cliques_show_plot) ) {
 
-          # OPTIMIZED: Use state to avoid recalculating expensive cliques analysis
+          # Use state to avoid recalculating expensive cliques analysis, but allow recalculation when needed
           cliques <- self$results$cliques_multiple_plot$state
-          if(is.null(cliques) || (!self$results$cliquesContent$isFilled() && self$options$cliques_show_text)) {
+          if(is.null(cliques)) {
               cliques <- tna::cliques(x=model, size=cliques_size, threshold=cliques_threshold)
 
               # Store state to avoid recalculation
               self$results$cliques_multiple_plot$setState(cliques)
               
-              if(!self$results$cliquesContent$isFilled() && self$options$cliques_show_text) {
+              if(self$options$cliques_show_text) {
                 self$results$cliquesContent$setContent(cliques)
               }
           }
@@ -346,9 +341,9 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       if(!is.null(model) && ( self$options$bootstrap_show_table || self$options$bootstrap_show_plot)) {
         
-        # OPTIMIZED: Use state to avoid recalculating expensive bootstrap
+        # Use state to avoid recalculating expensive bootstrap, but allow recalculation when needed
         bs <- self$results$bootstrap_plot$state
-        if(is.null(bs) || (!self$results$bootstrapTable$isFilled() && self$options$bootstrap_show_table)) {
+        if(is.null(bs)) {
           iteration <- self$options$bootstrap_iteration
           level <- self$options$bootstrap_level
           method <- self$options$bootstrap_method
@@ -371,8 +366,8 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           self$results$bootstrap_plot$setState(bs)
         }
 
-        # OPTIMIZED: Only populate table if not already done
-        if(!is.null(bs) && self$options$bootstrap_show_table && !self$results$bootstrapTable$isFilled()) {
+        # Populate table if we have data and table option is enabled
+        if(!is.null(bs) && self$options$bootstrap_show_table) {
           row_key_counter <- 1
           
           # Debug: Print structure to understand data format
@@ -434,9 +429,9 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       if(!is.null(model) && ( self$options$permutation_show_text || self$options$permutation_show_plot)) {
         
-        # OPTIMIZED: Use state to avoid recalculating expensive permutation test
+        # Use state to avoid recalculating expensive permutation test, but allow recalculation when needed
         permutationTest <- self$results$permutation_plot$state
-        if(is.null(permutationTest) || (!self$results$permutationContent$isFilled() && self$options$permutation_show_text)) {
+        if(is.null(permutationTest)) {
           permutationTest <- tna::permutation_test(
             x=model, 
             iter=self$options$permutation_iter, 
@@ -448,8 +443,8 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           self$results$permutation_plot$setState(permutationTest)
         }
 
-        # OPTIMIZED: Only populate table if not already done
-        if (!is.null(permutationTest) && self$options$permutation_show_text && !self$results$permutationContent$isFilled()) {
+        # Populate table if we have data and table option is enabled
+        if (!is.null(permutationTest) && self$options$permutation_show_text) {
           row_key_counter <- 1
           for (comparison_name in names(permutationTest)) {
             comparison_data <- permutationTest[[comparison_name]]
