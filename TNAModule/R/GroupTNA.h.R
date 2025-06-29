@@ -990,6 +990,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_threshold",
                     "cliques_size",
                     "cliques_threshold",
+                    "cliques_plot_cut",
                     "cliques_plot_min_value",
                     "cliques_plot_edge_label_size",
                     "cliques_plot_node_size",

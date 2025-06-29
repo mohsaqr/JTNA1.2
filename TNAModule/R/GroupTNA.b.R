@@ -143,7 +143,35 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           centrality_loops <- self$options$centrality_loops
           centrality_normalize <- self$options$centrality_normalize
 
-          vectorCharacter <- character(0)    
+          # Build vectorCharacter based on selected options (always needed)
+          vectorCharacter <- character(0)
+          if(self$options$centrality_OutStrength) {
+              vectorCharacter <- append(vectorCharacter, "OutStrength")
+          }
+          if(self$options$centrality_InStrength) {
+              vectorCharacter <- append(vectorCharacter, "InStrength")
+          }
+          if(self$options$centrality_ClosenessIn) {
+              vectorCharacter <- append(vectorCharacter, "ClosenessIn")
+          }
+          if(self$options$centrality_ClosenessOut) {
+              vectorCharacter <- append(vectorCharacter, "ClosenessOut")
+          }
+          if(self$options$centrality_Closeness) {
+              vectorCharacter <- append(vectorCharacter, "Closeness")
+          }
+          if(self$options$centrality_Betweenness) {
+              vectorCharacter <- append(vectorCharacter, "Betweenness")
+          }
+          if(self$options$centrality_BetweennessRSP) {
+              vectorCharacter <- append(vectorCharacter, "BetweennessRSP")
+          }
+          if(self$options$centrality_Diffusion) {
+              vectorCharacter <- append(vectorCharacter, "Diffusion")
+          }
+          if(self$options$centrality_Clustering) {
+              vectorCharacter <- append(vectorCharacter, "Clustering")
+          }
 
           # OPTIMIZED: Check if table is already filled before expensive centrality calculation
           fullTable <- self$results$centralityTable$isFilled()
@@ -154,39 +182,30 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               self$results$centralityTable$addColumn(name="state", type="text")
 
               if(self$options$centrality_OutStrength) {
-                  vectorCharacter <- append(vectorCharacter, "OutStrength")
                   self$results$centralityTable$addColumn(name="OutStrength", type="number")
               }
               if(self$options$centrality_InStrength) {
-                  vectorCharacter <- append(vectorCharacter, "InStrength")
                   self$results$centralityTable$addColumn(name="InStrength", type="number")
               }
               if(self$options$centrality_ClosenessIn) {
-                  vectorCharacter <- append(vectorCharacter, "ClosenessIn")
                   self$results$centralityTable$addColumn(name="ClosenessIn", type="number")
               }
               if(self$options$centrality_ClosenessOut) {
-                  vectorCharacter <- append(vectorCharacter, "ClosenessOut")
                   self$results$centralityTable$addColumn(name="ClosenessOut", type="number")
               }
               if(self$options$centrality_Closeness) {
-                  vectorCharacter <- append(vectorCharacter, "Closeness")
                   self$results$centralityTable$addColumn(name="Closeness", type="number")
               }
               if(self$options$centrality_Betweenness) {
-                  vectorCharacter <- append(vectorCharacter, "Betweenness")
                   self$results$centralityTable$addColumn(name="Betweenness", type="integer")
               }
               if(self$options$centrality_BetweennessRSP) {
-                  vectorCharacter <- append(vectorCharacter, "BetweennessRSP")
                   self$results$centralityTable$addColumn(name="BetweennessRSP", type="number")
               }
               if(self$options$centrality_Diffusion) {
-                  vectorCharacter <- append(vectorCharacter, "Diffusion")
                   self$results$centralityTable$addColumn(name="Diffusion", type="number")
               }
               if(self$options$centrality_Clustering) {
-                  vectorCharacter <- append(vectorCharacter, "Clustering")
                   self$results$centralityTable$addColumn(name="Clustering", type="number")
               }
           }
@@ -198,57 +217,69 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               self$results$centralityTable$setState(cent)
           }
 
-              for (i in 1:lengths(cent[1])) {
-                  index <- 1
-                  rowValues <- list()
+          # OPTIMIZED: Only populate table if we have data and table isn't filled
+          if(!is.null(cent) && !fullTable && length(vectorCharacter) > 0) {
+              # Handle Group TNA centrality data structure
+              row_count <- 1
+              for (group_name in names(cent)) {
+                  group_centrality <- cent[[group_name]]
+                  
+                  if(!is.null(group_centrality) && nrow(group_centrality) > 0) {
+                      for (i in 1:nrow(group_centrality)) {
+                          index <- 1
+                          rowValues <- list()
+                          
+                          rowValues$group <- as.character(group_name)
+                          rowValues$state <- as.character(group_centrality[i, index])
 
-                  rowValues$group <- as.character(cent[i, index])
-
-                  index <- index + 1
-                  rowValues$state <- as.character(cent[i, index])
-
-                  if ("OutStrength" %in% vectorCharacter) {
-                      index <- index + 1
-                      rowValues$OutStrength <- as.numeric(cent[i, index])
+                          if ("OutStrength" %in% vectorCharacter) {
+                              index <- index + 1
+                              rowValues$OutStrength <- as.numeric(group_centrality[i, index])
+                          }
+                          if ("InStrength" %in% vectorCharacter) {
+                              index <- index + 1
+                              rowValues$InStrength <- as.numeric(group_centrality[i, index])
+                          }
+                          if ("ClosenessIn" %in% vectorCharacter) {
+                              index <- index + 1
+                              rowValues$ClosenessIn <- as.numeric(group_centrality[i, index])
+                          }
+                          if ("ClosenessOut" %in% vectorCharacter) {
+                              index <- index + 1
+                              rowValues$ClosenessOut <- as.numeric(group_centrality[i, index])
+                          }
+                          if ("Closeness" %in% vectorCharacter) {
+                              index <- index + 1
+                              rowValues$Closeness <- as.numeric(group_centrality[i, index])
+                          }
+                          if ("Betweenness" %in% vectorCharacter) {
+                              index <- index + 1
+                              rowValues$Betweenness <- as.numeric(group_centrality[i, index])
+                          }
+                          if ("BetweennessRSP" %in% vectorCharacter) {
+                              index <- index + 1
+                              rowValues$BetweennessRSP <- as.numeric(group_centrality[i, index])
+                          }
+                          if ("Diffusion" %in% vectorCharacter) {
+                              index <- index + 1
+                              rowValues$Diffusion <- as.numeric(group_centrality[i, index])
+                          }
+                          if ("Clustering" %in% vectorCharacter) {
+                              index <- index + 1
+                              rowValues$Clustering <- as.numeric(group_centrality[i, index])
+                          }
+                          
+                          self$results$centralityTable$addRow(rowKey=row_count, values=rowValues)
+                          row_count <- row_count + 1
+                      }
                   }
-                  if ("InStrength" %in% vectorCharacter) {
-                      index <- index + 1
-                      rowValues$InStrength <- as.numeric(cent[i, index])
-                  }
-                  if ("ClosenessIn" %in% vectorCharacter) {
-                      index <- index + 1
-                      rowValues$ClosenessIn <- as.numeric(cent[i, index])
-                  }
-                  if ("ClosenessOut" %in% vectorCharacter) {
-                      index <- index + 1
-                      rowValues$ClosenessOut <- as.numeric(cent[i, index])
-                  }
-                  if ("Closeness" %in% vectorCharacter) {
-                      index <- index + 1
-                      rowValues$Closeness <- as.numeric(cent[i, index])
-                  }
-                  if ("Betweenness" %in% vectorCharacter) {
-                      index <- index + 1
-                      rowValues$Betweenness <- as.numeric(cent[i, index])
-                  }
-                  if ("BetweennessRSP" %in% vectorCharacter) {
-                      index <- index + 1
-                      rowValues$BetweennessRSP <- as.numeric(cent[i, index])
-                  }
-                  if ("Diffusion" %in% vectorCharacter) {
-                      index <- index + 1
-                      rowValues$Diffusion <- as.numeric(cent[i, index])
-                  }
-                  if ("Clustering" %in% vectorCharacter) {
-                      index <- index + 1
-                      rowValues$Clustering <- as.numeric(cent[i, index])
-                  }
-                  self$results$centralityTable$addRow(rowKey=i, values=rowValues)
+              }
           }
+          
+          # Set visibility
           self$results$centralityTitle$setVisible(self$options$centrality_show_plot || self$options$centrality_show_table)
           self$results$centrality_plot$setVisible(self$options$centrality_show_plot)
           self$results$centralityTable$setVisible(self$options$centrality_show_table)
-          
       }
 
 
