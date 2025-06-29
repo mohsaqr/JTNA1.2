@@ -67,14 +67,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bootstrap_plot_node_size = 1,
             bootstrap_plot_node_label_size = 1,
             bootstrap_plot_layout = NULL,
-            compare_model1 = 1,
-            compare_model2 = 2,
-            compare_show_text = FALSE,
-            compare_show_plot = FALSE,
-            compare_show_TNAplot = FALSE,
-            compare_TNAPlot_type = "heatmap",
-            compare_TNAPlot_population = "difference",
-            compare_TNAPlot_method = "pearson",
             permutation_show_text = FALSE,
             permutation_show_plot = FALSE,
             permutation_iter = 1000,
@@ -405,54 +397,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "circle",
                     "spring"))
-            private$..compare_model1 <- jmvcore::OptionInteger$new(
-                "compare_model1",
-                compare_model1,
-                default=1,
-                min=1)
-            private$..compare_model2 <- jmvcore::OptionInteger$new(
-                "compare_model2",
-                compare_model2,
-                default=2,
-                min=1)
-            private$..compare_show_text <- jmvcore::OptionBool$new(
-                "compare_show_text",
-                compare_show_text,
-                default=FALSE)
-            private$..compare_show_plot <- jmvcore::OptionBool$new(
-                "compare_show_plot",
-                compare_show_plot,
-                default=FALSE)
-            private$..compare_show_TNAplot <- jmvcore::OptionBool$new(
-                "compare_show_TNAplot",
-                compare_show_TNAplot,
-                default=FALSE)
-            private$..compare_TNAPlot_type <- jmvcore::OptionList$new(
-                "compare_TNAPlot_type",
-                compare_TNAPlot_type,
-                default="heatmap",
-                options=list(
-                    "heatmap",
-                    "scatterplot",
-                    "centrality_heatmap",
-                    "weight_density"))
-            private$..compare_TNAPlot_population <- jmvcore::OptionList$new(
-                "compare_TNAPlot_population",
-                compare_TNAPlot_population,
-                default="difference",
-                options=list(
-                    "x",
-                    "y",
-                    "difference"))
-            private$..compare_TNAPlot_method <- jmvcore::OptionList$new(
-                "compare_TNAPlot_method",
-                compare_TNAPlot_method,
-                default="pearson",
-                options=list(
-                    "pearson",
-                    "kendall",
-                    "spearman",
-                    "distance"))
             private$..permutation_show_text <- jmvcore::OptionBool$new(
                 "permutation_show_text",
                 permutation_show_text,
@@ -573,14 +517,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..bootstrap_plot_node_size)
             self$.addOption(private$..bootstrap_plot_node_label_size)
             self$.addOption(private$..bootstrap_plot_layout)
-            self$.addOption(private$..compare_model1)
-            self$.addOption(private$..compare_model2)
-            self$.addOption(private$..compare_show_text)
-            self$.addOption(private$..compare_show_plot)
-            self$.addOption(private$..compare_show_TNAplot)
-            self$.addOption(private$..compare_TNAPlot_type)
-            self$.addOption(private$..compare_TNAPlot_population)
-            self$.addOption(private$..compare_TNAPlot_method)
             self$.addOption(private$..permutation_show_text)
             self$.addOption(private$..permutation_show_plot)
             self$.addOption(private$..permutation_iter)
@@ -655,14 +591,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         bootstrap_plot_node_size = function() private$..bootstrap_plot_node_size$value,
         bootstrap_plot_node_label_size = function() private$..bootstrap_plot_node_label_size$value,
         bootstrap_plot_layout = function() private$..bootstrap_plot_layout$value,
-        compare_model1 = function() private$..compare_model1$value,
-        compare_model2 = function() private$..compare_model2$value,
-        compare_show_text = function() private$..compare_show_text$value,
-        compare_show_plot = function() private$..compare_show_plot$value,
-        compare_show_TNAplot = function() private$..compare_show_TNAplot$value,
-        compare_TNAPlot_type = function() private$..compare_TNAPlot_type$value,
-        compare_TNAPlot_population = function() private$..compare_TNAPlot_population$value,
-        compare_TNAPlot_method = function() private$..compare_TNAPlot_method$value,
         permutation_show_text = function() private$..permutation_show_text$value,
         permutation_show_plot = function() private$..permutation_show_plot$value,
         permutation_iter = function() private$..permutation_iter$value,
@@ -736,14 +664,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..bootstrap_plot_node_size = NA,
         ..bootstrap_plot_node_label_size = NA,
         ..bootstrap_plot_layout = NA,
-        ..compare_model1 = NA,
-        ..compare_model2 = NA,
-        ..compare_show_text = NA,
-        ..compare_show_plot = NA,
-        ..compare_show_TNAplot = NA,
-        ..compare_TNAPlot_type = NA,
-        ..compare_TNAPlot_population = NA,
-        ..compare_TNAPlot_method = NA,
         ..permutation_show_text = NA,
         ..permutation_show_plot = NA,
         ..permutation_iter = NA,
@@ -783,10 +703,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         bootstrapTitle = function() private$.items[["bootstrapTitle"]],
         bootstrapTable = function() private$.items[["bootstrapTable"]],
         bootstrap_plot = function() private$.items[["bootstrap_plot"]],
-        comparisonTitle = function() private$.items[["comparisonTitle"]],
-        comparisonContent = function() private$.items[["comparisonContent"]],
-        comparison_plot = function() private$.items[["comparison_plot"]],
-        comparisonTNA_plot = function() private$.items[["comparisonTNA_plot"]],
         permutationTitle = function() private$.items[["permutationTitle"]],
         permutationContent = function() private$.items[["permutationContent"]],
         permutation_plot = function() private$.items[["permutation_plot"]],
@@ -1217,65 +1133,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "bootstrap_plot_layout")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="comparisonTitle",
-                title="Comparison",
-                visible=FALSE))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="comparisonContent",
-                visible=FALSE,
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_variables_long_group",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "compare_model1",
-                    "compare_model2")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="comparison_plot",
-                width=1000,
-                height=800,
-                visible=FALSE,
-                renderFun=".showComparisonPlot",
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_variables_long_group",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "compare_model1",
-                    "compare_model2")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="comparisonTNA_plot",
-                width=1000,
-                height=800,
-                visible=FALSE,
-                renderFun=".showComparisonTNAPlot",
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_variables_long_group",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "compare_model1",
-                    "compare_model2",
-                    "compare_TNAPlot_type",
-                    "compare_TNAPlot_population",
-                    "compare_TNAPlot_method")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
                 name="permutationTitle",
                 title="Permutation",
                 visible=FALSE))
@@ -1441,14 +1298,6 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param bootstrap_plot_node_size .
 #' @param bootstrap_plot_node_label_size .
 #' @param bootstrap_plot_layout .
-#' @param compare_model1 .
-#' @param compare_model2 .
-#' @param compare_show_text .
-#' @param compare_show_plot .
-#' @param compare_show_TNAplot .
-#' @param compare_TNAPlot_type .
-#' @param compare_TNAPlot_population .
-#' @param compare_TNAPlot_method .
 #' @param permutation_show_text .
 #' @param permutation_show_plot .
 #' @param permutation_iter .
@@ -1489,10 +1338,6 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$bootstrapTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$bootstrap_plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$comparisonTitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$comparisonContent} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$comparison_plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$comparisonTNA_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$permutationTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$permutationContent} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$permutation_plot} \tab \tab \tab \tab \tab an image \cr
@@ -1569,14 +1414,6 @@ GroupTNA <- function(
     bootstrap_plot_node_size = 1,
     bootstrap_plot_node_label_size = 1,
     bootstrap_plot_layout,
-    compare_model1 = 1,
-    compare_model2 = 2,
-    compare_show_text = FALSE,
-    compare_show_plot = FALSE,
-    compare_show_TNAplot = FALSE,
-    compare_TNAPlot_type = "heatmap",
-    compare_TNAPlot_population = "difference",
-    compare_TNAPlot_method = "pearson",
     permutation_show_text = FALSE,
     permutation_show_plot = FALSE,
     permutation_iter = 1000,
@@ -1669,14 +1506,6 @@ GroupTNA <- function(
         bootstrap_plot_node_size = bootstrap_plot_node_size,
         bootstrap_plot_node_label_size = bootstrap_plot_node_label_size,
         bootstrap_plot_layout = bootstrap_plot_layout,
-        compare_model1 = compare_model1,
-        compare_model2 = compare_model2,
-        compare_show_text = compare_show_text,
-        compare_show_plot = compare_show_plot,
-        compare_show_TNAplot = compare_show_TNAplot,
-        compare_TNAPlot_type = compare_TNAPlot_type,
-        compare_TNAPlot_population = compare_TNAPlot_population,
-        compare_TNAPlot_method = compare_TNAPlot_method,
         permutation_show_text = permutation_show_text,
         permutation_show_plot = permutation_show_plot,
         permutation_iter = permutation_iter,

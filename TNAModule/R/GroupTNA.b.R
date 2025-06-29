@@ -404,43 +404,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       }
 
-      ### Comparison
 
-      if(!is.null(model) && ( self$options$compare_show_text || self$options$compare_show_plot || self$options$compare_show_TNAplot)) {
-          indexModel1 <- self$options$compare_model1
-          indexModel2 <- self$options$compare_model2
-          size <- length(model)
-
-          if(size < indexModel1 || size < indexModel2) {
-              self$results$errorText$setVisible(TRUE)
-              self$results$errorText$setContent(paste("Comparison - The index given can't be bigger than the number of TNA (", size, ")"))
-              return()
-          }
-
-          if( !self$results$comparisonContent$isFilled() || 
-              !self$results$comparison_plot$isFilled() || 
-              !self$results$comparisonTNA_plot$isFilled()
-          )
-          {
-              compare_group <- tna::compare(model, i=indexModel1, j=indexModel2)
-
-              # Title
-
-              # Text
-              if(!self$results$comparisonContent$isFilled()) {
-                self$results$comparisonContent$setContent(compare_group)
-              }
-
-              # Plot compareTNA
-              if(!self$results$comparisonTNA_plot$isFilled()) {
-                self$results$comparisonTNA_plot$setState(compare_group)
-              }
-          }
-          self$results$comparisonTitle$setVisible(self$options$compare_show_text || self$options$compare_show_plot || self$options$compare_show_TNAplot)
-          self$results$comparisonContent$setVisible(self$options$compare_show_text)
-          self$results$comparison_plot$setVisible(self$options$compare_show_plot)
-          self$results$comparisonTNA_plot$setVisible(self$options$compare_show_TNAplot)
-      }
 
       ## Permutation
 
@@ -851,40 +815,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             FALSE
         }     
     },
-    .showComparisonPlot=function(image, ...) {
-        plotData <- self$results$buildModelContent$state
 
-        if(!is.null(plotData) && self$options$compare_show_plot)  {
-            tna::plot_compare(
-                x=plotData,
-                i = self$options$compare_model1,
-                j = self$options$compare_model2
-            )
-            TRUE
-        }
-        else {
-            FALSE
-        }
-    },
-    .showComparisonTNAPlot=function(image, ...) {
-        plotData <- self$results$comparisonTNA_plot$state
-
-        if(!is.null(plotData) && self$options$compare_show_TNAplot)  {
-            p <- plot(
-                    x=plotData,
-                    type = self$options$compare_TNAPlot_type,
-                    population = self$options$compare_TNAPlot_population,
-                    method = self$options$compare_TNAPlot_method,
-                    name_x = "Model A",
-                    name_y = "Model B"
-                )
-            print(p)
-            TRUE
-        }
-        else {
-            FALSE
-        }
-    },
     .showPermutationPlot=function(image, ...) {
 
       plotData <- self$results$permutation_plot$state
