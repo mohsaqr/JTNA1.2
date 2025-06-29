@@ -291,7 +291,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             ### Community
 
-            if(!is.null(model) &&  self$options$community_show_plot ) {
+            if(!is.null(model) && (self$options$community_show_plot || self$options$community_show_table)) {
                 community_gamma <- as.numeric(self$options$community_gamma)
                 methods <- self$options$community_methods
 
@@ -321,11 +321,36 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     }
                     
                 }
-                self$results$community_plot$setVisible(self$options$community_show_plot)
-                self$results$communityContent$setVisible(FALSE)
-                self$results$communityTitle$setVisible(self$options$community_show_plot)
-                
 
+                # Populate communities table
+                if(!is.null(coms) && self$options$community_show_table) {
+                    if(!is.null(coms$assignments)) {
+                        assignments <- coms$assignments
+                        
+                        # Add columns for each community detection method
+                        method_names <- colnames(assignments)[-1]  # Exclude 'state' column
+                        for(method in method_names) {
+                            self$results$communityTable$addColumn(name=method, title=method, type="integer")
+                        }
+                        
+                        # Add rows with community assignments
+                        for (i in 1:nrow(assignments)) {
+                            rowValues <- list()
+                            rowValues$state <- as.character(assignments[i, "state"])
+                            
+                            for(method in method_names) {
+                                rowValues[[method]] <- as.integer(assignments[i, method])
+                            }
+                            
+                            self$results$communityTable$addRow(rowKey=i, values=rowValues)
+                        }
+                    }
+                }
+                
+                self$results$community_plot$setVisible(self$options$community_show_plot)
+                self$results$communityTable$setVisible(self$options$community_show_table)
+                self$results$communityContent$setVisible(FALSE)
+                self$results$communityTitle$setVisible(self$options$community_show_plot || self$options$community_show_table)
 
             }
 
@@ -354,11 +379,13 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             }
 
-            ### Bootstrap
+                        ### Bootstrap
 
-            if(!is.null(model) && ( self$options$bootstrap_show_text || self$options$bootstrap_show_plot || self$options$bootstrap_show_table)) {
+            if(!is.null(model) && ( self$options$bootstrap_show_plot || self$options$bootstrap_show_table)) {
 
-                if(!self$results$bootstrapContent$isFilled() || !self$results$bootstrap_plot$isFilled() || !self$results$bootstrapTable$isFilled()) {
+                # Check if we need to compute bootstrap
+                bs <- self$results$bootstrap_plot$state
+                if(is.null(bs) || !self$results$bootstrap_plot$isFilled()) {
                     iteration <- self$options$bootstrap_iteration
                     level <- self$options$bootstrap_level
                     method <- self$options$bootstrap_method
@@ -377,22 +404,35 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                     consistency_range=c(range_low, range_up)
                     )
 
-                    if(!self$results$bootstrapContent$isFilled()) {
-                        self$results$bootstrapContent$setContent(bs)
-                    }
+                    self$results$bootstrap_plot$setState(bs)
+                }
 
-                    if(!self$results$bootstrap_plot$isFilled()) {
-                        self$results$bootstrap_plot$setState(bs)
-                    }
-
-                    if(!is.null(bs$significant_edges)) {
-                        self$results$bootstrapTable$setState(bs$significant_edges)
+                # Populate bootstrap table
+                if(!is.null(bs) && !is.null(bs$summary) && self$options$bootstrap_show_table) {
+                    all_edges <- bs$summary
+                    if(nrow(all_edges) > 0) {
+                        # Sort by significance (TRUE/significant first, then FALSE/non-significant)
+                        all_edges <- all_edges[order(-all_edges$sig), ]
+                        
+                        for (i in 1:nrow(all_edges)) {
+                            self$results$bootstrapTable$addRow(rowKey=i, values=list(
+                                from=as.character(all_edges[i, "from"]),
+                                to=as.character(all_edges[i, "to"]),
+                                weight=all_edges[i, "weight"],
+                                p_value=all_edges[i, "p_value"],
+                                cr_lower=all_edges[i, "cr_lower"],
+                                cr_upper=all_edges[i, "cr_upper"],
+                                ci_lower=all_edges[i, "ci_lower"],
+                                ci_upper=all_edges[i, "ci_upper"],
+                                significant=ifelse(all_edges[i, "sig"], "Yes", "No")
+                            ))
+                        }
                     }
                 }
+                
                 self$results$bootstrap_plot$setVisible(self$options$bootstrap_show_plot)
-                self$results$bootstrapContent$setVisible(self$options$bootstrap_show_text)
                 self$results$bootstrapTable$setVisible(self$options$bootstrap_show_table)
-                self$results$bootstrapTitle$setVisible(self$options$bootstrap_show_plot || self$options$bootstrap_show_text || self$options$bootstrap_show_table)
+                self$results$bootstrapTitle$setVisible(self$options$bootstrap_show_plot || self$options$bootstrap_show_table)
 
             }
 
@@ -417,7 +457,8 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     edge.label.cex=self$options$buildModel_plot_edge_label_size,
                     node.width=self$options$buildModel_plot_node_size,
                     label.cex=self$options$buildModel_plot_node_label_size,
-                    layout=self$options$buildModel_plot_layout
+                    layout=self$options$buildModel_plot_layout,
+                    bg="transparent"
                 )
             }   
             TRUE
@@ -478,7 +519,8 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     edge.label.cex=self$options$edgeBetweenness_plot_edge_label_size,
                     node.width=self$options$edgeBetweenness_plot_node_size,
                     label.cex=self$options$edgeBetweenness_plot_node_label_size,
-                    layout=self$options$edgeBetweenness_plot_layout
+                    layout=self$options$edgeBetweenness_plot_layout,
+                    bg="transparent"
                 )
             }   
             TRUE
@@ -488,7 +530,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             if(!is.null(plotData) && self$options$community_show_plot)  {
                 methods <- self$options$community_methods
-                plot(x=plotData, method=methods)
+                plot(x=plotData, method=methods, bg="transparent")
             }   
             TRUE
         },
@@ -507,7 +549,8 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     edge.label.cex=self$options$cliques_plot_edge_label_size,
                     node.width=self$options$cliques_plot_node_size,
                     label.cex=self$options$cliques_plot_node_label_size,
-                    layout=self$options$cliques_plot_layout
+                    layout=self$options$cliques_plot_layout,
+                    bg="transparent"
                 )
             }
             else {
@@ -530,7 +573,8 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     edge.label.cex=self$options$cliques_plot_edge_label_size,
                     node.width=self$options$cliques_plot_node_size,
                     label.cex=self$options$cliques_plot_node_label_size,
-                    layout=self$options$cliques_plot_layout
+                    layout=self$options$cliques_plot_layout,
+                    bg="transparent"
                 )
             }   
             else {
@@ -553,7 +597,8 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     edge.label.cex=self$options$cliques_plot_edge_label_size,
                     node.width=self$options$cliques_plot_node_size,
                     label.cex=self$options$cliques_plot_node_label_size,
-                    layout=self$options$cliques_plot_layout
+                    layout=self$options$cliques_plot_layout,
+                    bg="transparent"
                 )
             }   
             else {
@@ -576,7 +621,8 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     edge.label.cex=self$options$cliques_plot_edge_label_size,
                     node.width=self$options$cliques_plot_node_size,
                     label.cex=self$options$cliques_plot_node_label_size,
-                    layout=self$options$cliques_plot_layout
+                    layout=self$options$cliques_plot_layout,
+                    bg="transparent"
                 )
             }   
             else {
@@ -599,7 +645,8 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     edge.label.cex=self$options$cliques_plot_edge_label_size,
                     node.width=self$options$cliques_plot_node_size,
                     label.cex=self$options$cliques_plot_node_label_size,
-                    layout=self$options$cliques_plot_layout
+                    layout=self$options$cliques_plot_layout,
+                    bg="transparent"
                 )
             }
             else {
@@ -622,7 +669,8 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     edge.label.cex=self$options$cliques_plot_edge_label_size,
                     node.width=self$options$cliques_plot_node_size,
                     label.cex=self$options$cliques_plot_node_label_size,
-                    layout=self$options$cliques_plot_layout
+                    layout=self$options$cliques_plot_layout,
+                    bg="transparent"
                 )
             }   
             else {
@@ -647,7 +695,8 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     node.width=self$options$bootstrap_plot_node_size,
                     label.cex=self$options$bootstrap_plot_node_label_size,
                     layout=self$options$bootstrap_plot_layout,
-                    edge.color = mat_color
+                    edge.color = mat_color,
+                    bg="transparent"
                 )
             }
             TRUE     

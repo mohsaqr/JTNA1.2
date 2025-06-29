@@ -272,7 +272,9 @@ children:
           - type: Label
             label: Display Options
             children:
-              
+              - type: CheckBox
+                name: community_show_table
+                label: Table
               - type: CheckBox
                 name: community_show_plot
                 label: Plot
@@ -387,14 +389,11 @@ children:
             label: Display Options
             children:
               - type: CheckBox
-                name: bootstrap_show_text
-                label: Text
+                name: bootstrap_show_plot
+                label: Plot
               - type: CheckBox
                 name: bootstrap_show_table
                 label: Table
-              - type: CheckBox
-                name: bootstrap_show_plot
-                label: Plot
       - type: LayoutBox
         stretchFactor: 1
         children:
@@ -489,6 +488,9 @@ children:
                 name: sequences_type_distribution
                 optionName: sequences_type
                 optionPart: distribution
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
           - type: Label
             label: Scale
             children:

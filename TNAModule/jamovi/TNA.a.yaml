@@ -69,7 +69,7 @@ options:
     - name: buildModel_plot_cut
       title: Cut value
       type: Number
-      default: 0
+      default: 0.1
       min: 0
       max: 1
 
@@ -212,7 +212,7 @@ options:
     - name: edgeBetweenness_plot_cut
       title: Cut value
       type: Number
-      default: 0
+      default: 0.1
       min: 0
       max: 1
 
@@ -282,6 +282,11 @@ options:
       min: 0
       max: 100
     
+    - name: community_show_table
+      title: Table
+      type: Bool
+      default: False
+    
     - name: community_show_plot
       title: Plot
       type: Bool
@@ -318,7 +323,7 @@ options:
     - name: cliques_plot_cut
       title: Cut value
       type: Number
-      default: 0
+      default: 0.1
       min: 0
       max: 1
 
@@ -408,11 +413,6 @@ options:
       max: 1
 
     ##### PLOT
-    - name: bootstrap_show_text
-      title: Text
-      type: Bool
-      default: False
-    
     - name: bootstrap_show_plot
       title: Plot
       type: Bool
@@ -426,7 +426,7 @@ options:
     - name: bootstrap_plot_cut
       title: Cut value
       type: Number
-      default: 0
+      default: 0.1
       min: 0
       max: 1
 

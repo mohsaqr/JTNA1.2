@@ -293,7 +293,25 @@ items:
         - community_methods
         - community_gamma
 
-    
+    - name: communityTable
+      type: Table
+      title: Community Assignments
+      visible: (community_show_table)
+      columns:
+        - name: state
+          title: State
+          type: text
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+
+        - community_methods
+        - community_gamma
 
     ### CLIQUE
 
@@ -384,24 +402,7 @@ items:
       title: Bootstrap
       visible: False
 
-    - name:  bootstrapContent
-      type:  Preformatted
-      visible: False
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
 
-        - bootstrap_iteration
-        - bootstrap_level
-        - bootstrap_method
-        - bootstrap_range_low
-        - bootstrap_range_up
-        - bootstrap_threshold
     
     - name: bootstrap_plot
       type: Image
@@ -434,8 +435,8 @@ items:
 
     - name: bootstrapTable
       type: Table
-      title: Bootstrap Table
-      visible: (bootstrap_show_significant_table)
+      title: Bootstrap Results
+      visible: (bootstrap_show_table)
       columns:
         - name: from
           title: From
@@ -461,6 +462,9 @@ items:
         - name: ci_upper
           title: CI Upper
           type: number
+        - name: significant
+          title: Significant
+          type: text
       clearWith:
         - buildModel_variables_long_actor
         - buildModel_variables_long_time
