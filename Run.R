@@ -1,20 +1,4 @@
----
-title: "BuildJamoviPlugin"
-author: "Dylan GIRAULT"
-date: "2025-04-28"
-output: html_document
----
-
-# TNA_Module
-
-## Configuration
-
-### TNA
-
-```{r}
-# DOWNLOAD TNA PACKAGE
-
-devtools::install_github("sonsoleslp/tna", force=TRUE)
+#devtools::install_github("sonsoleslp/tna", force=TRUE)
 library("tna")
 
 # INITIATION TO INSTALL IN JAMOVI
@@ -23,14 +7,11 @@ library("tna")
 options(jamovi_home="/Applications/jamovi.app")
 jmvtools::check()
 
-```
+
 
 ### Update/Install module
-    
-```{r}
+
 # INSTALL INTO JAMOVI
 
 setwd("/Users/mohammedsaqr/Documents/GitHub/JTNA1.2/TNAModule")
 jmvtools::install()
-
-```

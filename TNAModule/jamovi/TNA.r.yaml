@@ -104,6 +104,7 @@ items:
 
         - buildModel_digits
 
+
     ### CENTRALITY
     - name:  centralityTitle
       title: Centrality
@@ -195,18 +196,6 @@ items:
       type:  Preformatted
       title: Edge betweenness
       visible: False
-
-    - name:  edgeBetweennessContent
-      type:  Preformatted
-      visible: False
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
     
     - name: edgeBetweenness_plot
       type: Image
@@ -229,6 +218,41 @@ items:
         - edgeBetweenness_plot_node_size
         - edgeBetweenness_plot_node_label_size
         - edgeBetweenness_plot_layout
+
+    - name: edgeBetweennessTable
+      type: Table
+      title: Edge Betweenness
+      visible: (edgeBetweenness_show_table)
+      columns:
+        - name: from
+          title: From
+          type: text
+        - name: to
+          title: To
+          type: text
+        - name: value
+          title: Value
+          type: number
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+
+    - name: edgeBetweennessNoResultsNote
+      type: Preformatted
+      visible: false
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
 
     ### COMMUNITY
     - name:  communityTitle
@@ -268,6 +292,9 @@ items:
 
         - community_methods
         - community_gamma
+
+    
+
     ### CLIQUE
 
     - name:  cliquesTitle
@@ -404,6 +431,82 @@ items:
         - bootstrap_plot_node_size
         - bootstrap_plot_node_label_size
         - bootstrap_plot_layout
+
+    - name: bootstrapTable
+      type: Table
+      title: Bootstrap Table
+      visible: (bootstrap_show_significant_table)
+      columns:
+        - name: from
+          title: From
+          type: text
+        - name: to
+          title: To
+          type: text
+        - name: weight
+          title: Weight
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+        - name: cr_lower
+          title: CR Lower
+          type: number
+        - name: cr_upper
+          title: CR Upper
+          type: number
+        - name: ci_lower
+          title: CI Lower
+          type: number
+        - name: ci_upper
+          title: CI Upper
+          type: number
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - bootstrap_iteration
+        - bootstrap_level
+        - bootstrap_method
+        - bootstrap_range_low
+        - bootstrap_range_up
+        - bootstrap_threshold
+
+    - name: permutationTable
+      type: Table
+      title: Permutation Test Results
+      visible: False
+      columns:
+        - name: group_comparison
+          title: Comparison
+          type: text
+        - name: edge_name
+          title: Edge
+          type: text
+        - name: diff_true
+          title: Diff (True)
+          type: number
+        - name: effect_size
+          title: Effect Size
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - permutation_iter
+        - permutation_paired
+        - permutation_level
 
     ### Sequence Analysis
 

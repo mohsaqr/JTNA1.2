@@ -471,8 +471,21 @@ items:
       visible: False
 
     - name:  permutationContent
-      type:  Preformatted
+      type:  Table
+      title: Permutation Test Results
       visible: False
+      columns:
+        - name: group_comparison
+          title: Group Comparison
+          type: text
+        - name: edge_name
+          type: text
+        - name: diff_true
+          type: number
+        - name: effect_size
+          type: number
+        - name: p_value
+          type: number
       clearWith:
         - buildModel_variables_long_actor
         - buildModel_variables_long_time
@@ -482,8 +495,6 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
-
         - permutation_iter
         - permutation_paired
         - permutation_level

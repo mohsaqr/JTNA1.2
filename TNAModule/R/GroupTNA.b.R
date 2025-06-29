@@ -390,30 +390,67 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       ## Permutation
 
       if(!is.null(model) && ( self$options$permutation_show_text || self$options$permutation_show_plot)) {
-        if( !self$results$permutationContent$isFilled() || 
-              !self$results$permutation_plot$isFilled()
+        if( !self$results$permutation_plot$isFilled() || !self$results$permutationContent$isFilled() ) {
+          permutationTest <- tna::permutation_test(
+            x=model, 
+            iter=self$options$permutation_iter, 
+            paired=self$options$permutation_paired,
+            level=self$options$permutation_level
           )
-          {
-            permutationTest <- tna::permutation_test(
-              x=model, 
-              iter=self$options$permutation_iter, 
-              paired=self$options$permutation_paired,
-              level=self$options$permutation_level
-            )
 
-            # Text
-            if(!self$results$permutationContent$isFilled()) {
-              self$results$permutationContent$setContent(permutationTest)
+          # Define the matrix_to_from_to_value function (re-using from TNA.b.R for consistency)
+          matrix_to_from_to_value <- function(your_matrix) {
+            if (is.null(rownames(your_matrix))) {
+              rownames(your_matrix) <- paste0("Row", 1:nrow(your_matrix))
             }
-
-            # Plot
-            if(!self$results$permutation_plot$isFilled()) {
-              self$results$permutation_plot$setState(permutationTest)
+            if (is.null(colnames(your_matrix))) {
+              colnames(your_matrix) <- paste0("Col", 1:ncol(your_matrix))
             }
+            df <- setNames(as.data.frame(as.table(your_matrix)), c("from", "to", "value"))
+            return(df)
           }
-          self$results$permutationTitle$setVisible(self$options$permutation_show_text || self$options$permutation_show_plot)
-          self$results$permutationContent$setVisible(self$options$permutation_show_text)
-          self$results$permutation_plot$setVisible(self$options$permutation_show_plot)
+
+          # Populate the Jamovi table
+          if (!is.null(permutationTest)) {
+            row_key_counter <- 1
+            for (comparison_name in names(permutationTest)) {
+              comparison_data <- permutationTest[[comparison_name]]
+              if (!is.null(comparison_data$edges) && !is.null(comparison_data$edges$stats)) {
+                stats_df <- comparison_data$edges$stats
+
+                # Handle NAs and ensure numeric types
+                stats_df$diff_true <- as.numeric(stats_df$diff_true)
+                stats_df$effect_size <- as.numeric(stats_df$effect_size)
+                stats_df$p_value <- as.numeric(stats_df$p_value)
+
+                # Sort by p_value and then by diff_true (descending)
+                filtered_sorted_stats <- stats_df[order(stats_df$p_value, -stats_df$diff_true), ]
+
+                for (i in 1:nrow(filtered_sorted_stats)) {
+                  rowValues <- list(
+                    group_comparison = comparison_name,
+                    edge_name = as.character(filtered_sorted_stats[i, "edge_name"]),
+                    diff_true = as.numeric(filtered_sorted_stats[i, "diff_true"]),
+                    effect_size = as.numeric(filtered_sorted_stats[i, "effect_size"]),
+                    p_value = as.numeric(filtered_sorted_stats[i, "p_value"])
+                  )
+                  self$results$permutationContent$addRow(rowKey=as.character(row_key_counter), values=rowValues)
+                  row_key_counter <- row_key_counter + 1
+                }
+              }
+            }
+          } else {
+            self$results$permutationContent$setNote(key = NULL, note = "No permutation test results available.")
+          }
+
+          # Plot
+          if(!self$results$permutation_plot$isFilled()) {
+            self$results$permutation_plot$setState(permutationTest)
+          }
+        }
+        self$results$permutationTitle$setVisible(self$options$permutation_show_text || self$options$permutation_show_plot)
+        self$results$permutationContent$setVisible(self$options$permutation_show_text)
+        self$results$permutation_plot$setVisible(self$options$permutation_show_plot)
       }
 
       ### Sequence Analysis

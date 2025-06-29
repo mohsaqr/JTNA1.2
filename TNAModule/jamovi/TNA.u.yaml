@@ -225,7 +225,7 @@ children:
             label: Display Options
             children:
               - type: CheckBox
-                name: edgeBetweenness_show_text
+                name: edgeBetweenness_show_table
                 label: Table
               - type: CheckBox
                 name: edgeBetweenness_show_plot
@@ -272,9 +272,7 @@ children:
           - type: Label
             label: Display Options
             children:
-              - type: CheckBox
-                name: community_show_table
-                label: Table
+              
               - type: CheckBox
                 name: community_show_plot
                 label: Plot
@@ -390,6 +388,9 @@ children:
             children:
               - type: CheckBox
                 name: bootstrap_show_text
+                label: Text
+              - type: CheckBox
+                name: bootstrap_show_table
                 label: Table
               - type: CheckBox
                 name: bootstrap_show_plot
@@ -519,7 +520,6 @@ children:
               - type: CheckBox
                 name: sequences_include_na
                 label: Include missing values
-
               - type: TextBox
                 name: sequences_tick
                 format: number

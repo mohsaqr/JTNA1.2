@@ -38,7 +38,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             centrality_Diffusion = FALSE,
             centrality_InStrength = TRUE,
             centrality_OutStrength = TRUE,
-            edgeBetweenness_show_text = FALSE,
+            edgeBetweenness_show_table = FALSE,
             edgeBetweenness_show_plot = FALSE,
             edgeBetweenness_plot_cut = 0,
             edgeBetweenness_plot_min_value = 0.05,
@@ -48,7 +48,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             edgeBetweenness_plot_layout = NULL,
             community_methods = "spinglass",
             community_gamma = 1,
-            community_show_table = FALSE,
             community_show_plot = FALSE,
             cliques_size = 2,
             cliques_threshold = 0,
@@ -68,6 +67,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bootstrap_threshold = 0.1,
             bootstrap_show_text = FALSE,
             bootstrap_show_plot = FALSE,
+            bootstrap_show_table = FALSE,
             bootstrap_plot_cut = 0,
             bootstrap_plot_min_value = 0.05,
             bootstrap_plot_edge_label_size = 1,
@@ -232,9 +232,9 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "centrality_OutStrength",
                 centrality_OutStrength,
                 default=TRUE)
-            private$..edgeBetweenness_show_text <- jmvcore::OptionBool$new(
-                "edgeBetweenness_show_text",
-                edgeBetweenness_show_text,
+            private$..edgeBetweenness_show_table <- jmvcore::OptionBool$new(
+                "edgeBetweenness_show_table",
+                edgeBetweenness_show_table,
                 default=FALSE)
             private$..edgeBetweenness_show_plot <- jmvcore::OptionBool$new(
                 "edgeBetweenness_show_plot",
@@ -294,10 +294,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=1,
                 min=0,
                 max=100)
-            private$..community_show_table <- jmvcore::OptionBool$new(
-                "community_show_table",
-                community_show_table,
-                default=FALSE)
             private$..community_show_plot <- jmvcore::OptionBool$new(
                 "community_show_plot",
                 community_show_plot,
@@ -404,6 +400,10 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "bootstrap_show_plot",
                 bootstrap_show_plot,
                 default=FALSE)
+            private$..bootstrap_show_table <- jmvcore::OptionBool$new(
+                "bootstrap_show_table",
+                bootstrap_show_table,
+                default=FALSE)
             private$..bootstrap_plot_cut <- jmvcore::OptionNumber$new(
                 "bootstrap_plot_cut",
                 bootstrap_plot_cut,
@@ -508,7 +508,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..centrality_Diffusion)
             self$.addOption(private$..centrality_InStrength)
             self$.addOption(private$..centrality_OutStrength)
-            self$.addOption(private$..edgeBetweenness_show_text)
+            self$.addOption(private$..edgeBetweenness_show_table)
             self$.addOption(private$..edgeBetweenness_show_plot)
             self$.addOption(private$..edgeBetweenness_plot_cut)
             self$.addOption(private$..edgeBetweenness_plot_min_value)
@@ -518,7 +518,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..edgeBetweenness_plot_layout)
             self$.addOption(private$..community_methods)
             self$.addOption(private$..community_gamma)
-            self$.addOption(private$..community_show_table)
             self$.addOption(private$..community_show_plot)
             self$.addOption(private$..cliques_size)
             self$.addOption(private$..cliques_threshold)
@@ -538,6 +537,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..bootstrap_threshold)
             self$.addOption(private$..bootstrap_show_text)
             self$.addOption(private$..bootstrap_show_plot)
+            self$.addOption(private$..bootstrap_show_table)
             self$.addOption(private$..bootstrap_plot_cut)
             self$.addOption(private$..bootstrap_plot_min_value)
             self$.addOption(private$..bootstrap_plot_edge_label_size)
@@ -584,7 +584,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         centrality_Diffusion = function() private$..centrality_Diffusion$value,
         centrality_InStrength = function() private$..centrality_InStrength$value,
         centrality_OutStrength = function() private$..centrality_OutStrength$value,
-        edgeBetweenness_show_text = function() private$..edgeBetweenness_show_text$value,
+        edgeBetweenness_show_table = function() private$..edgeBetweenness_show_table$value,
         edgeBetweenness_show_plot = function() private$..edgeBetweenness_show_plot$value,
         edgeBetweenness_plot_cut = function() private$..edgeBetweenness_plot_cut$value,
         edgeBetweenness_plot_min_value = function() private$..edgeBetweenness_plot_min_value$value,
@@ -594,7 +594,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         edgeBetweenness_plot_layout = function() private$..edgeBetweenness_plot_layout$value,
         community_methods = function() private$..community_methods$value,
         community_gamma = function() private$..community_gamma$value,
-        community_show_table = function() private$..community_show_table$value,
         community_show_plot = function() private$..community_show_plot$value,
         cliques_size = function() private$..cliques_size$value,
         cliques_threshold = function() private$..cliques_threshold$value,
@@ -614,6 +613,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         bootstrap_threshold = function() private$..bootstrap_threshold$value,
         bootstrap_show_text = function() private$..bootstrap_show_text$value,
         bootstrap_show_plot = function() private$..bootstrap_show_plot$value,
+        bootstrap_show_table = function() private$..bootstrap_show_table$value,
         bootstrap_plot_cut = function() private$..bootstrap_plot_cut$value,
         bootstrap_plot_min_value = function() private$..bootstrap_plot_min_value$value,
         bootstrap_plot_edge_label_size = function() private$..bootstrap_plot_edge_label_size$value,
@@ -659,7 +659,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..centrality_Diffusion = NA,
         ..centrality_InStrength = NA,
         ..centrality_OutStrength = NA,
-        ..edgeBetweenness_show_text = NA,
+        ..edgeBetweenness_show_table = NA,
         ..edgeBetweenness_show_plot = NA,
         ..edgeBetweenness_plot_cut = NA,
         ..edgeBetweenness_plot_min_value = NA,
@@ -669,7 +669,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..edgeBetweenness_plot_layout = NA,
         ..community_methods = NA,
         ..community_gamma = NA,
-        ..community_show_table = NA,
         ..community_show_plot = NA,
         ..cliques_size = NA,
         ..cliques_threshold = NA,
@@ -689,6 +688,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..bootstrap_threshold = NA,
         ..bootstrap_show_text = NA,
         ..bootstrap_show_plot = NA,
+        ..bootstrap_show_table = NA,
         ..bootstrap_plot_cut = NA,
         ..bootstrap_plot_min_value = NA,
         ..bootstrap_plot_edge_label_size = NA,
@@ -720,8 +720,9 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         centralityTable = function() private$.items[["centralityTable"]],
         centrality_plot = function() private$.items[["centrality_plot"]],
         edgeBetweennessTitle = function() private$.items[["edgeBetweennessTitle"]],
-        edgeBetweennessContent = function() private$.items[["edgeBetweennessContent"]],
         edgeBetweenness_plot = function() private$.items[["edgeBetweenness_plot"]],
+        edgeBetweennessTable = function() private$.items[["edgeBetweennessTable"]],
+        edgeBetweennessNoResultsNote = function() private$.items[["edgeBetweennessNoResultsNote"]],
         communityTitle = function() private$.items[["communityTitle"]],
         communityContent = function() private$.items[["communityContent"]],
         community_plot = function() private$.items[["community_plot"]],
@@ -731,6 +732,7 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         bootstrapTitle = function() private$.items[["bootstrapTitle"]],
         bootstrapContent = function() private$.items[["bootstrapContent"]],
         bootstrap_plot = function() private$.items[["bootstrap_plot"]],
+        bootstrapTable = function() private$.items[["bootstrapTable"]],
         sequences_plot = function() private$.items[["sequences_plot"]]),
     private = list(),
     public=list(
@@ -922,18 +924,6 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="edgeBetweennessTitle",
                 title="Edge betweenness",
                 visible=FALSE))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="edgeBetweennessContent",
-                visible=FALSE,
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="edgeBetweenness_plot",
@@ -955,6 +945,44 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "edgeBetweenness_plot_node_size",
                     "edgeBetweenness_plot_node_label_size",
                     "edgeBetweenness_plot_layout")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="edgeBetweennessTable",
+                title="Edge Betweenness",
+                visible="(edgeBetweenness_show_table)",
+                columns=list(
+                    list(
+                        `name`="from", 
+                        `title`="From", 
+                        `type`="text"),
+                    list(
+                        `name`="to", 
+                        `title`="To", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="edgeBetweennessNoResultsNote",
+                visible=FALSE,
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="communityTitle",
@@ -1133,6 +1161,58 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "bootstrap_plot_node_size",
                     "bootstrap_plot_node_label_size",
                     "bootstrap_plot_layout")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="bootstrapTable",
+                title="Bootstrap Table",
+                visible="(bootstrap_show_significant_table)",
+                columns=list(
+                    list(
+                        `name`="from", 
+                        `title`="From", 
+                        `type`="text"),
+                    list(
+                        `name`="to", 
+                        `title`="To", 
+                        `type`="text"),
+                    list(
+                        `name`="weight", 
+                        `title`="Weight", 
+                        `type`="number"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number"),
+                    list(
+                        `name`="cr_lower", 
+                        `title`="CR Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="cr_upper", 
+                        `title`="CR Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="CI Upper", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "bootstrap_iteration",
+                    "bootstrap_level",
+                    "bootstrap_method",
+                    "bootstrap_range_low",
+                    "bootstrap_range_up",
+                    "bootstrap_threshold")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="sequences_plot",
@@ -1163,7 +1243,7 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "JTNA",
                 name = "TNA",
-                version = c(1,0,0),
+                version = c(1,3,0),
                 options = options,
                 results = TNAResults$new(options=options),
                 data = data,
@@ -1212,7 +1292,7 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param centrality_Diffusion .
 #' @param centrality_InStrength .
 #' @param centrality_OutStrength .
-#' @param edgeBetweenness_show_text .
+#' @param edgeBetweenness_show_table .
 #' @param edgeBetweenness_show_plot .
 #' @param edgeBetweenness_plot_cut .
 #' @param edgeBetweenness_plot_min_value .
@@ -1222,7 +1302,6 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param edgeBetweenness_plot_layout .
 #' @param community_methods .
 #' @param community_gamma .
-#' @param community_show_table .
 #' @param community_show_plot .
 #' @param cliques_size .
 #' @param cliques_threshold .
@@ -1242,6 +1321,7 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param bootstrap_threshold .
 #' @param bootstrap_show_text .
 #' @param bootstrap_show_plot .
+#' @param bootstrap_show_table .
 #' @param bootstrap_plot_cut .
 #' @param bootstrap_plot_min_value .
 #' @param bootstrap_plot_edge_label_size .
@@ -1269,8 +1349,9 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$centralityTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$centrality_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$edgeBetweennessTitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$edgeBetweennessContent} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$edgeBetweenness_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$edgeBetweennessTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$edgeBetweennessNoResultsNote} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$communityTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$communityContent} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$community_plot} \tab \tab \tab \tab \tab an image \cr
@@ -1285,6 +1366,7 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$bootstrapTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$bootstrapContent} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$bootstrap_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$sequences_plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
@@ -1329,7 +1411,7 @@ TNA <- function(
     centrality_Diffusion = FALSE,
     centrality_InStrength = TRUE,
     centrality_OutStrength = TRUE,
-    edgeBetweenness_show_text = FALSE,
+    edgeBetweenness_show_table = FALSE,
     edgeBetweenness_show_plot = FALSE,
     edgeBetweenness_plot_cut = 0,
     edgeBetweenness_plot_min_value = 0.05,
@@ -1339,7 +1421,6 @@ TNA <- function(
     edgeBetweenness_plot_layout,
     community_methods = "spinglass",
     community_gamma = 1,
-    community_show_table = FALSE,
     community_show_plot = FALSE,
     cliques_size = 2,
     cliques_threshold = 0,
@@ -1359,6 +1440,7 @@ TNA <- function(
     bootstrap_threshold = 0.1,
     bootstrap_show_text = FALSE,
     bootstrap_show_plot = FALSE,
+    bootstrap_show_table = FALSE,
     bootstrap_plot_cut = 0,
     bootstrap_plot_min_value = 0.05,
     bootstrap_plot_edge_label_size = 1,
@@ -1421,7 +1503,7 @@ TNA <- function(
         centrality_Diffusion = centrality_Diffusion,
         centrality_InStrength = centrality_InStrength,
         centrality_OutStrength = centrality_OutStrength,
-        edgeBetweenness_show_text = edgeBetweenness_show_text,
+        edgeBetweenness_show_table = edgeBetweenness_show_table,
         edgeBetweenness_show_plot = edgeBetweenness_show_plot,
         edgeBetweenness_plot_cut = edgeBetweenness_plot_cut,
         edgeBetweenness_plot_min_value = edgeBetweenness_plot_min_value,
@@ -1431,7 +1513,6 @@ TNA <- function(
         edgeBetweenness_plot_layout = edgeBetweenness_plot_layout,
         community_methods = community_methods,
         community_gamma = community_gamma,
-        community_show_table = community_show_table,
         community_show_plot = community_show_plot,
         cliques_size = cliques_size,
         cliques_threshold = cliques_threshold,
@@ -1451,6 +1532,7 @@ TNA <- function(
         bootstrap_threshold = bootstrap_threshold,
         bootstrap_show_text = bootstrap_show_text,
         bootstrap_show_plot = bootstrap_show_plot,
+        bootstrap_show_table = bootstrap_show_table,
         bootstrap_plot_cut = bootstrap_plot_cut,
         bootstrap_plot_min_value = bootstrap_plot_min_value,
         bootstrap_plot_edge_label_size = bootstrap_plot_edge_label_size,

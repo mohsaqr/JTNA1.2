@@ -1237,10 +1237,28 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="permutationTitle",
                 title="Permutation",
                 visible=FALSE))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Table$new(
                 options=options,
                 name="permutationContent",
+                title="Permutation Test Results",
                 visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="group_comparison", 
+                        `title`="Group Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="edge_name", 
+                        `type`="text"),
+                    list(
+                        `name`="diff_true", 
+                        `type`="number"),
+                    list(
+                        `name`="effect_size", 
+                        `type`="number"),
+                    list(
+                        `name`="p_value", 
+                        `type`="number")),
                 clearWith=list(
                     "buildModel_variables_long_actor",
                     "buildModel_variables_long_time",
@@ -1303,7 +1321,7 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "JTNA",
                 name = "GroupTNA",
-                version = c(1,0,0),
+                version = c(1,3,0),
                 options = options,
                 results = GroupTNAResults$new(options=options),
                 data = data,
@@ -1434,7 +1452,7 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$comparison_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$comparisonTNA_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$permutationTitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$permutationContent} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$permutationContent} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$permutation_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$sequences_plot} \tab \tab \tab \tab \tab an image \cr
 #' }

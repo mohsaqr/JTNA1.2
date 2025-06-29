@@ -2,7 +2,7 @@
 name:  TNA
 title: Transition Network Analysis
 menuGroup: JTNA
-version: '1.0.0'
+version: '1.3.0'
 jas: '1.2'
 
 options:
@@ -199,8 +199,8 @@ options:
 
     ### EDGE BETWEENNESS
     ##### PLOT
-    - name: edgeBetweenness_show_text
-      title: Text
+    - name: edgeBetweenness_show_table
+      title: Table
       type: Bool
       default: False
     
@@ -281,10 +281,7 @@ options:
       default: 1
       min: 0
       max: 100
-    - name: community_show_table
-      title: Table
-      type: Bool
-      default: False
+    
     - name: community_show_plot
       title: Plot
       type: Bool
@@ -418,6 +415,11 @@ options:
     
     - name: bootstrap_show_plot
       title: Plot
+      type: Bool
+      default: False
+
+    - name: bootstrap_show_table
+      title: Table
       type: Bool
       default: False
 

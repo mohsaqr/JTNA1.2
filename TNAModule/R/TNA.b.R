@@ -235,34 +235,63 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             ### Edge betweenness
 
-            if(!is.null(model) &&(self$options$edgeBetweenness_show_text || self$options$edgeBetweenness_show_plot) ) {
-                if(!is.null(model) && (!self$results$edgeBetweenness_plot$isFilled() || !self$results$edgeBetweennessContent$isFilled() )) { 
+            if(!is.null(model) && (self$options$edgeBetweenness_show_table || self$options$edgeBetweenness_show_plot)) {
+                if(!is.null(model)) { 
                     edgeBetwenness <- betweenness_network(x=model)
 
                     # Plot
                     if(!self$results$edgeBetweenness_plot$isFilled()) {
                         self$results$edgeBetweenness_plot$setState(edgeBetwenness)
                     }
-                    # Text - show only weights
-                    if(!self$results$edgeBetweennessContent$isFilled()) {
-                        # Show only the weights from edge betweenness result
-                        if(!is.null(edgeBetwenness) && !is.null(edgeBetwenness$weights)) {
-                            self$results$edgeBetweennessContent$setContent(edgeBetwenness$weights)
-                        } else {
-                            self$results$edgeBetweennessContent$setContent("No weights available")
+                    
+                    # Table - show weights
+                    matrix_to_from_to_value <- function(your_matrix) {
+                      if (is.null(rownames(your_matrix))) {
+                        rownames(your_matrix) <- paste0("Row", 1:nrow(your_matrix))
+                      }
+                      if (is.null(colnames(your_matrix))) {
+                        colnames(your_matrix) <- paste0("Col", 1:ncol(your_matrix))
+                      }
+                      df <- setNames(as.data.frame(as.table(your_matrix)), c("from", "to", "value"))
+                      return(df)
+                    }
+
+                    if(!is.null(edgeBetwenness) && !is.null(edgeBetwenness$weights)) {
+                        betable <- matrix_to_from_to_value(edgeBetwenness$weights)
+
+                        betable <- betable[betable$value > 0, ]
+
+                        betable <- betable[order(-betable$value), ]
+
+                        for (i in 1:nrow(betable)) {
+                            self$results$edgeBetweennessTable$addRow(rowKey=i, values=list(
+                                from=as.character(betable[i, "from"]),
+                                to=as.character(betable[i, "to"]),
+                                value=betable[i, "value"]
+                            ))
                         }
+
+                        has_results_to_display <- nrow(betable) > 0
+                        self$results$edgeBetweennessTable$setVisible(self$options$edgeBetweenness_show_table && has_results_to_display)
+                        self$results$edgeBetweennessNoResultsNote$setVisible(self$options$edgeBetweenness_show_table && !has_results_to_display)
+                        if (self$options$edgeBetweenness_show_table && !has_results_to_display) {
+                            self$results$edgeBetweennessNoResultsNote$setContent("No weights available for Edge Betweenness based on current filters.")
+                        } else {
+                            self$results$edgeBetweennessNoResultsNote$setContent("") # Clear the note if results are displayed
+                        }
+
+                    } else {
+                        self$results$edgeBetweennessContent$setVisible(FALSE)
+                        self$results$edgeBetweennessNoResultsNote$setVisible(self$options$edgeBetweenness_show_table)
+                        self$results$edgeBetweennessNoResultsNote$setContent("No weights available for Edge Betweenness.")
                     }
                 }
-                self$results$edgeBetweenness_plot$setVisible(self$options$edgeBetweenness_show_plot)
-                self$results$edgeBetweennessContent$setVisible(self$options$edgeBetweenness_show_text)
-                self$results$edgeBetweennessTitle$setVisible(self$options$edgeBetweenness_show_text || self$options$edgeBetweenness_show_plot)
-
             }
 
 
             ### Community
 
-            if(!is.null(model) &&  (self$options$community_show_table || self$options$community_show_plot) ) {
+            if(!is.null(model) &&  self$options$community_show_plot ) {
                 community_gamma <- as.numeric(self$options$community_gamma)
                 methods <- self$options$community_methods
 
@@ -284,19 +313,17 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         return()
                     }
 
-                    # Plot
                     if(!self$results$community_plot$isFilled()) {
                         self$results$community_plot$setState(coms)
                     }
-                    # Text
                     if(!self$results$communityContent$isFilled()) {
                         self$results$communityContent$setContent(coms)
                     }
                     
                 }
                 self$results$community_plot$setVisible(self$options$community_show_plot)
-                self$results$communityContent$setVisible(self$options$community_show_table)
-                self$results$communityTitle$setVisible(self$options$community_show_plot || self$options$community_show_table)
+                self$results$communityContent$setVisible(FALSE)
+                self$results$communityTitle$setVisible(self$options$community_show_plot)
                 
 
 
@@ -316,7 +343,6 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         self$results$cliquesContent$setContent(cliques)
                     }
 
-                    # Plot
                     if(!self$results$cliques_multiple_plot$isFilled()) {
                         self$results$cliques_multiple_plot$setState(cliques)
                     }
@@ -330,9 +356,9 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             ### Bootstrap
 
-            if(!is.null(model) && ( self$options$bootstrap_show_text || self$options$bootstrap_show_plot)) {
+            if(!is.null(model) && ( self$options$bootstrap_show_text || self$options$bootstrap_show_plot || self$options$bootstrap_show_table)) {
 
-                if(!self$results$bootstrapContent$isFilled() || !self$results$bootstrap_plot$isFilled()) {
+                if(!self$results$bootstrapContent$isFilled() || !self$results$bootstrap_plot$isFilled() || !self$results$bootstrapTable$isFilled()) {
                     iteration <- self$options$bootstrap_iteration
                     level <- self$options$bootstrap_level
                     method <- self$options$bootstrap_method
@@ -355,14 +381,18 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         self$results$bootstrapContent$setContent(bs)
                     }
 
-                    # Plot
                     if(!self$results$bootstrap_plot$isFilled()) {
                         self$results$bootstrap_plot$setState(bs)
+                    }
+
+                    if(!is.null(bs$significant_edges)) {
+                        self$results$bootstrapTable$setState(bs$significant_edges)
                     }
                 }
                 self$results$bootstrap_plot$setVisible(self$options$bootstrap_show_plot)
                 self$results$bootstrapContent$setVisible(self$options$bootstrap_show_text)
-                self$results$bootstrapTitle$setVisible(self$options$bootstrap_show_plot || self$options$bootstrap_show_text)
+                self$results$bootstrapTable$setVisible(self$options$bootstrap_show_table)
+                self$results$bootstrapTitle$setVisible(self$options$bootstrap_show_plot || self$options$bootstrap_show_text || self$options$bootstrap_show_table)
 
             }
 
@@ -370,7 +400,6 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             if(self$options$sequences_show_plot) {
                 
-                # Set visibility for sequence analysis
                 self$results$sequences_plot$setVisible(TRUE)
                 
             } else {
@@ -382,7 +411,6 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plotData <- self$results$buildModelContent$state
             
             if(!is.null(plotData) && self$options$buildModel_show_plot)  {
-                # TNA analysis has only one model, so use single plot layout
                 plot(x=plotData, 
                     cut=self$options$buildModel_plot_cut,
                     minimum=self$options$buildModel_plot_min_value,
@@ -398,7 +426,6 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plotData <- self$results$buildModelContent$state
             
             if(!is.null(plotData) && self$options$buildModel_show_histo)  {
-                # Use single plot layout for better title display
                 par(mfrow = c(1, 1))
                 hist(x=plotData, main="Histogram of Edge Weights (Probabilities)", 
                      xlab="Edge Weights (Probabilities)", ylab="Frequency")
@@ -409,14 +436,12 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plotData <- self$results$buildModelContent$state
             
             if(!is.null(plotData) && self$options$buildModel_show_frequencies)  {
-                # Use the tna package plot_frequencies function and print the result
                 tryCatch({
                     p <- plot_frequencies(x=plotData)
                     if(!is.null(p)) {
                         print(p)
                     }
                 }, error = function(e) {
-                    # Fallback to hist if plot_frequencies fails
                     hist(x=plotData, main="Frequencies Plot", 
                          xlab="Edge Weights", ylab="Frequency")
                 })
@@ -446,7 +471,6 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plotData <- self$results$edgeBetweenness_plot$state
             
             if(!is.null(plotData) && self$options$edgeBetweenness_show_plot)  {
-                # Edge betweenness for single TNA model
                 plot(
                     x=plotData,
                     cut=self$options$edgeBetweenness_plot_cut,
@@ -463,7 +487,6 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plotData <- self$results$community_plot$state
             
             if(!is.null(plotData) && self$options$community_show_plot)  {
-                # Community plot for single TNA model
                 methods <- self$options$community_methods
                 plot(x=plotData, method=methods)
             }   
@@ -612,7 +635,6 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plotData <- self$results$bootstrap_plot$state
 
             if(!is.null(plotData) && self$options$bootstrap_show_plot)  {
-                # Bootstrap plot for single TNA model
                 m_sig <- plotData$weights_sig
                 
                 mat_color <- matrix()
@@ -630,16 +652,14 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             TRUE     
         },
-                .showSequencesPlot=function(image, ...) {
+        .showSequencesPlot=function(image, ...) {
             
             if(self$options$sequences_show_plot) {
                 
-                # Get the TNA data
                 tna_data <- self$results$buildModelContent$state
                 
                 if(!is.null(tna_data)) {
                     
-                    # Call the tna::plot_sequences function directly
                     tryCatch({
                         plot_result <- tna::plot_sequences(
                             x = tna_data,
@@ -652,12 +672,12 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         
                         print(plot_result)
                     }, error = function(e) {
-                        # Simple fallback plot
                         plot(1, type="n", main="Sequence Analysis Error", 
                              sub=paste("Error:", e$message))
                     })
                 }
             }
             TRUE
-        })
+        }
+    )
 )
