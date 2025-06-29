@@ -145,49 +145,53 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
           vectorCharacter <- character(0)    
 
+          # OPTIMIZED: Check if table is already filled before expensive centrality calculation
           fullTable <- self$results$centralityTable$isFilled()
 
-          self$results$centralityTable$addColumn(name="group", type="text")
+          # Only add columns if table is not filled
+          if(!fullTable) {
+              self$results$centralityTable$addColumn(name="group", type="text")
+              self$results$centralityTable$addColumn(name="state", type="text")
 
-          self$results$centralityTable$addColumn(name="state", type="text")
+              if(self$options$centrality_OutStrength) {
+                  vectorCharacter <- append(vectorCharacter, "OutStrength")
+                  self$results$centralityTable$addColumn(name="OutStrength", type="number")
+              }
+              if(self$options$centrality_InStrength) {
+                  vectorCharacter <- append(vectorCharacter, "InStrength")
+                  self$results$centralityTable$addColumn(name="InStrength", type="number")
+              }
+              if(self$options$centrality_ClosenessIn) {
+                  vectorCharacter <- append(vectorCharacter, "ClosenessIn")
+                  self$results$centralityTable$addColumn(name="ClosenessIn", type="number")
+              }
+              if(self$options$centrality_ClosenessOut) {
+                  vectorCharacter <- append(vectorCharacter, "ClosenessOut")
+                  self$results$centralityTable$addColumn(name="ClosenessOut", type="number")
+              }
+              if(self$options$centrality_Closeness) {
+                  vectorCharacter <- append(vectorCharacter, "Closeness")
+                  self$results$centralityTable$addColumn(name="Closeness", type="number")
+              }
+              if(self$options$centrality_Betweenness) {
+                  vectorCharacter <- append(vectorCharacter, "Betweenness")
+                  self$results$centralityTable$addColumn(name="Betweenness", type="integer")
+              }
+              if(self$options$centrality_BetweennessRSP) {
+                  vectorCharacter <- append(vectorCharacter, "BetweennessRSP")
+                  self$results$centralityTable$addColumn(name="BetweennessRSP", type="number")
+              }
+              if(self$options$centrality_Diffusion) {
+                  vectorCharacter <- append(vectorCharacter, "Diffusion")
+                  self$results$centralityTable$addColumn(name="Diffusion", type="number")
+              }
+              if(self$options$centrality_Clustering) {
+                  vectorCharacter <- append(vectorCharacter, "Clustering")
+                  self$results$centralityTable$addColumn(name="Clustering", type="number")
+              }
+          }
 
-          if(self$options$centrality_OutStrength) {
-              vectorCharacter <- append(vectorCharacter, "OutStrength")
-              self$results$centralityTable$addColumn(name="OutStrength", type="number")
-          }
-          if(self$options$centrality_InStrength) {
-              vectorCharacter <- append(vectorCharacter, "InStrength")
-              self$results$centralityTable$addColumn(name="InStrength", type="number")
-          }
-          if(self$options$centrality_ClosenessIn) {
-              vectorCharacter <- append(vectorCharacter, "ClosenessIn")
-              self$results$centralityTable$addColumn(name="ClosenessIn", type="number")
-          }
-          if(self$options$centrality_ClosenessOut) {
-              vectorCharacter <- append(vectorCharacter, "ClosenessOut")
-              self$results$centralityTable$addColumn(name="ClosenessOut", type="number")
-          }
-          if(self$options$centrality_Closeness) {
-              vectorCharacter <- append(vectorCharacter, "Closeness")
-              self$results$centralityTable$addColumn(name="Closeness", type="number")
-          }
-          if(self$options$centrality_Betweenness) {
-              vectorCharacter <- append(vectorCharacter, "Betweenness")
-              self$results$centralityTable$addColumn(name="Betweenness", type="integer")
-          }
-          if(self$options$centrality_BetweennessRSP) {
-              vectorCharacter <- append(vectorCharacter, "BetweennessRSP")
-              self$results$centralityTable$addColumn(name="BetweennessRSP", type="number")
-          }
-          if(self$options$centrality_Diffusion) {
-              vectorCharacter <- append(vectorCharacter, "Diffusion")
-              self$results$centralityTable$addColumn(name="Diffusion", type="number")
-          }
-          if(self$options$centrality_Clustering) {
-              vectorCharacter <- append(vectorCharacter, "Clustering")
-              self$results$centralityTable$addColumn(name="Clustering", type="number")
-          }
-
+          # OPTIMIZED: Use state to store centrality results and avoid recalculation
           cent <- self$results$centralityTable$state
           if(length(vectorCharacter) > 0 && !is.null(model) && (!self$results$centrality_plot$isFilled() || !fullTable) ) {
               cent <- tna::centralities(x=model, loops=centrality_loops, normalize=centrality_normalize, measures=vectorCharacter)
@@ -253,12 +257,17 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         community_gamma <- as.numeric(self$options$community_gamma)
         methods <- self$options$community_methods
 
-        resultComs <- TRUE
-        if((!self$results$communityContent$isFilled() || !self$results$community_plot$isFilled())) { 
-          coms <- NULL
-
+        # OPTIMIZED: Use state to avoid recalculating community detection
+        coms <- self$results$community_plot$state
+        if(is.null(coms) || (!self$results$communityContent$isFilled() && self$options$community_show_table)) {
           resultComs <- tryCatch({
             coms <- tna::communities(x=model, methods=methods, gamma=community_gamma)
+            
+            # Store state to avoid recalculation
+            self$results$community_plot$setState(coms)
+            if(!self$results$communityContent$isFilled()) {
+                self$results$communityContent$setContent(coms)
+            }
             TRUE
           }, error = function(e) {
             self$results$communityTitle$setVisible(TRUE)
@@ -266,25 +275,14 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             self$results$communityErrorText$setVisible(TRUE)
             FALSE
           })
-
-          if(resultComs) {
-            # Plot
-            if(!self$results$community_plot$isFilled()) {
-              self$results$community_plot$setState(coms)
-            }
-                                # Text
-                    if(!self$results$communityContent$isFilled()) {
-                        self$results$communityContent$setContent(coms)
-                    }
-          }
-
-             
+          
+          if(!resultComs) return()
         }
-        if(resultComs) {
-          self$results$community_plot$setVisible(self$options$community_show_plot)
-          self$results$communityContent$setVisible(self$options$community_show_table)
-          self$results$communityTitle$setVisible(self$options$community_show_plot || self$options$community_show_table)
-        }
+
+        # Set visibility
+        self$results$community_plot$setVisible(self$options$community_show_plot)
+        self$results$communityContent$setVisible(self$options$community_show_table)
+        self$results$communityTitle$setVisible(self$options$community_show_plot || self$options$community_show_table)
       }
 
       ### Cliques
@@ -294,18 +292,20 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       if(!is.null(model) && ( self$options$cliques_show_text || self$options$cliques_show_plot) ) {
 
-          if(!self$results$cliques_multiple_plot$isFilled() || !self$results$cliquesContent$isFilled()) {
+          # OPTIMIZED: Use state to avoid recalculating expensive cliques analysis
+          cliques <- self$results$cliques_multiple_plot$state
+          if(is.null(cliques) || (!self$results$cliquesContent$isFilled() && self$options$cliques_show_text)) {
               cliques <- tna::cliques(x=model, size=cliques_size, threshold=cliques_threshold)
 
-              if(!self$results$cliquesContent$isFilled()) {
+              # Store state to avoid recalculation
+              self$results$cliques_multiple_plot$setState(cliques)
+              
+              if(!self$results$cliquesContent$isFilled() && self$options$cliques_show_text) {
                 self$results$cliquesContent$setContent(cliques)
               }
-
-              # Plot
-              if(!self$results$cliques_multiple_plot$isFilled()) {
-                self$results$cliques_multiple_plot$setState(cliques)
-              }
           }
+          
+          # Set visibility
           self$results$cliques_multiple_plot$setVisible(self$options$cliques_show_plot)
           self$results$cliquesContent$setVisible(self$options$cliques_show_text)
           self$results$cliquesTitle$setVisible(self$options$cliques_show_text || self$options$cliques_show_plot)
@@ -314,8 +314,10 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       ### Bootstrap
 
       if(!is.null(model) && ( self$options$bootstrap_show_table || self$options$bootstrap_show_plot)) {
-        bs <- NULL
-        if(!self$results$bootstrap_plot$isFilled() || (!self$results$bootstrapTable$isFilled() && self$options$bootstrap_show_table)) {
+        
+        # OPTIMIZED: Use state to avoid recalculating expensive bootstrap
+        bs <- self$results$bootstrap_plot$state
+        if(is.null(bs) || (!self$results$bootstrapTable$isFilled() && self$options$bootstrap_show_table)) {
           iteration <- self$options$bootstrap_iteration
           level <- self$options$bootstrap_level
           method <- self$options$bootstrap_method
@@ -334,21 +336,12 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             consistency_range=c(range_low, range_up)
           )
 
-
-
-          # Plot
-          if(!self$results$bootstrap_plot$isFilled()) {
-            self$results$bootstrap_plot$setState(bs)
-          }
-        }
-        
-        # Get bootstrap results from state if already computed
-        if(is.null(bs) && self$results$bootstrap_plot$isFilled()) {
-          bs <- self$results$bootstrap_plot$state
+          # Store state to avoid recalculation
+          self$results$bootstrap_plot$setState(bs)
         }
 
-        # Populate bootstrap table (similar to permutation table pattern)
-        if(!is.null(bs) && self$options$bootstrap_show_table) {
+        # OPTIMIZED: Only populate table if not already done
+        if(!is.null(bs) && self$options$bootstrap_show_table && !self$results$bootstrapTable$isFilled()) {
           row_key_counter <- 1
           
           # Debug: Print structure to understand data format
@@ -409,7 +402,10 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       ## Permutation
 
       if(!is.null(model) && ( self$options$permutation_show_text || self$options$permutation_show_plot)) {
-        if( !self$results$permutation_plot$isFilled() || !self$results$permutationContent$isFilled() ) {
+        
+        # OPTIMIZED: Use state to avoid recalculating expensive permutation test
+        permutationTest <- self$results$permutation_plot$state
+        if(is.null(permutationTest) || (!self$results$permutationContent$isFilled() && self$options$permutation_show_text)) {
           permutationTest <- tna::permutation_test(
             x=model, 
             iter=self$options$permutation_iter, 
@@ -417,59 +413,44 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             level=self$options$permutation_level
           )
 
-          # Define the matrix_to_from_to_value function (re-using from TNA.b.R for consistency)
-          matrix_to_from_to_value <- function(your_matrix) {
-            if (is.null(rownames(your_matrix))) {
-              rownames(your_matrix) <- paste0("Row", 1:nrow(your_matrix))
-            }
-            if (is.null(colnames(your_matrix))) {
-              colnames(your_matrix) <- paste0("Col", 1:ncol(your_matrix))
-            }
-            df <- setNames(as.data.frame(as.table(your_matrix)), c("from", "to", "value"))
-            return(df)
-          }
+          # Store state to avoid recalculation
+          self$results$permutation_plot$setState(permutationTest)
+        }
 
-          # Populate the Jamovi table
-          if (!is.null(permutationTest)) {
-            row_key_counter <- 1
-            for (comparison_name in names(permutationTest)) {
-              comparison_data <- permutationTest[[comparison_name]]
-              if (!is.null(comparison_data$edges) && !is.null(comparison_data$edges$stats)) {
-                stats_df <- comparison_data$edges$stats
+        # OPTIMIZED: Only populate table if not already done
+        if (!is.null(permutationTest) && self$options$permutation_show_text && !self$results$permutationContent$isFilled()) {
+          row_key_counter <- 1
+          for (comparison_name in names(permutationTest)) {
+            comparison_data <- permutationTest[[comparison_name]]
+            if (!is.null(comparison_data$edges) && !is.null(comparison_data$edges$stats)) {
+              stats_df <- comparison_data$edges$stats
 
-                # Handle NAs and ensure numeric types
-                stats_df$diff_true <- as.numeric(stats_df$diff_true)
-                stats_df$effect_size <- as.numeric(stats_df$effect_size)
-                stats_df$p_value <- as.numeric(stats_df$p_value)
+              # Handle NAs and ensure numeric types
+              stats_df$diff_true <- as.numeric(stats_df$diff_true)
+              stats_df$effect_size <- as.numeric(stats_df$effect_size)
+              stats_df$p_value <- as.numeric(stats_df$p_value)
 
-                # Sort by p_value and then by diff_true (descending)
-                filtered_sorted_stats <- stats_df[order(stats_df$p_value, -stats_df$diff_true), ]
+              # Sort by p_value and then by diff_true (descending)
+              filtered_sorted_stats <- stats_df[order(stats_df$p_value, -stats_df$diff_true), ]
 
-                for (i in 1:nrow(filtered_sorted_stats)) {
-                  rowValues <- list(
-                    group_comparison = comparison_name,
-                    edge_name = as.character(filtered_sorted_stats[i, "edge_name"]),
-                    diff_true = as.numeric(filtered_sorted_stats[i, "diff_true"]),
-                    effect_size = as.numeric(filtered_sorted_stats[i, "effect_size"]),
-                    p_value = as.numeric(filtered_sorted_stats[i, "p_value"])
-                  )
-                  self$results$permutationContent$addRow(rowKey=as.character(row_key_counter), values=rowValues)
-                  row_key_counter <- row_key_counter + 1
-                }
+              for (i in 1:nrow(filtered_sorted_stats)) {
+                rowValues <- list(
+                  group_comparison = comparison_name,
+                  edge_name = paste0(filtered_sorted_stats[i, "from"], " -> ", filtered_sorted_stats[i, "to"]),
+                  diff_true = filtered_sorted_stats[i, "diff_true"],
+                  effect_size = filtered_sorted_stats[i, "effect_size"],
+                  p_value = filtered_sorted_stats[i, "p_value"]
+                )
+                self$results$permutationContent$addRow(rowKey=as.character(row_key_counter), values=rowValues)
+                row_key_counter <- row_key_counter + 1
               }
             }
-          } else {
-            self$results$permutationContent$setNote(key = NULL, note = "No permutation test results available.")
-          }
-
-          # Plot
-          if(!self$results$permutation_plot$isFilled()) {
-            self$results$permutation_plot$setState(permutationTest)
           }
         }
-        self$results$permutationTitle$setVisible(self$options$permutation_show_text || self$options$permutation_show_plot)
-        self$results$permutationContent$setVisible(self$options$permutation_show_text)
+        # Set visibility
         self$results$permutation_plot$setVisible(self$options$permutation_show_plot)
+        self$results$permutationContent$setVisible(self$options$permutation_show_text)
+        self$results$permutationTitle$setVisible(self$options$permutation_show_text || self$options$permutation_show_plot)
       }
 
       ### Sequence Analysis

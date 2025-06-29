@@ -29,7 +29,6 @@ items:
         - buildModel_variables_long_action
         - buildModel_variables_long_order
         - buildModel_variables_long_group
-
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -46,11 +45,9 @@ items:
         - buildModel_variables_long_action
         - buildModel_variables_long_order
         - buildModel_variables_long_group
-
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
         - buildModel_plot_cut
         - buildModel_plot_min_value
         - buildModel_plot_edge_label_size
@@ -70,7 +67,6 @@ items:
         - buildModel_variables_long_action
         - buildModel_variables_long_order
         - buildModel_variables_long_group
-
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -87,7 +83,6 @@ items:
         - buildModel_variables_long_action
         - buildModel_variables_long_order
         - buildModel_variables_long_group
-
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -104,11 +99,9 @@ items:
         - buildModel_variables_long_action
         - buildModel_variables_long_order
         - buildModel_variables_long_group
-
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
         - buildModel_digits
 
 
@@ -130,8 +123,6 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
-
         - centrality_loops
         - centrality_normalize
         - centrality_Betweenness
@@ -160,8 +151,6 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
-
         - centrality_loops
         - centrality_normalize
         - centrality_Betweenness
@@ -189,8 +178,6 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
-
         - centrality_loops
         - centrality_normalize
         - centrality_Betweenness
@@ -225,8 +212,6 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
-
         - community_methods
         - community_gamma
 
@@ -245,8 +230,6 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
-
         - community_methods
         - community_gamma
 
@@ -269,8 +252,6 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
-
         - cliques_size
         - cliques_threshold
 
@@ -287,11 +268,9 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
-
         - cliques_size
         - cliques_threshold
-
+        - cliques_plot_cut
         - cliques_plot_min_value
         - cliques_plot_edge_label_size
         - cliques_plot_node_size
@@ -408,15 +387,12 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
-
         - bootstrap_iteration
         - bootstrap_level
         - bootstrap_method
         - bootstrap_range_low
         - bootstrap_range_up
         - bootstrap_threshold
-
         - bootstrap_plot_cut
         - bootstrap_plot_min_value
         - bootstrap_plot_edge_label_size
@@ -477,8 +453,6 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
-
         - permutation_iter
         - permutation_paired
         - permutation_level
@@ -501,12 +475,10 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
         - sequences_type
         - sequences_scale
         - sequences_geom
         - sequences_include_na
-
         - sequences_tick
 
 ...
