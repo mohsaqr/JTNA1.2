@@ -342,9 +342,41 @@ items:
       title: Bootstrap
       visible: False
 
-    - name:  bootstrapContent
-      type:  Preformatted
+    - name:  bootstrapTable
+      type:  Table
+      title: Bootstrap Results
       visible: False
+      columns:
+        - name: group
+          title: Group
+          type: text
+        - name: from
+          title: From
+          type: text
+        - name: to
+          title: To
+          type: text
+        - name: weight
+          title: Weight
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+        - name: cr_lower
+          title: CR Lower
+          type: number
+        - name: cr_upper
+          title: CR Upper
+          type: number
+        - name: ci_lower
+          title: CI Lower
+          type: number
+        - name: ci_upper
+          title: CI Upper
+          type: number
+        - name: significant
+          title: Significant
+          type: text
       clearWith:
         - buildModel_variables_long_actor
         - buildModel_variables_long_time
@@ -354,8 +386,6 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
-
         - bootstrap_iteration
         - bootstrap_level
         - bootstrap_method

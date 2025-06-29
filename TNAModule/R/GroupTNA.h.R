@@ -59,7 +59,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bootstrap_range_low = 0.75,
             bootstrap_range_up = 1.25,
             bootstrap_threshold = 0.1,
-            bootstrap_show_text = FALSE,
+            bootstrap_show_table = FALSE,
             bootstrap_show_plot = FALSE,
             bootstrap_plot_cut = 0,
             bootstrap_plot_min_value = 0.05,
@@ -361,9 +361,9 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=0.1,
                 min=0,
                 max=1)
-            private$..bootstrap_show_text <- jmvcore::OptionBool$new(
-                "bootstrap_show_text",
-                bootstrap_show_text,
+            private$..bootstrap_show_table <- jmvcore::OptionBool$new(
+                "bootstrap_show_table",
+                bootstrap_show_table,
                 default=FALSE)
             private$..bootstrap_show_plot <- jmvcore::OptionBool$new(
                 "bootstrap_show_plot",
@@ -565,7 +565,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..bootstrap_range_low)
             self$.addOption(private$..bootstrap_range_up)
             self$.addOption(private$..bootstrap_threshold)
-            self$.addOption(private$..bootstrap_show_text)
+            self$.addOption(private$..bootstrap_show_table)
             self$.addOption(private$..bootstrap_show_plot)
             self$.addOption(private$..bootstrap_plot_cut)
             self$.addOption(private$..bootstrap_plot_min_value)
@@ -647,7 +647,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         bootstrap_range_low = function() private$..bootstrap_range_low$value,
         bootstrap_range_up = function() private$..bootstrap_range_up$value,
         bootstrap_threshold = function() private$..bootstrap_threshold$value,
-        bootstrap_show_text = function() private$..bootstrap_show_text$value,
+        bootstrap_show_table = function() private$..bootstrap_show_table$value,
         bootstrap_show_plot = function() private$..bootstrap_show_plot$value,
         bootstrap_plot_cut = function() private$..bootstrap_plot_cut$value,
         bootstrap_plot_min_value = function() private$..bootstrap_plot_min_value$value,
@@ -728,7 +728,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..bootstrap_range_low = NA,
         ..bootstrap_range_up = NA,
         ..bootstrap_threshold = NA,
-        ..bootstrap_show_text = NA,
+        ..bootstrap_show_table = NA,
         ..bootstrap_show_plot = NA,
         ..bootstrap_plot_cut = NA,
         ..bootstrap_plot_min_value = NA,
@@ -781,7 +781,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         cliquesContent = function() private$.items[["cliquesContent"]],
         cliques_multiple_plot = function() private$.items[["cliques_multiple_plot"]],
         bootstrapTitle = function() private$.items[["bootstrapTitle"]],
-        bootstrapContent = function() private$.items[["bootstrapContent"]],
+        bootstrapTable = function() private$.items[["bootstrapTable"]],
         bootstrap_plot = function() private$.items[["bootstrap_plot"]],
         comparisonTitle = function() private$.items[["comparisonTitle"]],
         comparisonContent = function() private$.items[["comparisonContent"]],
@@ -1126,10 +1126,52 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="bootstrapTitle",
                 title="Bootstrap",
                 visible=FALSE))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="bootstrapContent",
+                name="bootstrapTable",
+                title="Bootstrap Results",
                 visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Group", 
+                        `type`="text"),
+                    list(
+                        `name`="from", 
+                        `title`="From", 
+                        `type`="text"),
+                    list(
+                        `name`="to", 
+                        `title`="To", 
+                        `type`="text"),
+                    list(
+                        `name`="weight", 
+                        `title`="Weight", 
+                        `type`="number"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number"),
+                    list(
+                        `name`="cr_lower", 
+                        `title`="CR Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="cr_upper", 
+                        `title`="CR Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="significant", 
+                        `title`="Significant", 
+                        `type`="text")),
                 clearWith=list(
                     "buildModel_variables_long_actor",
                     "buildModel_variables_long_time",
@@ -1321,7 +1363,7 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "JTNA",
                 name = "GroupTNA",
-                version = c(1,3,0),
+                version = c(1,4,0),
                 options = options,
                 results = GroupTNAResults$new(options=options),
                 data = data,
@@ -1391,7 +1433,7 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param bootstrap_range_low .
 #' @param bootstrap_range_up .
 #' @param bootstrap_threshold .
-#' @param bootstrap_show_text .
+#' @param bootstrap_show_table .
 #' @param bootstrap_show_plot .
 #' @param bootstrap_plot_cut .
 #' @param bootstrap_plot_min_value .
@@ -1445,7 +1487,7 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$cliques_multiple_plot$cliques_plot5} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$cliques_multiple_plot$cliques_plot6} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$bootstrapTitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$bootstrapContent} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$bootstrap_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$comparisonTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$comparisonContent} \tab \tab \tab \tab \tab a preformatted \cr
@@ -1519,7 +1561,7 @@ GroupTNA <- function(
     bootstrap_range_low = 0.75,
     bootstrap_range_up = 1.25,
     bootstrap_threshold = 0.1,
-    bootstrap_show_text = FALSE,
+    bootstrap_show_table = FALSE,
     bootstrap_show_plot = FALSE,
     bootstrap_plot_cut = 0,
     bootstrap_plot_min_value = 0.05,
@@ -1619,7 +1661,7 @@ GroupTNA <- function(
         bootstrap_range_low = bootstrap_range_low,
         bootstrap_range_up = bootstrap_range_up,
         bootstrap_threshold = bootstrap_threshold,
-        bootstrap_show_text = bootstrap_show_text,
+        bootstrap_show_table = bootstrap_show_table,
         bootstrap_show_plot = bootstrap_show_plot,
         bootstrap_plot_cut = bootstrap_plot_cut,
         bootstrap_plot_min_value = bootstrap_plot_min_value,

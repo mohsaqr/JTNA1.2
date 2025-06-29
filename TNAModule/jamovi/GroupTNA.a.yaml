@@ -2,7 +2,7 @@
 name:  GroupTNA
 title: Group TNA
 menuGroup: JTNA
-version: '1.3.0'
+version: '1.4.0'
 jas: '1.2'
 
 options:
@@ -358,8 +358,8 @@ options:
       max: 1
 
     ##### PLOT
-    - name: bootstrap_show_text
-      title: Text
+    - name: bootstrap_show_table
+      title: Bootstrap Results Table
       type: Bool
       default: False
     

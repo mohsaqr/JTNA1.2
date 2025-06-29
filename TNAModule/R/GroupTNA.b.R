@@ -313,8 +313,9 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       ### Bootstrap
 
-      if(!is.null(model) && ( self$options$bootstrap_show_text || self$options$bootstrap_show_plot)) {
-        if(!self$results$bootstrapContent$isFilled() || !self$results$bootstrap_plot$isFilled()) {
+      if(!is.null(model) && ( self$options$bootstrap_show_table || self$options$bootstrap_show_plot)) {
+        bs <- NULL
+        if(!self$results$bootstrap_plot$isFilled() || (!self$results$bootstrapTable$isFilled() && self$options$bootstrap_show_table)) {
           iteration <- self$options$bootstrap_iteration
           level <- self$options$bootstrap_level
           method <- self$options$bootstrap_method
@@ -333,19 +334,73 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             consistency_range=c(range_low, range_up)
           )
 
-          if(!self$results$bootstrapContent$isFilled()) {
-            self$results$bootstrapContent$setContent(bs)
-          }
+
 
           # Plot
           if(!self$results$bootstrap_plot$isFilled()) {
-
             self$results$bootstrap_plot$setState(bs)
           }
         }
+        
+        # Get bootstrap results from state if already computed
+        if(is.null(bs) && self$results$bootstrap_plot$isFilled()) {
+          bs <- self$results$bootstrap_plot$state
+        }
+
+        # Populate bootstrap table (similar to permutation table pattern)
+        if(!is.null(bs) && self$options$bootstrap_show_table) {
+          row_key_counter <- 1
+          
+          # Debug: Print structure to understand data format
+          tryCatch({
+            # Iterate through each group (A, B, C, etc.)
+            for (group_name in names(bs)) {
+              group_data <- bs[[group_name]]
+              
+              # Check if group has summary data
+              if (!is.null(group_data) && !is.null(group_data$summary)) {
+                summary_data <- group_data$summary
+                
+                # Check if summary_data has rows
+                if (is.data.frame(summary_data) && nrow(summary_data) > 0) {
+                  # Sort by significance (significant first), then by p-value
+                  sorted_summary <- summary_data[order(-summary_data$sig, summary_data$p_value), ]
+                  
+                  # Add each edge to the table
+                  for (i in 1:nrow(sorted_summary)) {
+                    rowValues <- list(
+                      group = group_name,
+                      from = as.character(sorted_summary[i, "from"]),
+                      to = as.character(sorted_summary[i, "to"]),
+                      weight = as.numeric(sorted_summary[i, "weight"]),
+                      p_value = as.numeric(sorted_summary[i, "p_value"]),
+                      cr_lower = as.numeric(sorted_summary[i, "cr_lower"]),
+                      cr_upper = as.numeric(sorted_summary[i, "cr_upper"]),
+                      ci_lower = as.numeric(sorted_summary[i, "ci_lower"]),
+                      ci_upper = as.numeric(sorted_summary[i, "ci_upper"]),
+                      significant = ifelse(sorted_summary[i, "sig"], "Yes", "No")
+                    )
+                    self$results$bootstrapTable$addRow(rowKey=as.character(row_key_counter), values=rowValues)
+                    row_key_counter <- row_key_counter + 1
+                  }
+                }
+              }
+            }
+            
+            # If no data was added, add a debug message
+            if (row_key_counter == 1) {
+              self$results$bootstrapTable$setNote(key = "bootstrap_debug", note = "No bootstrap results found. Check that bootstrap analysis completed successfully.")
+            }
+            
+          }, error = function(e) {
+            # Error handling - show structure info
+            self$results$bootstrapTable$setNote(key = "bootstrap_error", note = paste("Bootstrap table error:", e$message))
+          })
+        }
+        
         self$results$bootstrap_plot$setVisible(self$options$bootstrap_show_plot)
-        self$results$bootstrapContent$setVisible(self$options$bootstrap_show_text)
-        self$results$bootstrapTitle$setVisible(self$options$bootstrap_show_plot || self$options$bootstrap_show_text)
+        self$results$bootstrapTable$setVisible(self$options$bootstrap_show_table)
+        self$results$bootstrapTitle$setVisible(self$options$bootstrap_show_plot || self$options$bootstrap_show_table)
 
       }
 

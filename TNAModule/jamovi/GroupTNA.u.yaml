@@ -345,8 +345,8 @@ children:
             label: Display Options
             children:
               - type: CheckBox
-                name: bootstrap_show_text
-                label: Table
+                name: bootstrap_show_table
+                label: Bootstrap Results Table
               - type: CheckBox
                 name: bootstrap_show_plot
                 label: Plot
@@ -552,7 +552,6 @@ children:
               - type: CheckBox
                 name: sequences_include_na
                 label: Include missing values
-
               - type: TextBox
                 name: sequences_tick
                 format: number
