@@ -295,9 +295,14 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 community_gamma <- as.numeric(self$options$community_gamma)
                 methods <- self$options$community_methods
 
+                # Initialize coms variable to avoid scope issues
+                coms <- self$results$community_plot$state
+                
                 if((!self$results$communityContent$isFilled() || !self$results$community_plot$isFilled())) { 
 
-                    coms <- NULL
+                    if(is.null(coms)) {
+                        coms <- NULL
+                    }
                     
                     resultComs <- tryCatch({
                         coms <- tna::communities(x=model, methods=methods, gamma=community_gamma)

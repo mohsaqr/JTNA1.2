@@ -22,13 +22,13 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       model <- NULL
 
-      if(!self$options$buildModel_show_matrix &&
-        !self$options$buildModel_show_plot &&
-        !self$options$buildModel_show_histo &&
+      if(!isTRUE(self$options$buildModel_show_matrix) &&
+        !isTRUE(self$options$buildModel_show_plot) &&
+        !isTRUE(self$options$buildModel_show_histo) &&
         (
-          !self$options$buildModel_show_mosaic ||
+          !isTRUE(self$options$buildModel_show_mosaic) ||
           (
-            self$options$buildModel_show_mosaic && 
+            isTRUE(self$options$buildModel_show_mosaic) && 
             self$options$buildModel_type == "relative"
           )
         )
@@ -139,7 +139,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       ### Centrality
 
-      if(!is.null(model) && (self$options$centrality_show_table || self$options$centrality_show_plot) ) {
+      if(!is.null(model)) {
           centrality_loops <- self$options$centrality_loops
           centrality_normalize <- self$options$centrality_normalize
 
@@ -175,9 +175,24 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
           # Use state to store centrality results and avoid recalculation, but allow recalculation when needed
           cent <- self$results$centralityTable$state
-          if(length(vectorCharacter) > 0 && !is.null(model) && is.null(cent)) {
-              cent <- tna::centralities(x=model, loops=centrality_loops, normalize=centrality_normalize, measures=vectorCharacter)
-              self$results$centralityTable$setState(cent)
+          
+          if(length(vectorCharacter) > 0 && !is.null(model)) {
+              # Always recalculate when table is requested
+              tryCatch({
+                  cent_result <- tna::centralities(x=model, loops=centrality_loops, normalize=centrality_normalize, measures=vectorCharacter)
+                  
+                  # Validate the result before storing
+                  if(!is.null(cent_result) && is.data.frame(cent_result)) {
+                      cent <- cent_result
+                      self$results$centralityTable$setState(cent)
+                  } else {
+                      self$results$centralityTable$setNote(key = "centrality_error", note = "Invalid centrality calculation result")
+                  }
+              }, error = function(e) {
+                  # Add error handling for centrality calculation
+                  self$results$centralityTable$setNote(key = "centrality_error", note = paste("Centrality calculation error:", e$message))
+                  cent <- NULL
+              })
           }
 
           # Add columns if needed (jamovi will handle duplicates)
@@ -216,70 +231,71 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           if(!is.null(cent) && length(vectorCharacter) > 0) {
               # Handle Group TNA centrality data structure
               row_count <- 1
-              for (group_name in names(cent)) {
-                  group_centrality <- cent[[group_name]]
-                  
-                  if(!is.null(group_centrality) && nrow(group_centrality) > 0) {
-                      for (i in 1:nrow(group_centrality)) {
-                          index <- 1
-                          rowValues <- list()
-                          
-                          rowValues$group <- as.character(group_name)
-                          rowValues$state <- as.character(group_centrality[i, index])
+              
+              # GroupTNA centralities returns a data frame with columns: group, state, measures...
+              if(is.data.frame(cent) && !is.null(cent) && !is.na(nrow(cent)) && nrow(cent) > 0) {
+                  for (i in 1:nrow(cent)) {
+                      rowValues <- list()
+                      
+                      # Extract values directly from data frame columns
+                      rowValues$group <- as.character(cent[i, "group"])
+                      rowValues$state <- as.character(cent[i, "state"])
 
-                          if ("OutStrength" %in% vectorCharacter) {
-                              index <- index + 1
-                              rowValues$OutStrength <- as.numeric(group_centrality[i, index])
-                          }
-                          if ("InStrength" %in% vectorCharacter) {
-                              index <- index + 1
-                              rowValues$InStrength <- as.numeric(group_centrality[i, index])
-                          }
-                          if ("ClosenessIn" %in% vectorCharacter) {
-                              index <- index + 1
-                              rowValues$ClosenessIn <- as.numeric(group_centrality[i, index])
-                          }
-                          if ("ClosenessOut" %in% vectorCharacter) {
-                              index <- index + 1
-                              rowValues$ClosenessOut <- as.numeric(group_centrality[i, index])
-                          }
-                          if ("Closeness" %in% vectorCharacter) {
-                              index <- index + 1
-                              rowValues$Closeness <- as.numeric(group_centrality[i, index])
-                          }
-                          if ("Betweenness" %in% vectorCharacter) {
-                              index <- index + 1
-                              rowValues$Betweenness <- as.numeric(group_centrality[i, index])
-                          }
-                          if ("BetweennessRSP" %in% vectorCharacter) {
-                              index <- index + 1
-                              rowValues$BetweennessRSP <- as.numeric(group_centrality[i, index])
-                          }
-                          if ("Diffusion" %in% vectorCharacter) {
-                              index <- index + 1
-                              rowValues$Diffusion <- as.numeric(group_centrality[i, index])
-                          }
-                          if ("Clustering" %in% vectorCharacter) {
-                              index <- index + 1
-                              rowValues$Clustering <- as.numeric(group_centrality[i, index])
-                          }
-                          
-                          self$results$centralityTable$addRow(rowKey=row_count, values=rowValues)
-                          row_count <- row_count + 1
+                      if ("OutStrength" %in% vectorCharacter && "OutStrength" %in% colnames(cent)) {
+                          rowValues$OutStrength <- as.numeric(cent[i, "OutStrength"])
                       }
+                      if ("InStrength" %in% vectorCharacter && "InStrength" %in% colnames(cent)) {
+                          rowValues$InStrength <- as.numeric(cent[i, "InStrength"])
+                      }
+                      if ("ClosenessIn" %in% vectorCharacter && "ClosenessIn" %in% colnames(cent)) {
+                          rowValues$ClosenessIn <- as.numeric(cent[i, "ClosenessIn"])
+                      }
+                      if ("ClosenessOut" %in% vectorCharacter && "ClosenessOut" %in% colnames(cent)) {
+                          rowValues$ClosenessOut <- as.numeric(cent[i, "ClosenessOut"])
+                      }
+                      if ("Closeness" %in% vectorCharacter && "Closeness" %in% colnames(cent)) {
+                          rowValues$Closeness <- as.numeric(cent[i, "Closeness"])
+                      }
+                      if ("Betweenness" %in% vectorCharacter && "Betweenness" %in% colnames(cent)) {
+                          rowValues$Betweenness <- as.numeric(cent[i, "Betweenness"])
+                      }
+                      if ("BetweennessRSP" %in% vectorCharacter && "BetweennessRSP" %in% colnames(cent)) {
+                          rowValues$BetweennessRSP <- as.numeric(cent[i, "BetweennessRSP"])
+                      }
+                      if ("Diffusion" %in% vectorCharacter && "Diffusion" %in% colnames(cent)) {
+                          rowValues$Diffusion <- as.numeric(cent[i, "Diffusion"])
+                      }
+                      if ("Clustering" %in% vectorCharacter && "Clustering" %in% colnames(cent)) {
+                          rowValues$Clustering <- as.numeric(cent[i, "Clustering"])
+                      }
+                      
+                      self$results$centralityTable$addRow(rowKey=row_count, values=rowValues)
+                      row_count <- row_count + 1
                   }
+              }
+              
+              # Add informational note if no rows were added
+              if(row_count == 1) {
+                  self$results$centralityTable$setNote(key = "centrality_info", note = "No centrality data available. Please check your data and settings.")
+              }
+          } else {
+              # Add informational note if conditions not met
+              if(is.null(cent)) {
+                  self$results$centralityTable$setNote(key = "centrality_info", note = "Centrality calculation not performed.")
+              } else if(length(vectorCharacter) == 0) {
+                  self$results$centralityTable$setNote(key = "centrality_info", note = "Please select at least one centrality measure to display results.")
               }
           }
           
-          # Set visibility
-          self$results$centralityTitle$setVisible(self$options$centrality_show_plot || self$options$centrality_show_table)
+          # Set visibility - always show title and table when model exists
+          self$results$centralityTitle$setVisible(TRUE)
           self$results$centrality_plot$setVisible(self$options$centrality_show_plot)
-          self$results$centralityTable$setVisible(self$options$centrality_show_table)
+          self$results$centralityTable$setVisible(TRUE)
       }
 
 
       ### Community
-      if(!is.null(model) &&  (self$options$community_show_table || self$options$community_show_plot) ) {
+      if(!is.null(model) && (isTRUE(self$options$community_show_table) || isTRUE(self$options$community_show_plot)) ) {
         community_gamma <- as.numeric(self$options$community_gamma)
         methods <- self$options$community_methods
 
@@ -291,7 +307,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Store state to avoid recalculation
             self$results$community_plot$setState(coms)
-            if(self$options$community_show_table) {
+            if(isTRUE(self$options$community_show_table)) {
                 self$results$communityContent$setContent(coms)
             }
             TRUE
@@ -308,7 +324,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Set visibility
         self$results$community_plot$setVisible(self$options$community_show_plot)
         self$results$communityContent$setVisible(self$options$community_show_table)
-        self$results$communityTitle$setVisible(self$options$community_show_plot || self$options$community_show_table)
+        self$results$communityTitle$setVisible(isTRUE(self$options$community_show_plot) || isTRUE(self$options$community_show_table))
       }
 
       ### Cliques
@@ -316,7 +332,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       cliques_size <- as.numeric(self$options$cliques_size)
       cliques_threshold <- as.numeric(self$options$cliques_threshold)
 
-      if(!is.null(model) && ( self$options$cliques_show_text || self$options$cliques_show_plot) ) {
+      if(!is.null(model) && (isTRUE(self$options$cliques_show_text) || isTRUE(self$options$cliques_show_plot)) ) {
 
           # Use state to avoid recalculating expensive cliques analysis, but allow recalculation when needed
           cliques <- self$results$cliques_multiple_plot$state
@@ -326,7 +342,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               # Store state to avoid recalculation
               self$results$cliques_multiple_plot$setState(cliques)
               
-              if(self$options$cliques_show_text) {
+              if(isTRUE(self$options$cliques_show_text)) {
                 self$results$cliquesContent$setContent(cliques)
               }
           }
@@ -334,12 +350,12 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           # Set visibility
           self$results$cliques_multiple_plot$setVisible(self$options$cliques_show_plot)
           self$results$cliquesContent$setVisible(self$options$cliques_show_text)
-          self$results$cliquesTitle$setVisible(self$options$cliques_show_text || self$options$cliques_show_plot)
+          self$results$cliquesTitle$setVisible(isTRUE(self$options$cliques_show_text) || isTRUE(self$options$cliques_show_plot))
       }
 
       ### Bootstrap
 
-      if(!is.null(model) && ( self$options$bootstrap_show_table || self$options$bootstrap_show_plot)) {
+      if(!is.null(model) && (isTRUE(self$options$bootstrap_show_table) || isTRUE(self$options$bootstrap_show_plot))) {
         
         # Use state to avoid recalculating expensive bootstrap, but allow recalculation when needed
         bs <- self$results$bootstrap_plot$state
@@ -367,7 +383,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
 
         # Populate table if we have data and table option is enabled
-        if(!is.null(bs) && self$options$bootstrap_show_table) {
+        if(!is.null(bs) && isTRUE(self$options$bootstrap_show_table)) {
           row_key_counter <- 1
           
           # Debug: Print structure to understand data format
@@ -381,7 +397,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 summary_data <- group_data$summary
                 
                 # Check if summary_data has rows
-                if (is.data.frame(summary_data) && nrow(summary_data) > 0) {
+                if (is.data.frame(summary_data) && !is.null(summary_data) && !is.na(nrow(summary_data)) && nrow(summary_data) > 0) {
                   # Sort by significance (significant first), then by p-value
                   sorted_summary <- summary_data[order(-summary_data$sig, summary_data$p_value), ]
                   
@@ -419,7 +435,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         self$results$bootstrap_plot$setVisible(self$options$bootstrap_show_plot)
         self$results$bootstrapTable$setVisible(self$options$bootstrap_show_table)
-        self$results$bootstrapTitle$setVisible(self$options$bootstrap_show_plot || self$options$bootstrap_show_table)
+        self$results$bootstrapTitle$setVisible(isTRUE(self$options$bootstrap_show_plot) || isTRUE(self$options$bootstrap_show_table))
 
       }
 
@@ -427,7 +443,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       ## Permutation
 
-      if(!is.null(model) && ( self$options$permutation_show_text || self$options$permutation_show_plot)) {
+      if(!is.null(model) && (isTRUE(self$options$permutation_show_text) || isTRUE(self$options$permutation_show_plot))) {
         
         # Use state to avoid recalculating expensive permutation test, but allow recalculation when needed
         permutationTest <- self$results$permutation_plot$state
@@ -444,7 +460,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
 
         # Populate table if we have data and table option is enabled
-        if (!is.null(permutationTest) && self$options$permutation_show_text) {
+        if (!is.null(permutationTest) && isTRUE(self$options$permutation_show_text)) {
           row_key_counter <- 1
           for (comparison_name in names(permutationTest)) {
             comparison_data <- permutationTest[[comparison_name]]
@@ -458,14 +474,44 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
               # Sort by p_value and then by diff_true (descending)
               filtered_sorted_stats <- stats_df[order(stats_df$p_value, -stats_df$diff_true), ]
+              
+              # Add debug info about edge names
+              if("edge_name" %in% colnames(filtered_sorted_stats)) {
+                sample_edges <- head(filtered_sorted_stats$edge_name, 3)
+                # Also check character encoding and length
+                debug_info <- paste("Found", nrow(filtered_sorted_stats), "edges. Sample:", 
+                                  paste(sample_edges, collapse="; "),
+                                  ". Lengths:", paste(nchar(sample_edges), collapse=","))
+                self$results$permutationContent$setNote(key = "edge_debug", note = debug_info)
+              } else {
+                available_cols <- paste(colnames(filtered_sorted_stats), collapse=", ")
+                self$results$permutationContent$setNote(key = "edge_debug", note = paste("No edge_name column. Available:", available_cols))
+              }
 
               for (i in 1:nrow(filtered_sorted_stats)) {
+                # Get edge name with robust handling
+                edge_name_value <- filtered_sorted_stats[i, "edge_name"]
+                
+                # Handle various edge name formats and potential issues
+                if(is.null(edge_name_value) || is.na(edge_name_value) || edge_name_value == "" || edge_name_value == " -> ") {
+                  # Try to construct from row name or use fallback
+                  edge_name_value <- rownames(filtered_sorted_stats)[i]
+                  if(is.null(edge_name_value) || edge_name_value == "") {
+                    edge_name_value <- paste("Edge", i)
+                  }
+                } else {
+                  # Clean the edge name and ensure it's properly formatted
+                  edge_name_value <- trimws(as.character(edge_name_value))
+                  # Replace any problematic characters that might cause display issues
+                  edge_name_value <- gsub("[\u00A0\u2013\u2014]", "->", edge_name_value)
+                }
+                
                 rowValues <- list(
                   group_comparison = comparison_name,
-                  edge_name = paste0(filtered_sorted_stats[i, "from"], " -> ", filtered_sorted_stats[i, "to"]),
-                  diff_true = filtered_sorted_stats[i, "diff_true"],
-                  effect_size = filtered_sorted_stats[i, "effect_size"],
-                  p_value = filtered_sorted_stats[i, "p_value"]
+                  edge_name = edge_name_value,
+                  diff_true = as.numeric(filtered_sorted_stats[i, "diff_true"]),
+                  effect_size = as.numeric(filtered_sorted_stats[i, "effect_size"]),
+                  p_value = as.numeric(filtered_sorted_stats[i, "p_value"])
                 )
                 self$results$permutationContent$addRow(rowKey=as.character(row_key_counter), values=rowValues)
                 row_key_counter <- row_key_counter + 1
@@ -476,12 +522,12 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Set visibility
         self$results$permutation_plot$setVisible(self$options$permutation_show_plot)
         self$results$permutationContent$setVisible(self$options$permutation_show_text)
-        self$results$permutationTitle$setVisible(self$options$permutation_show_text || self$options$permutation_show_plot)
+        self$results$permutationTitle$setVisible(isTRUE(self$options$permutation_show_text) || isTRUE(self$options$permutation_show_plot))
       }
 
       ### Sequence Analysis
 
-      if(self$options$sequences_show_plot) {
+      if(isTRUE(self$options$sequences_show_plot)) {
           
           # Set visibility for sequence analysis
           self$results$sequences_plot$setVisible(TRUE)
