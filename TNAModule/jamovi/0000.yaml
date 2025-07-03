@@ -1,7 +1,7 @@
 ---
 title: Transition Network Analysis
 name: JTNA
-version: 1.4.0
+version: 1.5
 jms: '1.0'
 authors:
   - Dylan GIRAULT
