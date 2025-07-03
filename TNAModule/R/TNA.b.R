@@ -37,74 +37,86 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             else if(!is.null(self$data) && ncol(self$data) >= 1) {
 
-                dataForTNA <- NULL
+                # Wrap data preparation in error handling
+                tryCatch({
+                    dataForTNA <- NULL
 
-                copyData <- self$data
-                copyData[[self$options$buildModel_variables_long_action]] <- as.character(copyData[[self$options$buildModel_variables_long_action]])
+                    copyData <- self$data
+                    copyData[[self$options$buildModel_variables_long_action]] <- as.character(copyData[[self$options$buildModel_variables_long_action]])
 
-                if(!is.null(self$options$buildModel_variables_long_time)) {
-                    copyData[[self$options$buildModel_variables_long_time]] <- as.POSIXct(copyData[[self$options$buildModel_variables_long_time]])
-                }
-                if(!is.null(self$options$buildModel_variables_long_actor)) {
-                    copyData[[self$options$buildModel_variables_long_actor]] <- as.character(copyData[[self$options$buildModel_variables_long_actor]])
-                }
-                if(!is.null(self$options$buildModel_variables_long_order)) {
-                    copyData[[self$options$buildModel_variables_long_order]] <- as.character(copyData[[self$options$buildModel_variables_long_order]])
-                }
-
-                
-                threshold <- self$options$buildModel_threshold
-
-                columnToUseLong <- c(
-                    self$options$buildModel_variables_long_time,
-                    self$options$buildModel_variables_long_actor,
-                    self$options$buildModel_variables_long_action,
-                    self$options$buildModel_variables_long_order
-                )
-
-                longData <- copyData[columnToUseLong]
-
-
-                
-
-                if(ncol(longData) > 0) {
-                    actorColumn <- self$options$buildModel_variables_long_actor
-                    timeColumn <- self$options$buildModel_variables_long_time
-                    actionColumn <- self$options$buildModel_variables_long_action
-                    orderColumn <- self$options$buildModel_variables_long_order
-
-                    ##### TO REMOVE
-                    values_to_replace <- c("Applications", "Ethics", "General", "La_types", "Theory")
-                    new_value <- "Resources"
-                    longData[[self$options$buildModel_variables_long_action]] <- replace(
-                        longData[[self$options$buildModel_variables_long_action]], 
-                        longData[[self$options$buildModel_variables_long_action]] %in% values_to_replace, 
-                        new_value
-                    )
-                    ##### END TO REMOVE
-
-                    args_prepare_data <- list(
-                        data = longData,
-                        actor = actorColumn,
-                        time = timeColumn,
-                        action = actionColumn,
-                        time_threshold = threshold,
-                        order = orderColumn
-                    ) 
-
-                    args_prepare_data <- args_prepare_data[!sapply(args_prepare_data, is.null)]
-
-                    dataForTNA <- do.call(prepare_data, args_prepare_data)
-                }
-
-                if(!is.null(dataForTNA)) {
-
-                    if(scaling == "noScaling") {
-                        scaling = character(0L)
+                    if(!is.null(self$options$buildModel_variables_long_time)) {
+                        copyData[[self$options$buildModel_variables_long_time]] <- as.POSIXct(copyData[[self$options$buildModel_variables_long_time]])
+                    }
+                    if(!is.null(self$options$buildModel_variables_long_actor)) {
+                        copyData[[self$options$buildModel_variables_long_actor]] <- as.character(copyData[[self$options$buildModel_variables_long_actor]])
+                    }
+                    if(!is.null(self$options$buildModel_variables_long_order)) {
+                        copyData[[self$options$buildModel_variables_long_order]] <- as.character(copyData[[self$options$buildModel_variables_long_order]])
                     }
 
-                    model <- build_model(x=dataForTNA, type=type, scaling=scaling)     
-                }
+                    
+                    threshold <- self$options$buildModel_threshold
+
+                    columnToUseLong <- c(
+                        self$options$buildModel_variables_long_time,
+                        self$options$buildModel_variables_long_actor,
+                        self$options$buildModel_variables_long_action,
+                        self$options$buildModel_variables_long_order
+                    )
+
+                    longData <- copyData[columnToUseLong]
+
+                    if(ncol(longData) > 0) {
+                        actorColumn <- self$options$buildModel_variables_long_actor
+                        timeColumn <- self$options$buildModel_variables_long_time
+                        actionColumn <- self$options$buildModel_variables_long_action
+                        orderColumn <- self$options$buildModel_variables_long_order
+
+                        ##### TO REMOVE
+                        values_to_replace <- c("Applications", "Ethics", "General", "La_types", "Theory")
+                        new_value <- "Resources"
+                        longData[[self$options$buildModel_variables_long_action]] <- replace(
+                            longData[[self$options$buildModel_variables_long_action]], 
+                            longData[[self$options$buildModel_variables_long_action]] %in% values_to_replace, 
+                            new_value
+                        )
+                        ##### END TO REMOVE
+
+                        args_prepare_data <- list(
+                            data = longData,
+                            actor = actorColumn,
+                            time = timeColumn,
+                            action = actionColumn,
+                            time_threshold = threshold,
+                            order = orderColumn
+                        ) 
+
+                        args_prepare_data <- args_prepare_data[!sapply(args_prepare_data, is.null)]
+
+                        dataForTNA <- do.call(prepare_data, args_prepare_data)
+                    }
+
+                    if(!is.null(dataForTNA)) {
+
+                        if(scaling == "noScaling") {
+                            scaling = character(0L)
+                        }
+
+                        model <- build_model(x=dataForTNA, type=type, scaling=scaling)     
+                    }
+                    
+                }, error = function(e) {
+                    # Check if error is related to time format or contains time-related keywords
+                    error_msg <- tolower(as.character(e$message))
+                    if(grepl("time|date|posix|format", error_msg) || 
+                       grepl("character string is not in a standard unambiguous format", error_msg)) {
+                        self$results$errorText$setContent("Please enter an appropriate time format")
+                    } else {
+                        self$results$errorText$setContent(paste("Data preparation error:", e$message))
+                    }
+                    self$results$errorText$setVisible(TRUE)
+                    return()
+                })
             }
             
             if(!is.null(model)) {
@@ -236,62 +248,64 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ### Edge betweenness
 
             if(!is.null(model) && (self$options$edgeBetweenness_show_table || self$options$edgeBetweenness_show_plot)) {
-                if(!is.null(model)) { 
-                    edgeBetwenness <- betweenness_network(x=model)
+                edgeBetwenness <- betweenness_network(x=model)
 
-                    # Plot
-                    if(!self$results$edgeBetweenness_plot$isFilled()) {
-                        self$results$edgeBetweenness_plot$setState(edgeBetwenness)
-                    }
-                    
-                    # Table - show weights
-                    matrix_to_from_to_value <- function(your_matrix) {
-                      if (is.null(rownames(your_matrix))) {
-                        rownames(your_matrix) <- paste0("Row", 1:nrow(your_matrix))
-                      }
-                      if (is.null(colnames(your_matrix))) {
-                        colnames(your_matrix) <- paste0("Col", 1:ncol(your_matrix))
-                      }
-                      df <- setNames(as.data.frame(as.table(your_matrix)), c("from", "to", "value"))
-                      return(df)
-                    }
-
-                    if(!is.null(edgeBetwenness) && !is.null(edgeBetwenness$weights)) {
-                        betable <- matrix_to_from_to_value(edgeBetwenness$weights)
-
-                        betable <- betable[betable$value > 0, ]
-
-                        betable <- betable[order(-betable$value), ]
-
-                        for (i in 1:nrow(betable)) {
-                            self$results$edgeBetweennessTable$addRow(rowKey=i, values=list(
-                                from=as.character(betable[i, "from"]),
-                                to=as.character(betable[i, "to"]),
-                                value=betable[i, "value"]
-                            ))
-                        }
-
-                        has_results_to_display <- nrow(betable) > 0
-                        self$results$edgeBetweennessTable$setVisible(self$options$edgeBetweenness_show_table && has_results_to_display)
-                        self$results$edgeBetweennessNoResultsNote$setVisible(self$options$edgeBetweenness_show_table && !has_results_to_display)
-                        if (self$options$edgeBetweenness_show_table && !has_results_to_display) {
-                            self$results$edgeBetweennessNoResultsNote$setContent("No weights available for Edge Betweenness based on current filters.")
-                        } else {
-                            self$results$edgeBetweennessNoResultsNote$setContent("") # Clear the note if results are displayed
-                        }
-
-                    } else {
-                        self$results$edgeBetweennessContent$setVisible(FALSE)
-                        self$results$edgeBetweennessNoResultsNote$setVisible(self$options$edgeBetweenness_show_table)
-                        self$results$edgeBetweennessNoResultsNote$setContent("No weights available for Edge Betweenness.")
-                    }
+                # Plot
+                if(!self$results$edgeBetweenness_plot$isFilled()) {
+                    self$results$edgeBetweenness_plot$setState(edgeBetwenness)
                 }
+                
+                # Table - show weights
+                matrix_to_from_to_value <- function(your_matrix) {
+                  if (is.null(rownames(your_matrix))) {
+                    rownames(your_matrix) <- paste0("Row", 1:nrow(your_matrix))
+                  }
+                  if (is.null(colnames(your_matrix))) {
+                    colnames(your_matrix) <- paste0("Col", 1:ncol(your_matrix))
+                  }
+                  df <- setNames(as.data.frame(as.table(your_matrix)), c("from", "to", "value"))
+                  return(df)
+                }
+
+                if(!is.null(edgeBetwenness) && !is.null(edgeBetwenness$weights)) {
+                    betable <- matrix_to_from_to_value(edgeBetwenness$weights)
+
+                    betable <- betable[betable$value > 0, ]
+
+                    betable <- betable[order(-betable$value), ]
+
+                    for (i in 1:nrow(betable)) {
+                        self$results$edgeBetweennessTable$addRow(rowKey=i, values=list(
+                            from=as.character(betable[i, "from"]),
+                            to=as.character(betable[i, "to"]),
+                            value=betable[i, "value"]
+                        ))
+                    }
+
+                    has_results_to_display <- nrow(betable) > 0
+                    self$results$edgeBetweennessTable$setVisible(self$options$edgeBetweenness_show_table && has_results_to_display)
+                    self$results$edgeBetweennessNoResultsNote$setVisible(self$options$edgeBetweenness_show_table && !has_results_to_display)
+                    if (self$options$edgeBetweenness_show_table && !has_results_to_display) {
+                        self$results$edgeBetweennessNoResultsNote$setContent("No weights available for Edge Betweenness based on current filters.")
+                    } else {
+                        self$results$edgeBetweennessNoResultsNote$setContent("") # Clear the note if results are displayed
+                    }
+
+                } else {
+                    self$results$edgeBetweennessTable$setVisible(FALSE)
+                    self$results$edgeBetweennessNoResultsNote$setVisible(self$options$edgeBetweenness_show_table)
+                    self$results$edgeBetweennessNoResultsNote$setContent("No weights available for Edge Betweenness.")
+                }
+                
+                # Set plot visibility
+                self$results$edgeBetweenness_plot$setVisible(self$options$edgeBetweenness_show_plot)
+                self$results$edgeBetweennessTitle$setVisible(self$options$edgeBetweenness_show_table || self$options$edgeBetweenness_show_plot)
             }
 
 
             ### Community
 
-            if(!is.null(model) && (self$options$community_show_plot || self$options$community_show_table)) {
+            if(!is.null(model) && (self$options$community_show_table || self$options$community_show_plot)) {
                 community_gamma <- as.numeric(self$options$community_gamma)
                 methods <- self$options$community_methods
 
@@ -527,8 +541,10 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     layout=self$options$edgeBetweenness_plot_layout,
                     bg="transparent"
                 )
-            }   
-            TRUE
+                TRUE
+            } else {
+                FALSE
+            }
         },
         .showCommunityPlot=function(image, ...) {
             plotData <- self$results$community_plot$state
@@ -545,6 +561,12 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             number_value <- lengths(plotData[1])
             
             if(!is.null(plotData) && self$options$cliques_show_plot && number_value > 0)  {
+                len <- length(plotData)
+                if (len == 0) return(FALSE)
+                column <- ceiling(sqrt(len))
+                row <- ceiling(len / column)
+
+                par(mfrow = c(row, column))
                 plot(x=plotData, 
                     ask=FALSE, 
                     first=1, 
@@ -557,11 +579,12 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     layout=self$options$cliques_plot_layout,
                     bg="transparent"
                 )
+                TRUE
             }
             else {
                 self$results$cliques_multiple_plot$cliques_plot1$setVisible(FALSE)
+                FALSE
             } 
-            TRUE
         },
         .showCliquesPlot2=function(image, ...) {
             plotData <- self$results$cliques_multiple_plot$state
@@ -569,6 +592,12 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             number_value <- lengths(plotData[1])
             
             if(!is.null(plotData) && self$options$cliques_show_plot && number_value > 1)  {
+                len <- length(plotData)
+                if (len == 0) return(FALSE)
+                column <- ceiling(sqrt(len))
+                row <- ceiling(len / column)
+
+                par(mfrow = c(row, column))
                 plot(x=plotData, 
                     ask=FALSE, 
                     first=2, 
@@ -581,11 +610,12 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     layout=self$options$cliques_plot_layout,
                     bg="transparent"
                 )
+                TRUE
             }   
             else {
                 self$results$cliques_multiple_plot$cliques_plot2$setVisible(FALSE)
+                FALSE
             } 
-            TRUE
         },
         .showCliquesPlot3=function(image, ...) {
             plotData <- self$results$cliques_multiple_plot$state
@@ -593,6 +623,12 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             number_value <- lengths(plotData[1])
 
             if(!is.null(plotData) && self$options$cliques_show_plot && number_value > 2)  {
+                len <- length(plotData)
+                if (len == 0) return(FALSE)
+                column <- ceiling(sqrt(len))
+                row <- ceiling(len / column)
+
+                par(mfrow = c(row, column))
                 plot(x=plotData, 
                     ask=FALSE, 
                     first=3, 
@@ -605,11 +641,12 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     layout=self$options$cliques_plot_layout,
                     bg="transparent"
                 )
+                TRUE
             }   
             else {
                 self$results$cliques_multiple_plot$cliques_plot3$setVisible(FALSE)
+                FALSE
             } 
-            TRUE
         },
         .showCliquesPlot4=function(image, ...) {
             plotData <- self$results$cliques_multiple_plot$state
@@ -617,6 +654,12 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             number_value <- lengths(plotData[1])
 
             if(!is.null(plotData) && self$options$cliques_show_plot && number_value > 3)  {
+                len <- length(plotData)
+                if (len == 0) return(FALSE)
+                column <- ceiling(sqrt(len))
+                row <- ceiling(len / column)
+
+                par(mfrow = c(row, column))
                 plot(x=plotData, 
                     ask=FALSE, 
                     first=4, 
@@ -629,11 +672,12 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     layout=self$options$cliques_plot_layout,
                     bg="transparent"
                 )
+                TRUE
             }   
             else {
                 self$results$cliques_multiple_plot$cliques_plot4$setVisible(FALSE)
+                FALSE
             } 
-            TRUE
         },
         .showCliquesPlot5=function(image, ...) {
             plotData <- self$results$cliques_multiple_plot$state
@@ -641,6 +685,12 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             number_value <- lengths(plotData[1])
 
             if(!is.null(plotData) && self$options$cliques_show_plot && number_value > 4)  {
+                len <- length(plotData)
+                if (len == 0) return(FALSE)
+                column <- ceiling(sqrt(len))
+                row <- ceiling(len / column)
+
+                par(mfrow = c(row, column))
                 plot(x=plotData, 
                     ask=FALSE, 
                     first=5, 
@@ -653,11 +703,12 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     layout=self$options$cliques_plot_layout,
                     bg="transparent"
                 )
+                TRUE
             }
             else {
                 self$results$cliques_multiple_plot$cliques_plot5$setVisible(FALSE)
+                FALSE
             } 
-            TRUE
         },
         .showCliquesPlot6=function(image, ...) {
             plotData <- self$results$cliques_multiple_plot$state
@@ -665,6 +716,12 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             number_value <- lengths(plotData[1])
 
             if(!is.null(plotData) && self$options$cliques_show_plot && number_value > 5)  {
+                len <- length(plotData)
+                if (len == 0) return(FALSE)
+                column <- ceiling(sqrt(len))
+                row <- ceiling(len / column)
+
+                par(mfrow = c(row, column))
                 plot(x=plotData, 
                     ask=FALSE, 
                     first=6, 
@@ -677,32 +734,19 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     layout=self$options$cliques_plot_layout,
                     bg="transparent"
                 )
+                TRUE
             }   
             else {
                 self$results$cliques_multiple_plot$cliques_plot6$setVisible(FALSE)
+                FALSE
             } 
-            TRUE
         },
         .showBootstrapPlot=function(image, ...) {
 
             plotData <- self$results$bootstrap_plot$state
 
             if(!is.null(plotData) && self$options$bootstrap_show_plot)  {
-                m_sig <- plotData$weights_sig
-                
-                mat_color <- matrix()
-                mat_color[m_sig == 0] <- "red"
-                plot(
-                    x=plotData,
-                    cut=self$options$bootstrap_plot_cut,
-                    minimum=self$options$bootstrap_plot_min_value,
-                    edge.label.cex=self$options$bootstrap_plot_edge_label_size,
-                    node.width=self$options$bootstrap_plot_node_size,
-                    label.cex=self$options$bootstrap_plot_node_label_size,
-                    layout=self$options$bootstrap_plot_layout,
-                    edge.color = mat_color,
-                    bg="transparent"
-                )
+                plot(x=plotData, cut = 0.01)
             }
             TRUE     
         },
@@ -732,6 +776,24 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
             }
             TRUE
+        },
+        .showCliquesMultiPlot=function(image, ...) {
+            plotData <- self$results$cliques_multiple_plot$state
+            if (!is.null(plotData) && self$options$cliques_show_plot) {
+                plot(x=plotData, 
+                    ask=FALSE,
+                    cut=self$options$cliques_plot_cut,
+                    minimum=self$options$cliques_plot_min_value,
+                    edge.label.cex=self$options$cliques_plot_edge_label_size,
+                    node.width=self$options$cliques_plot_node_size,
+                    label.cex=self$options$cliques_plot_node_label_size,
+                    layout=self$options$cliques_plot_layout,
+                    bg="transparent"
+                )
+                TRUE
+            } else {
+                FALSE
+            }
         }
     )
 )

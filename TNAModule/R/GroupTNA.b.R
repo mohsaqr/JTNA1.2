@@ -42,75 +42,90 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       }
       else if(!is.null(self$data) && ncol(self$data) >= 1) {
 
-        dataForTNA <- NULL
+        # Wrap data preparation in error handling
+        tryCatch({
+          dataForTNA <- NULL
 
-        copyData <- self$data
-        copyData[[self$options$buildModel_variables_long_action]] <- as.character(copyData[[self$options$buildModel_variables_long_action]])
+          copyData <- self$data
+          copyData[[self$options$buildModel_variables_long_action]] <- as.character(copyData[[self$options$buildModel_variables_long_action]])
 
-        if(!is.null(self$options$buildModel_variables_long_time)) {
-          copyData[[self$options$buildModel_variables_long_time]] <- as.POSIXct(copyData[[self$options$buildModel_variables_long_time]])
-        }
-        if(!is.null(self$options$buildModel_variables_long_actor)) {
-          copyData[[self$options$buildModel_variables_long_actor]] <- as.character(copyData[[self$options$buildModel_variables_long_actor]])
-        }
-        if(!is.null(self$options$buildModel_variables_long_order)) {
-          copyData[[self$options$buildModel_variables_long_order]] <- as.character(copyData[[self$options$buildModel_variables_long_order]])
-        }
+          if(!is.null(self$options$buildModel_variables_long_time)) {
+            copyData[[self$options$buildModel_variables_long_time]] <- as.POSIXct(copyData[[self$options$buildModel_variables_long_time]])
+          }
+          if(!is.null(self$options$buildModel_variables_long_actor)) {
+            copyData[[self$options$buildModel_variables_long_actor]] <- as.character(copyData[[self$options$buildModel_variables_long_actor]])
+          }
+          if(!is.null(self$options$buildModel_variables_long_order)) {
+            copyData[[self$options$buildModel_variables_long_order]] <- as.character(copyData[[self$options$buildModel_variables_long_order]])
+          }
 
-        
-        threshold <- self$options$buildModel_threshold
+          
+          threshold <- self$options$buildModel_threshold
 
-        columnToUseLong <- c(
-          self$options$buildModel_variables_long_time,
-          self$options$buildModel_variables_long_actor,
-          self$options$buildModel_variables_long_action,
-          self$options$buildModel_variables_long_group,
-          self$options$buildModel_variables_long_order
-        )
-
-        longData <- copyData[columnToUseLong]
-
-        if(ncol(longData) > 0) {
-          actorColumn <- self$options$buildModel_variables_long_actor
-          timeColumn <- self$options$buildModel_variables_long_time
-          actionColumn <- self$options$buildModel_variables_long_action
-          groupColumn <- self$options$buildModel_variables_long_group
-          orderColumn <- self$options$buildModel_variables_long_order
-
-          ##### TO REMOVE
-          values_to_replace <- c("Applications", "Ethics", "General", "La_types", "Theory")
-          new_value <- "Resources"
-          longData[[actionColumn]] <- replace(
-              longData[[actionColumn]], 
-              longData[[actionColumn]] %in% values_to_replace, 
-              new_value
+          columnToUseLong <- c(
+            self$options$buildModel_variables_long_time,
+            self$options$buildModel_variables_long_actor,
+            self$options$buildModel_variables_long_action,
+            self$options$buildModel_variables_long_group,
+            self$options$buildModel_variables_long_order
           )
-          ##### END TO REMOVE
 
-          args_prepare_data <- list(
-              data = longData,
-              actor = actorColumn,
-              time = timeColumn,
-              action = actionColumn,
-              time_threshold = threshold,
-              order = orderColumn
-          ) 
+          longData <- copyData[columnToUseLong]
 
-          args_prepare_data <- args_prepare_data[!sapply(args_prepare_data, is.null)]
+          if(ncol(longData) > 0) {
+            actorColumn <- self$options$buildModel_variables_long_actor
+            timeColumn <- self$options$buildModel_variables_long_time
+            actionColumn <- self$options$buildModel_variables_long_action
+            groupColumn <- self$options$buildModel_variables_long_group
+            orderColumn <- self$options$buildModel_variables_long_order
 
-          dataForTNA <- do.call(tna::prepare_data, args_prepare_data)
-        }
+            ##### TO REMOVE
+            values_to_replace <- c("Applications", "Ethics", "General", "La_types", "Theory")
+            new_value <- "Resources"
+            longData[[actionColumn]] <- replace(
+                longData[[actionColumn]], 
+                longData[[actionColumn]] %in% values_to_replace, 
+                new_value
+            )
+            ##### END TO REMOVE
 
-        if(!is.null(dataForTNA)) {
+            args_prepare_data <- list(
+                data = longData,
+                actor = actorColumn,
+                time = timeColumn,
+                action = actionColumn,
+                time_threshold = threshold,
+                order = orderColumn
+            ) 
 
-            if(scaling == "noScaling") {
-                scaling = character(0L)
-            }
+            args_prepare_data <- args_prepare_data[!sapply(args_prepare_data, is.null)]
 
-            group <- dataForTNA$long_data[!duplicated(dataForTNA$long_data$.session_id),]
+            dataForTNA <- do.call(tna::prepare_data, args_prepare_data)
+          }
 
-            model <- tna::group_model(x=dataForTNA, group=group[[groupColumn]], type=type, scaling=scaling)   
-        }
+          if(!is.null(dataForTNA)) {
+
+              if(scaling == "noScaling") {
+                  scaling = character(0L)
+              }
+
+              group <- dataForTNA$long_data[!duplicated(dataForTNA$long_data$.session_id),]
+
+              model <- tna::group_model(x=dataForTNA, group=group[[groupColumn]], type=type, scaling=scaling)   
+          }
+          
+        }, error = function(e) {
+          # Check if error is related to time format or contains time-related keywords
+          error_msg <- tolower(as.character(e$message))
+          if(grepl("time|date|posix|format", error_msg) || 
+             grepl("character string is not in a standard unambiguous format", error_msg)) {
+              self$results$errorText$setContent("Please enter an appropriate time format")
+          } else {
+              self$results$errorText$setContent(paste("Data preparation error:", e$message))
+          }
+          self$results$errorText$setVisible(TRUE)
+          return()
+        })
       }
 
       if(!is.null(model)) { 
@@ -139,7 +154,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       ### Centrality
 
-      if(!is.null(model)) {
+      if(!is.null(model) && (self$options$centrality_show_table || self$options$centrality_show_plot)) {
           centrality_loops <- self$options$centrality_loops
           centrality_normalize <- self$options$centrality_normalize
 
@@ -177,22 +192,24 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           cent <- self$results$centralityTable$state
           
           if(length(vectorCharacter) > 0 && !is.null(model)) {
-              # Always recalculate when table is requested
-              tryCatch({
-                  cent_result <- tna::centralities(x=model, loops=centrality_loops, normalize=centrality_normalize, measures=vectorCharacter)
-                  
-                  # Validate the result before storing
-                  if(!is.null(cent_result) && is.data.frame(cent_result)) {
-                      cent <- cent_result
-                      self$results$centralityTable$setState(cent)
-                  } else {
-                      self$results$centralityTable$setNote(key = "centrality_error", note = "Invalid centrality calculation result")
-                  }
-              }, error = function(e) {
-                  # Add error handling for centrality calculation
-                  self$results$centralityTable$setNote(key = "centrality_error", note = paste("Centrality calculation error:", e$message))
-                  cent <- NULL
-              })
+              # Only calculate if not already filled or if explicitly requested
+              if(is.null(cent) || !self$results$centralityTable$isFilled()) {
+                  tryCatch({
+                      cent_result <- tna::centralities(x=model, loops=centrality_loops, normalize=centrality_normalize, measures=vectorCharacter)
+                      
+                      # Validate the result before storing
+                      if(!is.null(cent_result) && is.data.frame(cent_result)) {
+                          cent <- cent_result
+                          self$results$centralityTable$setState(cent)
+                      } else {
+                          self$results$centralityTable$setNote(key = "centrality_error", note = "Invalid centrality calculation result")
+                      }
+                  }, error = function(e) {
+                      # Add error handling for centrality calculation
+                      self$results$centralityTable$setNote(key = "centrality_error", note = paste("Centrality calculation error:", e$message))
+                      cent <- NULL
+                  })
+              }
           }
 
           # Add columns if needed (jamovi will handle duplicates)
@@ -287,15 +304,15 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               }
           }
           
-          # Set visibility - always show title and table when model exists
-          self$results$centralityTitle$setVisible(TRUE)
+          # Set visibility based on user selection
+          self$results$centralityTitle$setVisible(self$options$centrality_show_table || self$options$centrality_show_plot)
           self$results$centrality_plot$setVisible(self$options$centrality_show_plot)
-          self$results$centralityTable$setVisible(TRUE)
+          self$results$centralityTable$setVisible(self$options$centrality_show_table)
       }
 
 
       ### Community
-      if(!is.null(model) && (isTRUE(self$options$community_show_table) || isTRUE(self$options$community_show_plot)) ) {
+      if(!is.null(model) && isTRUE(self$options$community_show_plot) ) {
         community_gamma <- as.numeric(self$options$community_gamma)
         methods <- self$options$community_methods
 
@@ -307,9 +324,10 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Store state to avoid recalculation
             self$results$community_plot$setState(coms)
-            if(isTRUE(self$options$community_show_table)) {
-                self$results$communityContent$setContent(coms)
-            }
+            # Community table disabled for GroupTNA
+            # if(isTRUE(self$options$community_show_table)) {
+            #     self$results$communityContent$setContent(coms)
+            # }
             TRUE
           }, error = function(e) {
             self$results$communityTitle$setVisible(TRUE)
@@ -323,8 +341,8 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Set visibility
         self$results$community_plot$setVisible(self$options$community_show_plot)
-        self$results$communityContent$setVisible(self$options$community_show_table)
-        self$results$communityTitle$setVisible(isTRUE(self$options$community_show_plot) || isTRUE(self$options$community_show_table))
+        self$results$communityContent$setVisible(FALSE)  # Hide community table in GroupTNA
+        self$results$communityTitle$setVisible(isTRUE(self$options$community_show_plot))
       }
 
       ### Cliques
@@ -572,10 +590,39 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       plotData <- self$results$buildModelContent$state
       
       if(!is.null(plotData) && self$options$buildModel_show_histo)  {
-        # Use single plot layout for better title display
-        par(mfrow = c(1, 1))
-        hist(x=plotData, main="Histogram of Edge Weights (Probabilities)", 
-             xlab="Edge Weights (Probabilities)", ylab="Frequency")
+        # Check if plotData is a list (multiple groups) or single model
+        if(is.list(plotData) && length(plotData) > 1) {
+          # Multiple groups - set up layout like other plots
+          if(length(plotData) == 1) {
+            par(mfrow = c(1, 1))
+          } else if(length(plotData) <= 4) {
+            par(mfrow = c(2, 2))
+          } else if(length(plotData) <= 6) {
+            par(mfrow = c(2, 3))
+          } else if(length(plotData) <= 9) {
+            par(mfrow = c(3, 3))
+          } else {
+            row <- ceiling(sqrt(length(plotData)))
+            column <- ceiling(length(plotData) / row)
+            par(mfrow = c(row, column))
+          }
+          
+          # Create histogram for each group
+          for(i in 1:length(plotData)) {
+            group_name <- names(plotData)[i]
+            if(is.null(group_name)) group_name <- paste("Group", i)
+            
+            hist(x=plotData[[i]], 
+                 main=paste("Histogram -", group_name), 
+                 xlab="Edge Weights (Probabilities)", 
+                 ylab="Frequency")
+          }
+        } else {
+          # Single model - use single plot layout
+          par(mfrow = c(1, 1))
+          hist(x=plotData, main="Histogram of Edge Weights (Probabilities)", 
+               xlab="Edge Weights (Probabilities)", ylab="Frequency")
+        }
         TRUE
       } else {
         FALSE
@@ -665,7 +712,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 ask=FALSE, 
                 first=1, 
                 n=1,
-                cut=0.1, # Default cut level set to 0.1
+                cut=self$options$cliques_plot_cut,
                 minimum=self$options$cliques_plot_min_value,
                 edge.label.cex=self$options$cliques_plot_edge_label_size,
                 node.width=self$options$cliques_plot_node_size,
@@ -695,7 +742,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 ask=FALSE, 
                 first=2, 
                 n=1,
-                cut=0.1, # Default cut level set to 0.1
+                cut=self$options$cliques_plot_cut,
                 minimum=self$options$cliques_plot_min_value,
                 edge.label.cex=self$options$cliques_plot_edge_label_size,
                 node.width=self$options$cliques_plot_node_size,
@@ -725,7 +772,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 ask=FALSE, 
                 first=3, 
                 n=1,
-                cut=0.1, # Default cut level set to 0.1
+                cut=self$options$cliques_plot_cut,
                 minimum=self$options$cliques_plot_min_value,
                 edge.label.cex=self$options$cliques_plot_edge_label_size,
                 node.width=self$options$cliques_plot_node_size,
@@ -755,7 +802,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 ask=FALSE, 
                 first=4, 
                 n=1,
-                cut=0.1, # Default cut level set to 0.1
+                cut=self$options$cliques_plot_cut,
                 minimum=self$options$cliques_plot_min_value,
                 edge.label.cex=self$options$cliques_plot_edge_label_size,
                 node.width=self$options$cliques_plot_node_size,
@@ -785,7 +832,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 ask=FALSE, 
                 first=5, 
                 n=1,
-                cut=0.1, # Default cut level set to 0.1
+                cut=self$options$cliques_plot_cut,
                 minimum=self$options$cliques_plot_min_value,
                 edge.label.cex=self$options$cliques_plot_edge_label_size,
                 node.width=self$options$cliques_plot_node_size,
@@ -815,7 +862,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 ask=FALSE, 
                 first=6, 
                 n=1,
-                cut=0.1, # Default cut level set to 0.1
+                cut=self$options$cliques_plot_cut,
                 minimum=self$options$cliques_plot_min_value,
                 edge.label.cex=self$options$cliques_plot_edge_label_size,
                 node.width=self$options$cliques_plot_node_size,
@@ -830,9 +877,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
     },
     .showBootstrapPlot=function(image, ...) {
-
         plotData <- self$results$bootstrap_plot$state
-
         if(!is.null(plotData) && self$options$bootstrap_show_plot)  {
             if(length(plotData) == 1) {
               par(mfrow = c(1, 1))
@@ -847,26 +892,9 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               column <- ceiling(length(plotData) / row)
               par(mfrow = c(row, column))
             }
-            m_sig <- plotData[[1]]$weights_sig
-
-            mat_color <- matrix()
-            mat_color[m_sig == 0] <- "red"
-            plot(
-                x=plotData,
-                cut=0.1, # Default cut level set to 0.1
-                minimum=self$options$bootstrap_plot_min_value,
-                edge.label.cex=self$options$bootstrap_plot_edge_label_size,
-                node.width=self$options$bootstrap_plot_node_size,
-                label.cex=self$options$bootstrap_plot_node_label_size,
-                layout=self$options$bootstrap_plot_layout,
-                edge.color = mat_color,
-                pie=NULL
-            )
-            TRUE
+            plot(x=plotData, cut = 0.01)
         }
-        else {
-            FALSE
-        }     
+        TRUE     
     },
 
     .showPermutationPlot=function(image, ...) {

@@ -10,6 +10,9 @@ date: "2025-06-28"
 library(dplyr)
 library(tna)
 
+source("/Users/mohammedsaqr/Documents/GitHub/JTNA1.2/Run.R")
+
+
 data("group_regulation_long")
 Twogroups <- group_regulation_long %>% filter(Course!="C")
 Data <- prepare_data(Twogroups, actor = "Actor", action = "Action")
@@ -31,24 +34,41 @@ print (Bootstrap_results$summary)
 ```
 
 ```{r}
+library(tna)
+data("group_regulation_long")
 Threegroups <- group_regulation_long 
-
 Data3 <- prepare_data(Threegroups, actor = "Actor", action = "Action")
 Group3 <- group_tna(Data3, group="Course")
 
-permutation_results3 <- permutation_test(Group3)
+bootstrap_results3 <- bootstrap(Group3)
+
+plot(bootstrap_results3)
 
 permutation_results3$`A vs. B`
 permutation_results3$`A vs. C`
 permutation_results3$`B vs. C`
 
 
+Data3 <- prepare_data(Threegroups, actor = "Actor", action = "Action")
+Group3 <- group_tna(Data3, group="Course")
 Bootstrap_results3 <- bootstrap(Group3)
 print (Bootstrap_results3$A)
 print (Bootstrap_results3$B)
 print (Bootstrap_results3$C)
 
 
+```
+
+
+```{r}
+layout (t(1:4))
+data("group_regulation_long")
+Singledata <- group_regulation_long %>% filter(Course=="C")
+Data1 <- prepare_data(Singledata, actor = "Actor", action = "Action")
+
+Single <- tna(Data1)
+Cliques = cliques(Single)
+plot(Cliques, ask = FALSE)
 
 ```
 
@@ -84,4 +104,23 @@ Com <- communities(Single)
 print(Com$assignments)
 
 ```
+
+
+```{r}
+
+BS <- bootstrap(Single)
+
+plot()
+
+```
+
+
+
+
+
+
+
+
+
+
 

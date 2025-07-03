@@ -228,10 +228,6 @@ options:
       default: 1
       min: 0
       max: 100
-    - name: community_show_table
-      title: Table
-      type: Bool
-      default: False
     - name: community_show_plot
       title: Plot
       type: Bool

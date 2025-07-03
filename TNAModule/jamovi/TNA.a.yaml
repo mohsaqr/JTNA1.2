@@ -286,7 +286,7 @@ options:
       title: Table
       type: Bool
       default: False
-    
+
     - name: community_show_plot
       title: Plot
       type: Bool

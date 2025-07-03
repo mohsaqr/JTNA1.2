@@ -41,7 +41,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             centrality_OutStrength = TRUE,
             community_methods = "spinglass",
             community_gamma = 1,
-            community_show_table = FALSE,
             community_show_plot = FALSE,
             cliques_size = 2,
             cliques_threshold = 0,
@@ -251,10 +250,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=1,
                 min=0,
                 max=100)
-            private$..community_show_table <- jmvcore::OptionBool$new(
-                "community_show_table",
-                community_show_table,
-                default=FALSE)
             private$..community_show_plot <- jmvcore::OptionBool$new(
                 "community_show_plot",
                 community_show_plot,
@@ -491,7 +486,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..centrality_OutStrength)
             self$.addOption(private$..community_methods)
             self$.addOption(private$..community_gamma)
-            self$.addOption(private$..community_show_table)
             self$.addOption(private$..community_show_plot)
             self$.addOption(private$..cliques_size)
             self$.addOption(private$..cliques_threshold)
@@ -565,7 +559,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         centrality_OutStrength = function() private$..centrality_OutStrength$value,
         community_methods = function() private$..community_methods$value,
         community_gamma = function() private$..community_gamma$value,
-        community_show_table = function() private$..community_show_table$value,
         community_show_plot = function() private$..community_show_plot$value,
         cliques_size = function() private$..cliques_size$value,
         cliques_threshold = function() private$..cliques_threshold$value,
@@ -638,7 +631,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..centrality_OutStrength = NA,
         ..community_methods = NA,
         ..community_gamma = NA,
-        ..community_show_table = NA,
         ..community_show_plot = NA,
         ..cliques_size = NA,
         ..cliques_threshold = NA,
@@ -1273,7 +1265,6 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param centrality_OutStrength .
 #' @param community_methods .
 #' @param community_gamma .
-#' @param community_show_table .
 #' @param community_show_plot .
 #' @param cliques_size .
 #' @param cliques_threshold .
@@ -1389,7 +1380,6 @@ GroupTNA <- function(
     centrality_OutStrength = TRUE,
     community_methods = "spinglass",
     community_gamma = 1,
-    community_show_table = FALSE,
     community_show_plot = FALSE,
     cliques_size = 2,
     cliques_threshold = 0,
@@ -1481,7 +1471,6 @@ GroupTNA <- function(
         centrality_OutStrength = centrality_OutStrength,
         community_methods = community_methods,
         community_gamma = community_gamma,
-        community_show_table = community_show_table,
         community_show_plot = community_show_plot,
         cliques_size = cliques_size,
         cliques_threshold = cliques_threshold,

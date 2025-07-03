@@ -229,9 +229,6 @@ children:
             label: Display Options
             children:
               - type: CheckBox
-                name: community_show_table
-                label: Table
-              - type: CheckBox
                 name: community_show_plot
                 label: Plot
       - type: LayoutBox

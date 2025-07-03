@@ -256,9 +256,10 @@ items:
 
     ### COMMUNITY
     - name:  communityTitle
-      title: Community
       type:  Preformatted
+      title: Community
       visible: False
+      
 
     - name:  communityContent
       type:  Preformatted
@@ -274,7 +275,7 @@ items:
 
         - community_methods
         - community_gamma
-
+    
     - name: community_plot
       type: Image
       width: 600
