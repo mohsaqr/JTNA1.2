@@ -135,7 +135,7 @@ If you use JTNA in your research, please cite:
 - **Santtu Tikka** - Statistical Methods
 - **Sonsoles López-Pernas** - Research & Development
 
-**Maintainer**: Sonsoles López-Pernas (saqr@saqr.me)
+**Maintainer**: Mohammed Saqr (saqr@saqr.me)
 
 ## 📄 License
 
