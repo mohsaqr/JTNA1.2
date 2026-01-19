@@ -1,6 +1,6 @@
 ---
-name:  TNA
-title: Transition Network Analysis
+name:  ClusterTNA
+title: Cluster TNA
 menuGroup: JTNA
 version: '1.4.0'
 jas: '1.2'
@@ -10,7 +10,7 @@ options:
       type: Data
 
     - name: buildModel_variables_long_actor
-      title: Actor (Optional)
+      title: Actor
       type: Variable
     - name: buildModel_variables_long_time
       title: Time (Optional)
@@ -21,6 +21,20 @@ options:
     - name: buildModel_variables_long_order
       title: Order (Optional)
       type: Variable
+
+    ### CLUSTERING PARAMETERS
+
+    - name: clustering_k
+      title: Number of Clusters (k)
+      type: Integer
+      default: 2
+      min: 2
+      max: 20
+
+    - name: clustering_run
+      title: Run Clustering
+      type: Bool
+      default: false
 
     ### BUILD MODEL DATA
 
@@ -46,7 +60,7 @@ options:
       max: 10
 
     - name: buildModel_scaling
-      title: Scaling 
+      title: Scaling
       type: List
       options:
         - title: No scaling
@@ -69,7 +83,7 @@ options:
       title: Threshold
       type: Integer
       default: 900
-    
+
     - name: buildModel_show_plot
       title: Plot
       type: Bool
@@ -78,7 +92,7 @@ options:
     - name: buildModel_plot_cut
       title: Cut value
       type: Number
-      default: 0.1
+      default: 0
       min: 0
       max: 1
 
@@ -113,6 +127,7 @@ options:
     - name: buildModel_plot_layout
       title: Layout
       type: List
+      default: circle
       options:
         - title: Circle
           name: circle
@@ -142,7 +157,7 @@ options:
           name: layout_with_sugiyama
         - title: Random
           name: layout_randomly
-    
+
     - name: buildModel_show_histo
       title: Histogram
       type: Bool
@@ -230,86 +245,6 @@ options:
       type: Bool
       default: True
 
-    ### EDGE BETWEENNESS
-    ##### PLOT
-    - name: edgeBetweenness_show_table
-      title: Table
-      type: Bool
-      default: False
-    
-    - name: edgeBetweenness_show_plot
-      title: Plot
-      type: Bool
-      default: False
-
-    - name: edgeBetweenness_plot_cut
-      title: Cut value
-      type: Number
-      default: 0.1
-      min: 0
-      max: 1
-
-    - name: edgeBetweenness_plot_min_value
-      title: Minimum value
-      type: Number
-      default: 0.05
-      min: 0
-      max: 1
-
-    - name: edgeBetweenness_plot_edge_label_size
-      title: Edge label size
-      type: Number
-      default: 1
-      min: 0
-      max: 10
-
-    - name: edgeBetweenness_plot_node_size
-      title: Node size
-      type: Number
-      default: 1
-      min: 0
-      max: 2
-
-    - name: edgeBetweenness_plot_node_label_size
-      title: Node label size
-      type: Number
-      default: 1
-      min: 0
-      max: 10
-
-    - name: edgeBetweenness_plot_layout
-      title: Layout
-      type: List
-      options:
-        - title: Circle
-          name: circle
-        - title: Spring
-          name: spring
-        - title: Kamada-Kawai
-          name: layout_with_kk
-        - title: Graphopt
-          name: layout_with_graphopt
-        - title: GEM
-          name: layout_with_gem
-        - title: DRL
-          name: layout_with_drl
-        - title: Star
-          name: layout_as_star
-        - title: Grid
-          name: layout_on_grid
-        - title: Nicely
-          name: layout_nicely
-        - title: Fruchterman-Reingold
-          name: layout_with_fr
-        - title: Davidson-Harel
-          name: layout_with_dh
-        - title: LGL
-          name: layout_with_lgl
-        - title: Sugiyama
-          name: layout_with_sugiyama
-        - title: Random
-          name: layout_randomly
-
     ### COMMUNITY DATA
     - name: community_methods
       title: Methods
@@ -330,7 +265,7 @@ options:
         title: Edge betweenness
       - name: leading_eigen
         title: Leading eigen
-      
+
 
     - name: community_gamma
       title: Gamma
@@ -338,12 +273,6 @@ options:
       default: 1
       min: 0
       max: 100
-    
-    - name: community_show_table
-      title: Table
-      type: Bool
-      default: False
-
     - name: community_show_plot
       title: Plot
       type: Bool
@@ -380,7 +309,7 @@ options:
     - name: cliques_plot_cut
       title: Cut value
       type: Number
-      default: 0.1
+      default: 0
       min: 0
       max: 1
 
@@ -445,7 +374,7 @@ options:
           name: layout_with_sugiyama
         - title: Random
           name: layout_randomly
-    
+
     ### BOOTSTRAP
 
     - name: bootstrap_iteration
@@ -471,21 +400,21 @@ options:
           name: stability
         - title: Threshold
           name: threshold
-      
+
     - name: bootstrap_range_low
       title: Lower
       type: Number
       default: 0.75
       min: 0
       max: 10
-    
+
     - name: bootstrap_range_up
       title: Upper
       type: Number
       default: 1.25
       min: 0
       max: 10
-    
+
     - name: bootstrap_threshold
       title: Threshold
       type: Number
@@ -494,20 +423,20 @@ options:
       max: 1
 
     ##### PLOT
-    - name: bootstrap_show_plot
-      title: Plot
+    - name: bootstrap_show_table
+      title: Bootstrap Results Table
       type: Bool
       default: False
 
-    - name: bootstrap_show_table
-      title: Table
+    - name: bootstrap_show_plot
+      title: Plot
       type: Bool
       default: False
 
     - name: bootstrap_plot_cut
       title: Cut value
       type: Number
-      default: 0.1
+      default: 0
       min: 0
       max: 1
 
@@ -542,6 +471,7 @@ options:
     - name: bootstrap_plot_layout
       title: Layout
       type: List
+      default: circle
       options:
         - title: Circle
           name: circle
@@ -571,6 +501,39 @@ options:
           name: layout_with_sugiyama
         - title: Random
           name: layout_randomly
+
+
+
+
+    ### Permutation
+
+    - name: permutation_show_text
+      title: Text
+      type: Bool
+      default: False
+
+    - name: permutation_show_plot
+      title: Plot
+      type: Bool
+      default: False
+
+    - name: permutation_iter
+      title: Iter
+      type: Integer
+      default: 1000
+      min: 1
+
+    - name: permutation_paired
+      title: Paired
+      type: Bool
+      default: False
+
+    - name: permutation_level
+      title: Level
+      type: Number
+      default: 0.05
+      min: 0
+      max: 1
 
     ### SEQUENCE ANALYSIS
 
@@ -622,5 +585,56 @@ options:
       title: Sequence Plot
       type: Bool
       default: false
+
+    ### COMPARE SEQUENCES
+
+    - name: compare_sequences_show_table
+      title: Table
+      type: Bool
+      default: false
+
+    - name: compare_sequences_show_plot
+      title: Plot
+      type: Bool
+      default: false
+
+    - name: compare_sequences_sub_min
+      title: Min Subsequence Length
+      type: Integer
+      default: 2
+      min: 2
+      max: 10
+
+    - name: compare_sequences_sub_max
+      title: Max Subsequence Length
+      type: Integer
+      default: 4
+      min: 2
+      max: 10
+
+    - name: compare_sequences_min_freq
+      title: Minimum Frequency
+      type: Integer
+      default: 20
+      min: 1
+      max: 100
+
+    - name: compare_sequences_correction
+      title: Correction Method
+      type: List
+      default: bonferroni
+      options:
+        - title: Bonferroni
+          name: bonferroni
+        - title: Holm
+          name: holm
+        - title: Hochberg
+          name: hochberg
+        - title: BH (FDR)
+          name: BH
+        - title: BY
+          name: BY
+        - title: None
+          name: none
 
 ...

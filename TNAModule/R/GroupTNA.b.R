@@ -111,7 +111,12 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
               group <- dataForTNA$long_data[!duplicated(dataForTNA$long_data$.session_id),]
 
-              model <- tna::group_model(x=dataForTNA, group=group[[groupColumn]], type=type, scaling=scaling)   
+              if(type == "attention") {
+                  lambda <- self$options$buildModel_lambda
+                  model <- tna::group_model(x=dataForTNA, group=group[[groupColumn]], type=type, scaling=scaling, lambda=lambda)
+              } else {
+                  model <- tna::group_model(x=dataForTNA, group=group[[groupColumn]], type=type, scaling=scaling)
+              }
           }
           
         }, error = function(e) {
@@ -546,17 +551,93 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       ### Sequence Analysis
 
       if(isTRUE(self$options$sequences_show_plot)) {
-          
+
           # Set visibility for sequence analysis
           self$results$sequences_plot$setVisible(TRUE)
-          
+
       } else {
           self$results$sequences_plot$setVisible(FALSE)
+      }
+
+      ### Compare Sequences
+      if(!is.null(model) && (isTRUE(self$options$compare_sequences_show_table) || isTRUE(self$options$compare_sequences_show_plot))) {
+        compSeq <- self$results$compareSequences_plot$state
+        if(is.null(compSeq)) {
+          tryCatch({
+            sub_range <- self$options$compare_sequences_sub_min:self$options$compare_sequences_sub_max
+            compSeq <- tna::compare_sequences(
+              x = model,
+              sub = sub_range,
+              min_freq = self$options$compare_sequences_min_freq,
+              correction = self$options$compare_sequences_correction
+            )
+
+            # Remove patterns containing * (NAs)
+            compSeq <- compSeq[!grepl("\\*", compSeq$pattern), ]
+
+            # Sort by total frequency (sum of all freq_ columns)
+            freqCols <- colnames(compSeq)[grep("^freq_", colnames(compSeq))]
+            compSeq$total_freq <- rowSums(compSeq[, freqCols, drop=FALSE])
+            compSeq <- compSeq[order(-compSeq$total_freq), ]
+
+            # Keep only top 20
+            if(nrow(compSeq) > 20) {
+              compSeq <- compSeq[1:20, ]
+            }
+            compSeq$total_freq <- NULL
+
+            self$results$compareSequences_plot$setState(compSeq)
+          }, error = function(e) {
+            self$results$errorText$setContent(paste("Compare Sequences Error:", e$message))
+            self$results$errorText$setVisible(TRUE)
+          })
+        }
+
+        # Show plot first, then table
+        self$results$compareSequences_plot$setVisible(self$options$compare_sequences_show_plot)
+        self$results$compareSequencesTitle$setVisible(self$options$compare_sequences_show_table || self$options$compare_sequences_show_plot)
+
+        # Populate table
+        if(!is.null(compSeq) && isTRUE(self$options$compare_sequences_show_table)) {
+          # Get column names dynamically (freq_X, prop_X for each group)
+          colNames <- colnames(compSeq)
+          freqCols <- colNames[grep("^freq_", colNames)]
+          propCols <- colNames[grep("^prop_", colNames)]
+
+          # Add dynamic columns
+          for(fc in freqCols) {
+            self$results$compareSequencesTable$addColumn(name=fc, title=fc, type="integer")
+          }
+          for(pc in propCols) {
+            self$results$compareSequencesTable$addColumn(name=pc, title=pc, type="number")
+          }
+          self$results$compareSequencesTable$addColumn(name="statistic", title="Statistic", type="number")
+          self$results$compareSequencesTable$addColumn(name="p_value", title="p-value", type="number")
+
+          # Add rows
+          for(i in 1:nrow(compSeq)) {
+            rowValues <- list(
+              pattern = as.character(compSeq[i, "pattern"]),
+              length = nchar(gsub("[^-]", "", as.character(compSeq[i, "pattern"]))) + 1
+            )
+            for(fc in freqCols) {
+              rowValues[[fc]] <- as.integer(compSeq[i, fc])
+            }
+            for(pc in propCols) {
+              rowValues[[pc]] <- as.numeric(compSeq[i, pc])
+            }
+            rowValues$statistic <- as.numeric(compSeq[i, "statistic"])
+            rowValues$p_value <- as.numeric(compSeq[i, "p_value"])
+            self$results$compareSequencesTable$addRow(rowKey=i, values=rowValues)
+          }
+        }
+
+        self$results$compareSequencesTable$setVisible(self$options$compare_sequences_show_table)
       }
     },
     .showBuildModelPlot=function(image, ...) {
       plotData <- self$results$buildModelContent$state
-      
+
       if(!is.null(plotData) && self$options$buildModel_show_plot)  {
         if(length(plotData) == 1) {
           par(mfrow = c(1, 1))
@@ -571,15 +652,20 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           column <- ceiling(length(plotData) / row)
           par(mfrow = c(row, column))
         }
-        plot(x=plotData, 
-          cut=0.1, # Default cut level set to 0.1
-          minimum=self$options$buildModel_plot_min_value,
-          edge.label.cex=self$options$buildModel_plot_edge_label_size,
-          node.width=self$options$buildModel_plot_node_size,
-          label.cex=self$options$buildModel_plot_node_label_size,
-          layout=self$options$buildModel_plot_layout,
-          pie=NULL
-        )
+        tryCatch({
+          plot(x=plotData,
+            cut=0.1, # Default cut level set to 0.1
+            minimum=self$options$buildModel_plot_min_value,
+            edge.label.cex=self$options$buildModel_plot_edge_label_size,
+            node.width=self$options$buildModel_plot_node_size,
+            label.cex=self$options$buildModel_plot_node_label_size,
+            layout=self$options$buildModel_plot_layout
+          )
+        }, error = function(e) {
+          layout_name <- self$options$buildModel_plot_layout
+          self$results$errorText$setContent(paste0("Layout '", layout_name, "' is not available for this network. Please try a different layout."))
+          self$results$errorText$setVisible(TRUE)
+        })
         TRUE
       }
       else {
@@ -689,7 +775,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           par(mfrow = c(row, column))
         }
         methods <- self$options$community_methods
-        plot(x=plotData, method=methods, pie=NULL)
+        plot(x=plotData, method=methods)
         TRUE
       }
       else {
@@ -924,14 +1010,14 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       }
     },
         .showSequencesPlot=function(image, ...) {
-            
+
             if(self$options$sequences_show_plot) {
-                
+
                 # Get the TNA data
                 tna_data <- self$results$buildModelContent$state
-                
+
                 if(!is.null(tna_data)) {
-                    
+
                     # Call the tna::plot_sequences function directly
                     tryCatch({
                         plot_result <- tna::plot_sequences(
@@ -942,16 +1028,38 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             include_na = self$options$sequences_include_na,
                             tick = self$options$sequences_tick
                         )
-                        
+
                         print(plot_result)
                     }, error = function(e) {
                         # Simple fallback plot
-                        plot(1, type="n", main="Sequence Analysis Error", 
+                        plot(1, type="n", main="Sequence Analysis Error",
                              sub=paste("Error:", e$message))
                     })
                 }
             }
             TRUE
-        }
+        },
+    .showCompareSequencesPlot = function(image, ...) {
+      if(!self$options$compare_sequences_show_plot) return(FALSE)
+      plotData <- self$results$compareSequences_plot$state
+      if(is.null(plotData)) return(FALSE)
+
+      tryCatch({
+        p <- plot(plotData)
+        # Make text larger
+        p <- p + ggplot2::theme(
+          text = ggplot2::element_text(size = 14),
+          axis.text = ggplot2::element_text(size = 12),
+          axis.title = ggplot2::element_text(size = 14),
+          legend.text = ggplot2::element_text(size = 12),
+          legend.title = ggplot2::element_text(size = 14),
+          strip.text = ggplot2::element_text(size = 12)
+        )
+        print(p)
+      }, error = function(e) {
+        plot(1, type="n", main="Compare Sequences Error", sub=e$message)
+      })
+      TRUE
+    }
   )
 )

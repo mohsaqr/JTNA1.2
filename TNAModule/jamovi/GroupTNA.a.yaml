@@ -28,7 +28,7 @@ options:
     ### BUILD MODEL DATA
 
     - name: buildModel_type
-      title: Type 
+      title: Type
       type: List
       options:
         - title: Relative
@@ -37,7 +37,16 @@ options:
           name:  frequency
         - title: Co-occurrence
           name:  co-occurrence
+        - title: Attention
+          name:  attention
       default: relative
+
+    - name: buildModel_lambda
+      title: Lambda (decay rate)
+      type: Number
+      default: 1
+      min: 0.01
+      max: 10
 
     - name: buildModel_scaling
       title: Scaling 
@@ -112,6 +121,30 @@ options:
           name: circle
         - title: Spring
           name: spring
+        - title: Kamada-Kawai
+          name: layout_with_kk
+        - title: Graphopt
+          name: layout_with_graphopt
+        - title: GEM
+          name: layout_with_gem
+        - title: DRL
+          name: layout_with_drl
+        - title: Star
+          name: layout_as_star
+        - title: Grid
+          name: layout_on_grid
+        - title: Nicely
+          name: layout_nicely
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
+        - title: Davidson-Harel
+          name: layout_with_dh
+        - title: LGL
+          name: layout_with_lgl
+        - title: Sugiyama
+          name: layout_with_sugiyama
+        - title: Random
+          name: layout_randomly
     
     - name: buildModel_show_histo
       title: Histogram
@@ -305,6 +338,30 @@ options:
           name: circle
         - title: Spring
           name: spring
+        - title: Kamada-Kawai
+          name: layout_with_kk
+        - title: Graphopt
+          name: layout_with_graphopt
+        - title: GEM
+          name: layout_with_gem
+        - title: DRL
+          name: layout_with_drl
+        - title: Star
+          name: layout_as_star
+        - title: Grid
+          name: layout_on_grid
+        - title: Nicely
+          name: layout_nicely
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
+        - title: Davidson-Harel
+          name: layout_with_dh
+        - title: LGL
+          name: layout_with_lgl
+        - title: Sugiyama
+          name: layout_with_sugiyama
+        - title: Random
+          name: layout_randomly
     
     ### BOOTSTRAP
 
@@ -407,6 +464,30 @@ options:
           name: circle
         - title: Spring
           name: spring
+        - title: Kamada-Kawai
+          name: layout_with_kk
+        - title: Graphopt
+          name: layout_with_graphopt
+        - title: GEM
+          name: layout_with_gem
+        - title: DRL
+          name: layout_with_drl
+        - title: Star
+          name: layout_as_star
+        - title: Grid
+          name: layout_on_grid
+        - title: Nicely
+          name: layout_nicely
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
+        - title: Davidson-Harel
+          name: layout_with_dh
+        - title: LGL
+          name: layout_with_lgl
+        - title: Sugiyama
+          name: layout_with_sugiyama
+        - title: Random
+          name: layout_randomly
 
 
 
@@ -491,5 +572,56 @@ options:
       title: Sequence Plot
       type: Bool
       default: false
+
+    ### COMPARE SEQUENCES
+
+    - name: compare_sequences_show_table
+      title: Table
+      type: Bool
+      default: false
+
+    - name: compare_sequences_show_plot
+      title: Plot
+      type: Bool
+      default: false
+
+    - name: compare_sequences_sub_min
+      title: Min Subsequence Length
+      type: Integer
+      default: 2
+      min: 2
+      max: 10
+
+    - name: compare_sequences_sub_max
+      title: Max Subsequence Length
+      type: Integer
+      default: 4
+      min: 2
+      max: 10
+
+    - name: compare_sequences_min_freq
+      title: Minimum Frequency
+      type: Integer
+      default: 20
+      min: 1
+      max: 100
+
+    - name: compare_sequences_correction
+      title: Correction Method
+      type: List
+      default: bonferroni
+      options:
+        - title: Bonferroni
+          name: bonferroni
+        - title: Holm
+          name: holm
+        - title: Hochberg
+          name: hochberg
+        - title: BH (FDR)
+          name: BH
+        - title: BY
+          name: BY
+        - title: None
+          name: none
 
 ...

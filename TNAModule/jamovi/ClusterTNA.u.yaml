@@ -1,5 +1,5 @@
-title: Group TNA
-name: GroupTNA
+title: Cluster TNA
+name: ClusterTNA
 jus: '3.0'
 compilerMode: tame
 children:
@@ -31,12 +31,28 @@ children:
             name: buildModel_variables_long_order
             maxItemCount: 1
             isTarget: true
-      - type: TargetLayoutBox
+  - type: CollapseBox
+    label: Clustering Parameters
+    margin: large
+    collapsed: false
+    stretchFactor: 1
+    style: inline
+    children:
+      - type: LayoutBox
+        stretchFactor: 1
         children:
-          - type: VariablesListBox
-            name: buildModel_variables_long_group
-            maxItemCount: 1
-            isTarget: true
+          - type: Label
+            label: Run Analysis
+            children:
+              - type: CheckBox
+                name: clustering_run
+                label: Run Clustering Analysis
+          - type: Label
+            label: Cluster Settings
+            children:
+              - type: TextBox
+                name: clustering_k
+                format: number
   - type: LayoutBox
     stretchFactor: 1
     style: inline

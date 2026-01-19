@@ -39,6 +39,12 @@ analyses:
     menuGroup: JTNA
     menuTitle: Group TNA
     category: analyses
+  - title: Cluster TNA
+    name: ClusterTNA
+    ns: JTNA
+    menuGroup: JTNA
+    menuTitle: Cluster TNA
+    category: analyses
 usesNative: true
 minApp: 1.8.0
 

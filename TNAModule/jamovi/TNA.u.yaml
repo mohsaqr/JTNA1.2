@@ -54,12 +54,20 @@ children:
                 name: buildModel_type_co_occurrence
                 optionName: buildModel_type
                 optionPart: co-occurrence
+              - type: RadioButton
+                name: buildModel_type_attention
+                optionName: buildModel_type
+                optionPart: attention
           - type: Label
             label: Basic Options
             children:
               - type: CheckBox
                 name: buildModel_show_matrix
                 label: Matrix
+              - type: TextBox
+                name: buildModel_lambda
+                format: number
+                enable: (buildModel_type_attention)
       - type: LayoutBox
         stretchFactor: 1
         children:

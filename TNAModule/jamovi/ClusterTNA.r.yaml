@@ -1,6 +1,6 @@
 ---
-name:  GroupTNA
-title: Group TNA
+name:  ClusterTNA
+title: Cluster TNA
 jrs:   '1.1'
 refs:
   - TNA
@@ -13,12 +13,12 @@ items:
     - name:  tnaTitle
       title: TNA
       type:  Preformatted
-      visible: True
+      visible: False
     ### BUILD MODEL
     - name:  buildModelTitle
       title: Model
       type:  Preformatted
-      visible: True
+      visible: False
 
     - name:  buildModelContent
       type:  Preformatted
@@ -28,7 +28,11 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_variables_long_group
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - clustering_weighted
+        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -44,7 +48,11 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_variables_long_group
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - clustering_weighted
+        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -66,7 +74,11 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_variables_long_group
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - clustering_weighted
+        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -82,7 +94,11 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_variables_long_group
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - clustering_weighted
+        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -98,7 +114,11 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_variables_long_group
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - clustering_weighted
+        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -110,7 +130,7 @@ items:
       title: Centrality
       type:  Preformatted
       visible: False
-    
+
     - name:  centralityContent
       type:  Preformatted
       visible: False
@@ -119,7 +139,11 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_variables_long_group
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - clustering_weighted
+        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -147,7 +171,11 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_variables_long_group
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - clustering_weighted
+        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -162,7 +190,7 @@ items:
         - centrality_Diffusion
         - centrality_InStrength
         - centrality_OutStrength
-    
+
     - name: centrality_plot
       type: Image
       width: 1000
@@ -174,7 +202,11 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_variables_long_group
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - clustering_weighted
+        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -208,7 +240,11 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_variables_long_group
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - clustering_weighted
+        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -226,7 +262,11 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_variables_long_group
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - clustering_weighted
+        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -248,7 +288,11 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_variables_long_group
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - clustering_weighted
+        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -264,7 +308,11 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_variables_long_group
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - clustering_weighted
+        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -281,39 +329,39 @@ items:
         type: Image
         width: 1000
         height: 800
-        visible: True
+        visible: False
         renderFun: .showCliquesPlot1
       - name: cliques_plot2
         type: Image
         width: 1000
         height: 800
-        visible: True
+        visible: False
         renderFun: .showCliquesPlot2
       - name: cliques_plot3
         type: Image
         width: 1000
         height: 800
-        visible: True
+        visible: False
         renderFun: .showCliquesPlot3
       - name: cliques_plot4
         type: Image
         width: 1000
         height: 800
-        visible: True
+        visible: False
         renderFun: .showCliquesPlot4
       - name: cliques_plot5
         type: Image
         width: 1000
         height: 800
-        visible: True
+        visible: False
         renderFun: .showCliquesPlot5
       - name: cliques_plot6
         type: Image
         width: 1000
         height: 800
-        visible: True
+        visible: False
         renderFun: .showCliquesPlot6
-    
+
     ### Bootstrap
 
     - name:  bootstrapTitle
@@ -326,8 +374,8 @@ items:
       title: Bootstrap Results
       visible: False
       columns:
-        - name: group
-          title: Group
+        - name: cluster
+          title: Cluster
           type: text
         - name: from
           title: From
@@ -361,7 +409,11 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_variables_long_group
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - clustering_weighted
+        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -371,7 +423,7 @@ items:
         - bootstrap_range_low
         - bootstrap_range_up
         - bootstrap_threshold
-    
+
     - name: bootstrap_plot
       type: Image
       width: 1000
@@ -383,7 +435,11 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_variables_long_group
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - clustering_weighted
+        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -400,7 +456,7 @@ items:
         - bootstrap_plot_node_label_size
         - bootstrap_plot_layout
 
-    
+
     ### Permutation
 
     - name:  permutationTitle
@@ -413,8 +469,8 @@ items:
       title: Permutation Test Results
       visible: False
       columns:
-        - name: group_comparison
-          title: Group Comparison
+        - name: cluster_comparison
+          title: Cluster Comparison
           type: text
         - name: edge_name
           type: text
@@ -429,15 +485,19 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_variables_long_group
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - clustering_weighted
+        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
         - permutation_iter
         - permutation_paired
         - permutation_level
-        
-    
+
+
     - name: permutation_plot
       type: Image
       width: 1000
@@ -449,7 +509,11 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_variables_long_group
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - clustering_weighted
+        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -471,7 +535,7 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_variables_long_group
+        - clustering_k
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -500,7 +564,7 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_variables_long_group
+        - clustering_k
         - compare_sequences_sub_min
         - compare_sequences_sub_max
         - compare_sequences_min_freq
@@ -522,7 +586,7 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_variables_long_group
+        - clustering_k
         - compare_sequences_sub_min
         - compare_sequences_sub_max
         - compare_sequences_min_freq

@@ -102,7 +102,12 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             scaling = character(0L)
                         }
 
-                        model <- build_model(x=dataForTNA, type=type, scaling=scaling)     
+                        if(type == "attention") {
+                            lambda <- self$options$buildModel_lambda
+                            model <- build_model(x=dataForTNA, type=type, scaling=scaling, lambda=lambda)
+                        } else {
+                            model <- build_model(x=dataForTNA, type=type, scaling=scaling)
+                        }
                     }
                     
                 }, error = function(e) {
@@ -468,18 +473,24 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         .showBuildModelPlot=function(image, ...) {
             plotData <- self$results$buildModelContent$state
-            
+
             if(!is.null(plotData) && self$options$buildModel_show_plot)  {
-                plot(x=plotData, 
-                    cut=self$options$buildModel_plot_cut,
-                    minimum=self$options$buildModel_plot_min_value,
-                    edge.label.cex=self$options$buildModel_plot_edge_label_size,
-                    node.width=self$options$buildModel_plot_node_size,
-                    label.cex=self$options$buildModel_plot_node_label_size,
-                    layout=self$options$buildModel_plot_layout,
-                    bg="transparent"
-                )
-            }   
+                tryCatch({
+                    plot(x=plotData,
+                        cut=self$options$buildModel_plot_cut,
+                        minimum=self$options$buildModel_plot_min_value,
+                        edge.label.cex=self$options$buildModel_plot_edge_label_size,
+                        node.width=self$options$buildModel_plot_node_size,
+                        label.cex=self$options$buildModel_plot_node_label_size,
+                        layout=self$options$buildModel_plot_layout,
+                        bg="transparent"
+                    )
+                }, error = function(e) {
+                    layout_name <- self$options$buildModel_plot_layout
+                    self$results$errorText$setContent(paste0("Layout '", layout_name, "' is not available for this network. Please try a different layout."))
+                    self$results$errorText$setVisible(TRUE)
+                })
+            }
             TRUE
         },
         .showBuildModelHisto=function(image, ...) {

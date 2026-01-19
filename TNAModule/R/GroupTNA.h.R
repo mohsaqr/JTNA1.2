@@ -12,6 +12,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             buildModel_variables_long_order = NULL,
             buildModel_variables_long_group = NULL,
             buildModel_type = "relative",
+            buildModel_lambda = 1,
             buildModel_scaling = "noScaling",
             buildModel_show_matrix = FALSE,
             buildModel_threshold = 900,
@@ -76,7 +77,13 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             sequences_geom = "bar",
             sequences_include_na = TRUE,
             sequences_tick = 5,
-            sequences_show_plot = FALSE, ...) {
+            sequences_show_plot = FALSE,
+            compare_sequences_show_table = FALSE,
+            compare_sequences_show_plot = FALSE,
+            compare_sequences_sub_min = 2,
+            compare_sequences_sub_max = 4,
+            compare_sequences_min_freq = 20,
+            compare_sequences_correction = "bonferroni", ...) {
 
             super$initialize(
                 package="JTNA",
@@ -105,8 +112,15 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "relative",
                     "frequency",
-                    "co-occurrence"),
+                    "co-occurrence",
+                    "attention"),
                 default="relative")
+            private$..buildModel_lambda <- jmvcore::OptionNumber$new(
+                "buildModel_lambda",
+                buildModel_lambda,
+                default=1,
+                min=0.01,
+                max=10)
             private$..buildModel_scaling <- jmvcore::OptionList$new(
                 "buildModel_scaling",
                 buildModel_scaling,
@@ -163,7 +177,19 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 buildModel_plot_layout,
                 options=list(
                     "circle",
-                    "spring"))
+                    "spring",
+                    "layout_with_kk",
+                    "layout_with_graphopt",
+                    "layout_with_gem",
+                    "layout_with_drl",
+                    "layout_as_star",
+                    "layout_on_grid",
+                    "layout_nicely",
+                    "layout_with_fr",
+                    "layout_with_dh",
+                    "layout_with_lgl",
+                    "layout_with_sugiyama",
+                    "layout_randomly"))
             private$..buildModel_show_histo <- jmvcore::OptionBool$new(
                 "buildModel_show_histo",
                 buildModel_show_histo,
@@ -310,7 +336,19 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default="circle",
                 options=list(
                     "circle",
-                    "spring"))
+                    "spring",
+                    "layout_with_kk",
+                    "layout_with_graphopt",
+                    "layout_with_gem",
+                    "layout_with_drl",
+                    "layout_as_star",
+                    "layout_on_grid",
+                    "layout_nicely",
+                    "layout_with_fr",
+                    "layout_with_dh",
+                    "layout_with_lgl",
+                    "layout_with_sugiyama",
+                    "layout_randomly"))
             private$..bootstrap_iteration <- jmvcore::OptionInteger$new(
                 "bootstrap_iteration",
                 bootstrap_iteration,
@@ -391,7 +429,19 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 bootstrap_plot_layout,
                 options=list(
                     "circle",
-                    "spring"))
+                    "spring",
+                    "layout_with_kk",
+                    "layout_with_graphopt",
+                    "layout_with_gem",
+                    "layout_with_drl",
+                    "layout_as_star",
+                    "layout_on_grid",
+                    "layout_nicely",
+                    "layout_with_fr",
+                    "layout_with_dh",
+                    "layout_with_lgl",
+                    "layout_with_sugiyama",
+                    "layout_randomly"))
             private$..permutation_show_text <- jmvcore::OptionBool$new(
                 "permutation_show_text",
                 permutation_show_text,
@@ -450,6 +500,43 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "sequences_show_plot",
                 sequences_show_plot,
                 default=FALSE)
+            private$..compare_sequences_show_table <- jmvcore::OptionBool$new(
+                "compare_sequences_show_table",
+                compare_sequences_show_table,
+                default=FALSE)
+            private$..compare_sequences_show_plot <- jmvcore::OptionBool$new(
+                "compare_sequences_show_plot",
+                compare_sequences_show_plot,
+                default=FALSE)
+            private$..compare_sequences_sub_min <- jmvcore::OptionInteger$new(
+                "compare_sequences_sub_min",
+                compare_sequences_sub_min,
+                default=2,
+                min=2,
+                max=10)
+            private$..compare_sequences_sub_max <- jmvcore::OptionInteger$new(
+                "compare_sequences_sub_max",
+                compare_sequences_sub_max,
+                default=4,
+                min=2,
+                max=10)
+            private$..compare_sequences_min_freq <- jmvcore::OptionInteger$new(
+                "compare_sequences_min_freq",
+                compare_sequences_min_freq,
+                default=20,
+                min=1,
+                max=100)
+            private$..compare_sequences_correction <- jmvcore::OptionList$new(
+                "compare_sequences_correction",
+                compare_sequences_correction,
+                default="bonferroni",
+                options=list(
+                    "bonferroni",
+                    "holm",
+                    "hochberg",
+                    "BH",
+                    "BY",
+                    "none"))
 
             self$.addOption(private$..buildModel_variables_long_actor)
             self$.addOption(private$..buildModel_variables_long_time)
@@ -457,6 +544,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..buildModel_variables_long_order)
             self$.addOption(private$..buildModel_variables_long_group)
             self$.addOption(private$..buildModel_type)
+            self$.addOption(private$..buildModel_lambda)
             self$.addOption(private$..buildModel_scaling)
             self$.addOption(private$..buildModel_show_matrix)
             self$.addOption(private$..buildModel_threshold)
@@ -522,6 +610,12 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..sequences_include_na)
             self$.addOption(private$..sequences_tick)
             self$.addOption(private$..sequences_show_plot)
+            self$.addOption(private$..compare_sequences_show_table)
+            self$.addOption(private$..compare_sequences_show_plot)
+            self$.addOption(private$..compare_sequences_sub_min)
+            self$.addOption(private$..compare_sequences_sub_max)
+            self$.addOption(private$..compare_sequences_min_freq)
+            self$.addOption(private$..compare_sequences_correction)
         }),
     active = list(
         buildModel_variables_long_actor = function() private$..buildModel_variables_long_actor$value,
@@ -530,6 +624,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         buildModel_variables_long_order = function() private$..buildModel_variables_long_order$value,
         buildModel_variables_long_group = function() private$..buildModel_variables_long_group$value,
         buildModel_type = function() private$..buildModel_type$value,
+        buildModel_lambda = function() private$..buildModel_lambda$value,
         buildModel_scaling = function() private$..buildModel_scaling$value,
         buildModel_show_matrix = function() private$..buildModel_show_matrix$value,
         buildModel_threshold = function() private$..buildModel_threshold$value,
@@ -594,7 +689,13 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         sequences_geom = function() private$..sequences_geom$value,
         sequences_include_na = function() private$..sequences_include_na$value,
         sequences_tick = function() private$..sequences_tick$value,
-        sequences_show_plot = function() private$..sequences_show_plot$value),
+        sequences_show_plot = function() private$..sequences_show_plot$value,
+        compare_sequences_show_table = function() private$..compare_sequences_show_table$value,
+        compare_sequences_show_plot = function() private$..compare_sequences_show_plot$value,
+        compare_sequences_sub_min = function() private$..compare_sequences_sub_min$value,
+        compare_sequences_sub_max = function() private$..compare_sequences_sub_max$value,
+        compare_sequences_min_freq = function() private$..compare_sequences_min_freq$value,
+        compare_sequences_correction = function() private$..compare_sequences_correction$value),
     private = list(
         ..buildModel_variables_long_actor = NA,
         ..buildModel_variables_long_time = NA,
@@ -602,6 +703,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..buildModel_variables_long_order = NA,
         ..buildModel_variables_long_group = NA,
         ..buildModel_type = NA,
+        ..buildModel_lambda = NA,
         ..buildModel_scaling = NA,
         ..buildModel_show_matrix = NA,
         ..buildModel_threshold = NA,
@@ -666,7 +768,13 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..sequences_geom = NA,
         ..sequences_include_na = NA,
         ..sequences_tick = NA,
-        ..sequences_show_plot = NA)
+        ..sequences_show_plot = NA,
+        ..compare_sequences_show_table = NA,
+        ..compare_sequences_show_plot = NA,
+        ..compare_sequences_sub_min = NA,
+        ..compare_sequences_sub_max = NA,
+        ..compare_sequences_min_freq = NA,
+        ..compare_sequences_correction = NA)
 )
 
 GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -698,7 +806,10 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         permutationTitle = function() private$.items[["permutationTitle"]],
         permutationContent = function() private$.items[["permutationContent"]],
         permutation_plot = function() private$.items[["permutation_plot"]],
-        sequences_plot = function() private$.items[["sequences_plot"]]),
+        sequences_plot = function() private$.items[["sequences_plot"]],
+        compareSequencesTitle = function() private$.items[["compareSequencesTitle"]],
+        compareSequences_plot = function() private$.items[["compareSequences_plot"]],
+        compareSequencesTable = function() private$.items[["compareSequencesTable"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -1203,7 +1314,54 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "sequences_scale",
                     "sequences_geom",
                     "sequences_include_na",
-                    "sequences_tick")))}))
+                    "sequences_tick")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="compareSequencesTitle",
+                title="Compare Sequences",
+                visible=FALSE))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="compareSequences_plot",
+                title="Sequence Comparison Plot",
+                width=700,
+                height=500,
+                visible=FALSE,
+                renderFun=".showCompareSequencesPlot",
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_variables_long_group",
+                    "compare_sequences_sub_min",
+                    "compare_sequences_sub_max",
+                    "compare_sequences_min_freq",
+                    "compare_sequences_correction")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="compareSequencesTable",
+                title="Sequence Pattern Comparison",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="pattern", 
+                        `title`="Pattern", 
+                        `type`="text"),
+                    list(
+                        `name`="length", 
+                        `title`="Length", 
+                        `type`="integer")),
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_variables_long_group",
+                    "compare_sequences_sub_min",
+                    "compare_sequences_sub_max",
+                    "compare_sequences_min_freq",
+                    "compare_sequences_correction")))}))
 
 GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "GroupTNABase",
@@ -1236,6 +1394,7 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param buildModel_variables_long_order .
 #' @param buildModel_variables_long_group .
 #' @param buildModel_type .
+#' @param buildModel_lambda .
 #' @param buildModel_scaling .
 #' @param buildModel_show_matrix .
 #' @param buildModel_threshold .
@@ -1301,6 +1460,12 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param sequences_include_na .
 #' @param sequences_tick .
 #' @param sequences_show_plot .
+#' @param compare_sequences_show_table .
+#' @param compare_sequences_show_plot .
+#' @param compare_sequences_sub_min .
+#' @param compare_sequences_sub_max .
+#' @param compare_sequences_min_freq .
+#' @param compare_sequences_correction .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$errorText} \tab \tab \tab \tab \tab a preformatted \cr
@@ -1334,6 +1499,9 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$permutationContent} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$permutation_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$sequences_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$compareSequencesTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$compareSequences_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$compareSequencesTable} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -1351,6 +1519,7 @@ GroupTNA <- function(
     buildModel_variables_long_order,
     buildModel_variables_long_group,
     buildModel_type = "relative",
+    buildModel_lambda = 1,
     buildModel_scaling = "noScaling",
     buildModel_show_matrix = FALSE,
     buildModel_threshold = 900,
@@ -1415,7 +1584,13 @@ GroupTNA <- function(
     sequences_geom = "bar",
     sequences_include_na = TRUE,
     sequences_tick = 5,
-    sequences_show_plot = FALSE) {
+    sequences_show_plot = FALSE,
+    compare_sequences_show_table = FALSE,
+    compare_sequences_show_plot = FALSE,
+    compare_sequences_sub_min = 2,
+    compare_sequences_sub_max = 4,
+    compare_sequences_min_freq = 20,
+    compare_sequences_correction = "bonferroni") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("GroupTNA requires jmvcore to be installed (restart may be required)")
@@ -1442,6 +1617,7 @@ GroupTNA <- function(
         buildModel_variables_long_order = buildModel_variables_long_order,
         buildModel_variables_long_group = buildModel_variables_long_group,
         buildModel_type = buildModel_type,
+        buildModel_lambda = buildModel_lambda,
         buildModel_scaling = buildModel_scaling,
         buildModel_show_matrix = buildModel_show_matrix,
         buildModel_threshold = buildModel_threshold,
@@ -1506,7 +1682,13 @@ GroupTNA <- function(
         sequences_geom = sequences_geom,
         sequences_include_na = sequences_include_na,
         sequences_tick = sequences_tick,
-        sequences_show_plot = sequences_show_plot)
+        sequences_show_plot = sequences_show_plot,
+        compare_sequences_show_table = compare_sequences_show_table,
+        compare_sequences_show_plot = compare_sequences_show_plot,
+        compare_sequences_sub_min = compare_sequences_sub_min,
+        compare_sequences_sub_max = compare_sequences_sub_max,
+        compare_sequences_min_freq = compare_sequences_min_freq,
+        compare_sequences_correction = compare_sequences_correction)
 
     analysis <- GroupTNAClass$new(
         options = options,
