@@ -274,6 +274,66 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         self$results$bootstrapTable$setVisible(self$options$bootstrap_show_table)
         self$results$bootstrapTitle$setVisible(self$options$bootstrap_show_plot || self$options$bootstrap_show_table)
       }
+
+      ### Permutation Test (only for group models)
+      if (!is.null(model) && is_group_model && (isTRUE(self$options$permutation_show_table) || isTRUE(self$options$permutation_show_plot))) {
+        permutationTest <- self$results$permutation_plot$state
+        if (is.null(permutationTest)) {
+          tryCatch({
+            permutationTest <- tna::permutation_test(
+              x = model,
+              iter = self$options$permutation_iter,
+              paired = self$options$permutation_paired,
+              level = self$options$permutation_level
+            )
+            self$results$permutation_plot$setState(permutationTest)
+          }, error = function(e) {
+            self$results$permutationTitle$setVisible(TRUE)
+            self$results$permutationTable$setNote(key = "error", note = paste("Error:", e$message))
+          })
+        }
+
+        # Populate table if we have data
+        if (!is.null(permutationTest) && isTRUE(self$options$permutation_show_table)) {
+          row_key_counter <- 1
+          for (comparison_name in names(permutationTest)) {
+            comparison_data <- permutationTest[[comparison_name]]
+            if (!is.null(comparison_data$edges) && !is.null(comparison_data$edges$stats)) {
+              stats_df <- comparison_data$edges$stats
+              stats_df$diff_true <- as.numeric(stats_df$diff_true)
+              stats_df$effect_size <- as.numeric(stats_df$effect_size)
+              stats_df$p_value <- as.numeric(stats_df$p_value)
+              filtered_sorted_stats <- stats_df[order(stats_df$p_value, -stats_df$diff_true), ]
+
+              for (i in 1:nrow(filtered_sorted_stats)) {
+                edge_name_value <- filtered_sorted_stats[i, "edge_name"]
+                if (is.null(edge_name_value) || is.na(edge_name_value) || edge_name_value == "") {
+                  edge_name_value <- rownames(filtered_sorted_stats)[i]
+                  if (is.null(edge_name_value) || edge_name_value == "") {
+                    edge_name_value <- paste("Edge", i)
+                  }
+                } else {
+                  edge_name_value <- trimws(as.character(edge_name_value))
+                }
+
+                rowValues <- list(
+                  group_comparison = as.character(comparison_name),
+                  edge_name = edge_name_value,
+                  diff_true = as.numeric(filtered_sorted_stats[i, "diff_true"]),
+                  effect_size = as.numeric(filtered_sorted_stats[i, "effect_size"]),
+                  p_value = as.numeric(filtered_sorted_stats[i, "p_value"])
+                )
+                self$results$permutationTable$addRow(rowKey = as.character(row_key_counter), values = rowValues)
+                row_key_counter <- row_key_counter + 1
+              }
+            }
+          }
+        }
+
+        self$results$permutation_plot$setVisible(self$options$permutation_show_plot)
+        self$results$permutationTable$setVisible(self$options$permutation_show_table)
+        self$results$permutationTitle$setVisible(isTRUE(self$options$permutation_show_table) || isTRUE(self$options$permutation_show_plot))
+      }
     },
 
     # Plot functions
@@ -392,6 +452,28 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         label.cex = self$options$bootstrap_plot_node_label_size,
         layout = self$options$bootstrap_plot_layout
       )
+      TRUE
+    },
+
+    .showPermutationPlot = function(image, ...) {
+      plotData <- self$results$permutation_plot$state
+      if (is.null(plotData) || !self$options$permutation_show_plot) return(FALSE)
+
+      if (length(plotData) == 1) {
+        par(mfrow = c(1, 1))
+      } else if (length(plotData) <= 4) {
+        par(mfrow = c(2, 2))
+      } else if (length(plotData) <= 6) {
+        par(mfrow = c(2, 3))
+      } else if (length(plotData) <= 9) {
+        par(mfrow = c(3, 3))
+      } else {
+        row <- ceiling(sqrt(length(plotData)))
+        column <- ceiling(length(plotData) / row)
+        par(mfrow = c(row, column))
+      }
+
+      plot(x = plotData)
       TRUE
     }
   )

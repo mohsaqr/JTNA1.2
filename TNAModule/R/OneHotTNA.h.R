@@ -62,7 +62,12 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bootstrap_plot_edge_label_size = 1,
             bootstrap_plot_node_size = 1,
             bootstrap_plot_node_label_size = 1,
-            bootstrap_plot_layout = "circle", ...) {
+            bootstrap_plot_layout = "circle",
+            permutation_show_table = FALSE,
+            permutation_show_plot = FALSE,
+            permutation_iter = 1000,
+            permutation_paired = FALSE,
+            permutation_level = 0.05, ...) {
 
             super$initialize(
                 package="JTNA",
@@ -403,6 +408,30 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "layout_with_lgl",
                     "layout_with_sugiyama",
                     "layout_randomly"))
+            private$..permutation_show_table <- jmvcore::OptionBool$new(
+                "permutation_show_table",
+                permutation_show_table,
+                default=FALSE)
+            private$..permutation_show_plot <- jmvcore::OptionBool$new(
+                "permutation_show_plot",
+                permutation_show_plot,
+                default=FALSE)
+            private$..permutation_iter <- jmvcore::OptionInteger$new(
+                "permutation_iter",
+                permutation_iter,
+                default=1000,
+                min=1,
+                max=10000)
+            private$..permutation_paired <- jmvcore::OptionBool$new(
+                "permutation_paired",
+                permutation_paired,
+                default=FALSE)
+            private$..permutation_level <- jmvcore::OptionNumber$new(
+                "permutation_level",
+                permutation_level,
+                default=0.05,
+                min=0,
+                max=1)
 
             self$.addOption(private$..buildModel_variables_onehot)
             self$.addOption(private$..buildModel_variables_actor)
@@ -461,6 +490,11 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..bootstrap_plot_node_size)
             self$.addOption(private$..bootstrap_plot_node_label_size)
             self$.addOption(private$..bootstrap_plot_layout)
+            self$.addOption(private$..permutation_show_table)
+            self$.addOption(private$..permutation_show_plot)
+            self$.addOption(private$..permutation_iter)
+            self$.addOption(private$..permutation_paired)
+            self$.addOption(private$..permutation_level)
         }),
     active = list(
         buildModel_variables_onehot = function() private$..buildModel_variables_onehot$value,
@@ -519,7 +553,12 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         bootstrap_plot_edge_label_size = function() private$..bootstrap_plot_edge_label_size$value,
         bootstrap_plot_node_size = function() private$..bootstrap_plot_node_size$value,
         bootstrap_plot_node_label_size = function() private$..bootstrap_plot_node_label_size$value,
-        bootstrap_plot_layout = function() private$..bootstrap_plot_layout$value),
+        bootstrap_plot_layout = function() private$..bootstrap_plot_layout$value,
+        permutation_show_table = function() private$..permutation_show_table$value,
+        permutation_show_plot = function() private$..permutation_show_plot$value,
+        permutation_iter = function() private$..permutation_iter$value,
+        permutation_paired = function() private$..permutation_paired$value,
+        permutation_level = function() private$..permutation_level$value),
     private = list(
         ..buildModel_variables_onehot = NA,
         ..buildModel_variables_actor = NA,
@@ -577,7 +616,12 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..bootstrap_plot_edge_label_size = NA,
         ..bootstrap_plot_node_size = NA,
         ..bootstrap_plot_node_label_size = NA,
-        ..bootstrap_plot_layout = NA)
+        ..bootstrap_plot_layout = NA,
+        ..permutation_show_table = NA,
+        ..permutation_show_plot = NA,
+        ..permutation_iter = NA,
+        ..permutation_paired = NA,
+        ..permutation_level = NA)
 )
 
 OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -605,7 +649,10 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         cliques_plot = function() private$.items[["cliques_plot"]],
         bootstrapTitle = function() private$.items[["bootstrapTitle"]],
         bootstrapTable = function() private$.items[["bootstrapTable"]],
-        bootstrap_plot = function() private$.items[["bootstrap_plot"]]),
+        bootstrap_plot = function() private$.items[["bootstrap_plot"]],
+        permutationTitle = function() private$.items[["permutationTitle"]],
+        permutationTable = function() private$.items[["permutationTable"]],
+        permutation_plot = function() private$.items[["permutation_plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -956,7 +1003,65 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "bootstrap_plot_edge_label_size",
                     "bootstrap_plot_node_size",
                     "bootstrap_plot_node_label_size",
-                    "bootstrap_plot_layout")))}))
+                    "bootstrap_plot_layout")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="permutationTitle",
+                title="Permutation Test",
+                visible=FALSE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="permutationTable",
+                title="Permutation Test Results",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="group_comparison", 
+                        `title`="Group Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="edge_name", 
+                        `title`="Edge", 
+                        `type`="text"),
+                    list(
+                        `name`="diff_true", 
+                        `title`="Difference", 
+                        `type`="number"),
+                    list(
+                        `name`="effect_size", 
+                        `title`="Effect Size", 
+                        `type`="number"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_onehot",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_session",
+                    "buildModel_variables_group",
+                    "buildModel_window",
+                    "buildModel_scaling",
+                    "permutation_iter",
+                    "permutation_paired",
+                    "permutation_level")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="permutation_plot",
+                width=1000,
+                height=1000,
+                visible=FALSE,
+                renderFun=".showPermutationPlot",
+                clearWith=list(
+                    "buildModel_variables_onehot",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_session",
+                    "buildModel_variables_group",
+                    "buildModel_window",
+                    "buildModel_scaling",
+                    "permutation_iter",
+                    "permutation_paired",
+                    "permutation_level")))}))
 
 OneHotTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "OneHotTNABase",
@@ -1040,6 +1145,11 @@ OneHotTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param bootstrap_plot_node_size .
 #' @param bootstrap_plot_node_label_size .
 #' @param bootstrap_plot_layout .
+#' @param permutation_show_table .
+#' @param permutation_show_plot .
+#' @param permutation_iter .
+#' @param permutation_paired .
+#' @param permutation_level .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$errorText} \tab \tab \tab \tab \tab a preformatted \cr
@@ -1064,6 +1174,9 @@ OneHotTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$bootstrapTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$bootstrap_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$permutationTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$permutationTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$permutation_plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -1131,7 +1244,12 @@ OneHotTNA <- function(
     bootstrap_plot_edge_label_size = 1,
     bootstrap_plot_node_size = 1,
     bootstrap_plot_node_label_size = 1,
-    bootstrap_plot_layout = "circle") {
+    bootstrap_plot_layout = "circle",
+    permutation_show_table = FALSE,
+    permutation_show_plot = FALSE,
+    permutation_iter = 1000,
+    permutation_paired = FALSE,
+    permutation_level = 0.05) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("OneHotTNA requires jmvcore to be installed (restart may be required)")
@@ -1206,7 +1324,12 @@ OneHotTNA <- function(
         bootstrap_plot_edge_label_size = bootstrap_plot_edge_label_size,
         bootstrap_plot_node_size = bootstrap_plot_node_size,
         bootstrap_plot_node_label_size = bootstrap_plot_node_label_size,
-        bootstrap_plot_layout = bootstrap_plot_layout)
+        bootstrap_plot_layout = bootstrap_plot_layout,
+        permutation_show_table = permutation_show_table,
+        permutation_show_plot = permutation_show_plot,
+        permutation_iter = permutation_iter,
+        permutation_paired = permutation_paired,
+        permutation_level = permutation_level)
 
     analysis <- OneHotTNAClass$new(
         options = options,

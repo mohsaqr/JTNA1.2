@@ -468,4 +468,34 @@ options:
         - title: Random
           name: layout_randomly
 
+    ### PERMUTATION
+    - name: permutation_show_table
+      title: Table
+      type: Bool
+      default: False
+
+    - name: permutation_show_plot
+      title: Plot
+      type: Bool
+      default: False
+
+    - name: permutation_iter
+      title: Iterations
+      type: Integer
+      default: 1000
+      min: 1
+      max: 10000
+
+    - name: permutation_paired
+      title: Paired
+      type: Bool
+      default: False
+
+    - name: permutation_level
+      title: Level
+      type: Number
+      default: 0.05
+      min: 0
+      max: 1
+
 ...

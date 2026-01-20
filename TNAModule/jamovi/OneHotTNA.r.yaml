@@ -339,4 +339,58 @@ items:
         - bootstrap_plot_node_label_size
         - bootstrap_plot_layout
 
+    ### PERMUTATION
+    - name: permutationTitle
+      type: Preformatted
+      title: Permutation Test
+      visible: False
+
+    - name: permutationTable
+      type: Table
+      title: Permutation Test Results
+      visible: False
+      columns:
+        - name: group_comparison
+          title: Group Comparison
+          type: text
+        - name: edge_name
+          title: Edge
+          type: text
+        - name: diff_true
+          title: Difference
+          type: number
+        - name: effect_size
+          title: Effect Size
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+      clearWith:
+        - buildModel_variables_onehot
+        - buildModel_variables_actor
+        - buildModel_variables_session
+        - buildModel_variables_group
+        - buildModel_window
+        - buildModel_scaling
+        - permutation_iter
+        - permutation_paired
+        - permutation_level
+
+    - name: permutation_plot
+      type: Image
+      width: 1000
+      height: 1000
+      visible: False
+      renderFun: .showPermutationPlot
+      clearWith:
+        - buildModel_variables_onehot
+        - buildModel_variables_actor
+        - buildModel_variables_session
+        - buildModel_variables_group
+        - buildModel_window
+        - buildModel_scaling
+        - permutation_iter
+        - permutation_paired
+        - permutation_level
+
 ...
