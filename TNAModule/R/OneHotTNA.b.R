@@ -320,7 +320,14 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     .showBootstrapPlot = function(image, ...) {
       plotData <- self$results$bootstrap_plot$state
       if (is.null(plotData) || !self$options$bootstrap_show_plot) return(FALSE)
-      plot(x = plotData, cut = 0.01)
+      plot(x = plotData,
+        cut = self$options$bootstrap_plot_cut,
+        minimum = self$options$bootstrap_plot_min_value,
+        edge.label.cex = self$options$bootstrap_plot_edge_label_size,
+        node.width = self$options$bootstrap_plot_node_size,
+        label.cex = self$options$bootstrap_plot_node_label_size,
+        layout = self$options$bootstrap_plot_layout
+      )
       TRUE
     }
   )
