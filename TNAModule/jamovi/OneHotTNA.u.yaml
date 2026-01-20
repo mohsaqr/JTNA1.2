@@ -94,6 +94,9 @@ children:
               - type: CheckBox
                 name: buildModel_show_frequencies
                 label: Frequencies plot
+              - type: CheckBox
+                name: buildModel_show_mosaic
+                label: Mosaic plot
       - type: LayoutBox
         stretchFactor: 1
         children:
@@ -123,6 +126,10 @@ children:
               - type: ComboBox
                 name: buildModel_plot_layout
                 enable: (buildModel_show_plot)
+              - type: TextBox
+                name: buildModel_digits
+                format: number
+                enable: (buildModel_show_mosaic)
   - type: CollapseBox
     label: Centrality Analysis
     margin: large

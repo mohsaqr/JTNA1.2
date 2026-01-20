@@ -22,6 +22,8 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             buildModel_plot_layout = "circle",
             buildModel_show_histo = FALSE,
             buildModel_show_frequencies = FALSE,
+            buildModel_show_mosaic = FALSE,
+            buildModel_digits = 1,
             centrality_loops = FALSE,
             centrality_normalize = FALSE,
             centrality_show_table = FALSE,
@@ -167,6 +169,16 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "buildModel_show_frequencies",
                 buildModel_show_frequencies,
                 default=FALSE)
+            private$..buildModel_show_mosaic <- jmvcore::OptionBool$new(
+                "buildModel_show_mosaic",
+                buildModel_show_mosaic,
+                default=FALSE)
+            private$..buildModel_digits <- jmvcore::OptionInteger$new(
+                "buildModel_digits",
+                buildModel_digits,
+                default=1,
+                min=0,
+                max=5)
             private$..centrality_loops <- jmvcore::OptionBool$new(
                 "centrality_loops",
                 centrality_loops,
@@ -449,6 +461,8 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..buildModel_plot_layout)
             self$.addOption(private$..buildModel_show_histo)
             self$.addOption(private$..buildModel_show_frequencies)
+            self$.addOption(private$..buildModel_show_mosaic)
+            self$.addOption(private$..buildModel_digits)
             self$.addOption(private$..centrality_loops)
             self$.addOption(private$..centrality_normalize)
             self$.addOption(private$..centrality_show_table)
@@ -513,6 +527,8 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         buildModel_plot_layout = function() private$..buildModel_plot_layout$value,
         buildModel_show_histo = function() private$..buildModel_show_histo$value,
         buildModel_show_frequencies = function() private$..buildModel_show_frequencies$value,
+        buildModel_show_mosaic = function() private$..buildModel_show_mosaic$value,
+        buildModel_digits = function() private$..buildModel_digits$value,
         centrality_loops = function() private$..centrality_loops$value,
         centrality_normalize = function() private$..centrality_normalize$value,
         centrality_show_table = function() private$..centrality_show_table$value,
@@ -576,6 +592,8 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..buildModel_plot_layout = NA,
         ..buildModel_show_histo = NA,
         ..buildModel_show_frequencies = NA,
+        ..buildModel_show_mosaic = NA,
+        ..buildModel_digits = NA,
         ..centrality_loops = NA,
         ..centrality_normalize = NA,
         ..centrality_show_table = NA,
@@ -635,6 +653,7 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         buildModel_plot = function() private$.items[["buildModel_plot"]],
         buildModel_histo = function() private$.items[["buildModel_histo"]],
         buildModel_frequencies = function() private$.items[["buildModel_frequencies"]],
+        buildModel_mosaic = function() private$.items[["buildModel_mosaic"]],
         centralityTitle = function() private$.items[["centralityTitle"]],
         centralityContent = function() private$.items[["centralityContent"]],
         centralityTable = function() private$.items[["centralityTable"]],
@@ -736,6 +755,21 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_group",
                     "buildModel_window",
                     "buildModel_scaling")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="buildModel_mosaic",
+                width=400,
+                height=300,
+                visible=FALSE,
+                renderFun=".showBuildModelMosaic",
+                clearWith=list(
+                    "buildModel_variables_onehot",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_session",
+                    "buildModel_variables_group",
+                    "buildModel_window",
+                    "buildModel_scaling",
+                    "buildModel_digits")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="centralityTitle",
@@ -1104,6 +1138,8 @@ OneHotTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param buildModel_plot_layout .
 #' @param buildModel_show_histo .
 #' @param buildModel_show_frequencies .
+#' @param buildModel_show_mosaic .
+#' @param buildModel_digits .
 #' @param centrality_loops .
 #' @param centrality_normalize .
 #' @param centrality_show_table .
@@ -1159,6 +1195,7 @@ OneHotTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$buildModel_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$buildModel_histo} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$buildModel_frequencies} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$buildModel_mosaic} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$centralityTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$centralityContent} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$centralityTable} \tab \tab \tab \tab \tab a table \cr
@@ -1204,6 +1241,8 @@ OneHotTNA <- function(
     buildModel_plot_layout = "circle",
     buildModel_show_histo = FALSE,
     buildModel_show_frequencies = FALSE,
+    buildModel_show_mosaic = FALSE,
+    buildModel_digits = 1,
     centrality_loops = FALSE,
     centrality_normalize = FALSE,
     centrality_show_table = FALSE,
@@ -1284,6 +1323,8 @@ OneHotTNA <- function(
         buildModel_plot_layout = buildModel_plot_layout,
         buildModel_show_histo = buildModel_show_histo,
         buildModel_show_frequencies = buildModel_show_frequencies,
+        buildModel_show_mosaic = buildModel_show_mosaic,
+        buildModel_digits = buildModel_digits,
         centrality_loops = centrality_loops,
         centrality_normalize = centrality_normalize,
         centrality_show_table = centrality_show_table,

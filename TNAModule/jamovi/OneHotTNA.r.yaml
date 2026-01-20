@@ -79,6 +79,21 @@ items:
         - buildModel_window
         - buildModel_scaling
 
+    - name: buildModel_mosaic
+      type: Image
+      width: 400
+      height: 300
+      visible: False
+      renderFun: .showBuildModelMosaic
+      clearWith:
+        - buildModel_variables_onehot
+        - buildModel_variables_actor
+        - buildModel_variables_session
+        - buildModel_variables_group
+        - buildModel_window
+        - buildModel_scaling
+        - buildModel_digits
+
     ### CENTRALITY
     - name:  centralityTitle
       title: Centrality

@@ -137,6 +137,18 @@ options:
       type: Bool
       default: False
 
+    - name: buildModel_show_mosaic
+      title: Mosaic plot
+      type: Bool
+      default: False
+
+    - name: buildModel_digits
+      title: Digits
+      type: Integer
+      default: 1
+      min: 0
+      max: 5
+
     ### CENTRALITY DATA
 
     - name: centrality_loops

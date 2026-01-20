@@ -124,6 +124,7 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         self$results$buildModel_plot$setVisible(self$options$buildModel_show_plot)
         self$results$buildModel_histo$setVisible(self$options$buildModel_show_histo)
         self$results$buildModel_frequencies$setVisible(self$options$buildModel_show_frequencies)
+        self$results$buildModel_mosaic$setVisible(self$options$buildModel_show_mosaic)
       }
 
       ### Centrality
@@ -381,6 +382,19 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (!is.null(p)) print(p)
       }, error = function(e) {
         hist(plotData, main = "Frequencies Plot", xlab = "Edge Weights", ylab = "Frequency")
+      })
+      TRUE
+    },
+
+    .showBuildModelMosaic = function(image, ...) {
+      plotData <- self$results$buildModelContent$state
+      if (is.null(plotData) || !self$options$buildModel_show_mosaic) return(FALSE)
+      tryCatch({
+        p <- tna::plot_mosaic(x = plotData, digits = self$options$buildModel_digits)
+        if (!is.null(p)) print(p)
+      }, error = function(e) {
+        self$results$errorText$setContent(paste0("Mosaic plot error: ", e$message))
+        self$results$errorText$setVisible(TRUE)
       })
       TRUE
     },
