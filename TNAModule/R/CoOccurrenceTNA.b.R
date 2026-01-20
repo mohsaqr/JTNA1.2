@@ -18,7 +18,7 @@ CoOccurrenceTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                   <li><b>Actor</b>: Column identifying individuals (optional). Separates sequences by person.</li>
                   <li><b>Time</b> or <b>Order</b>: For ordering events chronologically (optional).</li>
                   <li>This analysis builds a <b>co-occurrence network</b> showing which actions tend to occur together.</li>
-                  <li>The <b>tna</b> R package is used. See <a href="https://doi.org/10.1177/01466216251348840" target="_blank">Tikka et al. (2025)</a>.</li>
+                  <li>Learn more: <a href="https://lamethods.org/book2/chapters/ch15-tna/ch15-tna.html" target="_blank">TNA Tutorial</a> | <a href="https://lamethods.org/book2/chapters/ch16-ftna/ch16-ftna.html" target="_blank">FTNA</a> | <a href="https://lamethods.org/book2/chapters/ch17-tna-clusters/ch17-tna-clusters.html" target="_blank">Group TNA</a></li>
                 </ul>
                 </div>
                 </div>'
