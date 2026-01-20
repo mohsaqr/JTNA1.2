@@ -13,12 +13,12 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             buildModel_scaling = "noScaling",
             buildModel_show_matrix = FALSE,
             buildModel_show_plot = TRUE,
-            buildModel_plot_cut = 0,
+            buildModel_plot_cut = 0.1,
             buildModel_plot_min_value = 0.05,
             buildModel_plot_edge_label_size = 1,
             buildModel_plot_node_size = 1,
             buildModel_plot_node_label_size = 1,
-            buildModel_plot_layout = NULL,
+            buildModel_plot_layout = "circle",
             buildModel_show_histo = FALSE,
             buildModel_show_frequencies = FALSE,
             centrality_loops = FALSE,
@@ -42,7 +42,7 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             cliques_threshold = 0,
             cliques_show_text = FALSE,
             cliques_show_plot = FALSE,
-            cliques_plot_cut = 0,
+            cliques_plot_cut = 0.1,
             cliques_plot_min_value = 0,
             cliques_plot_edge_label_size = 1,
             cliques_plot_node_size = 1,
@@ -56,12 +56,12 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bootstrap_threshold = 0.1,
             bootstrap_show_plot = FALSE,
             bootstrap_show_table = FALSE,
-            bootstrap_plot_cut = 0,
+            bootstrap_plot_cut = 0.1,
             bootstrap_plot_min_value = 0.05,
             bootstrap_plot_edge_label_size = 1,
             bootstrap_plot_node_size = 1,
             bootstrap_plot_node_label_size = 1,
-            bootstrap_plot_layout = NULL, ...) {
+            bootstrap_plot_layout = "circle", ...) {
 
             super$initialize(
                 package="JTNA",
@@ -104,7 +104,7 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..buildModel_plot_cut <- jmvcore::OptionNumber$new(
                 "buildModel_plot_cut",
                 buildModel_plot_cut,
-                default=0,
+                default=0.1,
                 min=0,
                 max=1)
             private$..buildModel_plot_min_value <- jmvcore::OptionNumber$new(
@@ -134,6 +134,7 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..buildModel_plot_layout <- jmvcore::OptionList$new(
                 "buildModel_plot_layout",
                 buildModel_plot_layout,
+                default="circle",
                 options=list(
                     "circle",
                     "spring",
@@ -258,7 +259,7 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..cliques_plot_cut <- jmvcore::OptionNumber$new(
                 "cliques_plot_cut",
                 cliques_plot_cut,
-                default=0,
+                default=0.1,
                 min=0,
                 max=1)
             private$..cliques_plot_min_value <- jmvcore::OptionNumber$new(
@@ -352,7 +353,7 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..bootstrap_plot_cut <- jmvcore::OptionNumber$new(
                 "bootstrap_plot_cut",
                 bootstrap_plot_cut,
-                default=0,
+                default=0.1,
                 min=0,
                 max=1)
             private$..bootstrap_plot_min_value <- jmvcore::OptionNumber$new(
@@ -382,6 +383,7 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..bootstrap_plot_layout <- jmvcore::OptionList$new(
                 "bootstrap_plot_layout",
                 bootstrap_plot_layout,
+                default="circle",
                 options=list(
                     "circle",
                     "spring",
@@ -1055,12 +1057,12 @@ OneHotTNA <- function(
     buildModel_scaling = "noScaling",
     buildModel_show_matrix = FALSE,
     buildModel_show_plot = TRUE,
-    buildModel_plot_cut = 0,
+    buildModel_plot_cut = 0.1,
     buildModel_plot_min_value = 0.05,
     buildModel_plot_edge_label_size = 1,
     buildModel_plot_node_size = 1,
     buildModel_plot_node_label_size = 1,
-    buildModel_plot_layout,
+    buildModel_plot_layout = "circle",
     buildModel_show_histo = FALSE,
     buildModel_show_frequencies = FALSE,
     centrality_loops = FALSE,
@@ -1084,7 +1086,7 @@ OneHotTNA <- function(
     cliques_threshold = 0,
     cliques_show_text = FALSE,
     cliques_show_plot = FALSE,
-    cliques_plot_cut = 0,
+    cliques_plot_cut = 0.1,
     cliques_plot_min_value = 0,
     cliques_plot_edge_label_size = 1,
     cliques_plot_node_size = 1,
@@ -1098,12 +1100,12 @@ OneHotTNA <- function(
     bootstrap_threshold = 0.1,
     bootstrap_show_plot = FALSE,
     bootstrap_show_table = FALSE,
-    bootstrap_plot_cut = 0,
+    bootstrap_plot_cut = 0.1,
     bootstrap_plot_min_value = 0.05,
     bootstrap_plot_edge_label_size = 1,
     bootstrap_plot_node_size = 1,
     bootstrap_plot_node_label_size = 1,
-    bootstrap_plot_layout) {
+    bootstrap_plot_layout = "circle") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("OneHotTNA requires jmvcore to be installed (restart may be required)")
