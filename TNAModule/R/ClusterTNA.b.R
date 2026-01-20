@@ -205,11 +205,29 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Populate bootstrap table
         if(!is.null(bs) && isTRUE(self$options$bootstrap_show_table)) {
           row_key <- 1
+          max_rows <- self$options$bootstrap_table_max_rows
+          show_all <- isTRUE(self$options$bootstrap_table_show_all)
+          significant_only <- isTRUE(self$options$bootstrap_table_significant_only)
+
           for (group_name in names(bs)) {
             group_data <- bs[[group_name]]
             if (!is.null(group_data$summary) && nrow(group_data$summary) > 0) {
-              for (i in 1:nrow(group_data$summary)) {
-                row <- group_data$summary[i,]
+              summary_data <- group_data$summary
+              # Sort by significance
+              summary_data <- summary_data[order(-summary_data$sig, summary_data$p_value), ]
+
+              # Filter for significant only if requested
+              if (significant_only) {
+                summary_data <- summary_data[summary_data$sig == TRUE, ]
+              }
+
+              if (nrow(summary_data) == 0) next
+
+              for (i in 1:nrow(summary_data)) {
+                # Check row limit unless show_all is enabled
+                if (!show_all && row_key > max_rows) break
+
+                row <- summary_data[i,]
                 self$results$bootstrapTable$addRow(rowKey=row_key, values=list(
                   group = group_name,
                   from = as.character(row$from),
@@ -224,6 +242,9 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 ))
                 row_key <- row_key + 1
               }
+
+              # Break outer loop if row limit reached
+              if (!show_all && row_key > max_rows) break
             }
           }
         }

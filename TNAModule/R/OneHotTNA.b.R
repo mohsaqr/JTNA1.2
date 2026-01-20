@@ -254,8 +254,25 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Populate table
         if (!is.null(bs) && isTRUE(self$options$bootstrap_show_table)) {
           if (!is.null(bs$summary) && nrow(bs$summary) > 0) {
-            for (i in 1:nrow(bs$summary)) {
-              row <- bs$summary[i, ]
+            all_edges <- bs$summary
+            # Sort by significance
+            all_edges <- all_edges[order(-all_edges$sig, all_edges$p_value), ]
+
+            # Filter for significant only if requested
+            if (isTRUE(self$options$bootstrap_table_significant_only)) {
+              all_edges <- all_edges[all_edges$sig == TRUE, ]
+            }
+
+            # Limit rows unless show all is enabled
+            if (!isTRUE(self$options$bootstrap_table_show_all)) {
+              max_rows <- self$options$bootstrap_table_max_rows
+              if (nrow(all_edges) > max_rows) {
+                all_edges <- all_edges[1:max_rows, ]
+              }
+            }
+
+            for (i in 1:nrow(all_edges)) {
+              row <- all_edges[i, ]
               self$results$bootstrapTable$addRow(rowKey = i, values = list(
                 from = as.character(row$from),
                 to = as.character(row$to),
@@ -343,8 +360,9 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       if (is.null(plotData)) return(FALSE)
 
       tryCatch({
-        # Check if it's a group model (list of models)
-        if (inherits(plotData, "group_tna") || (is.list(plotData) && length(plotData) > 1 && !inherits(plotData, "tna"))) {
+        # Check if it's a group model (only apply multi-panel layout if group variable is used)
+        is_group_model <- !is.null(self$options$buildModel_variables_group)
+        if (is_group_model && (inherits(plotData, "group_tna") || (is.list(plotData) && length(plotData) > 1 && !inherits(plotData, "tna")))) {
           n_groups <- length(plotData)
           if (n_groups <= 4) {
             par(mfrow = c(2, 2))
@@ -410,8 +428,9 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       plotData <- self$results$community_plot$state
       if (is.null(plotData) || !self$options$community_show_plot) return(FALSE)
       methods <- self$options$community_methods
-      # Check if it's a group model result
-      if (is.list(plotData) && length(plotData) > 1) {
+      # Check if it's a group model result (only apply multi-panel layout if group variable is used)
+      is_group_model <- !is.null(self$options$buildModel_variables_group)
+      if (is_group_model && is.list(plotData) && length(plotData) > 1) {
         n_groups <- length(plotData)
         if (n_groups <= 4) {
           par(mfrow = c(2, 2))
@@ -426,8 +445,9 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     .showCliquesPlot = function(image, ...) {
       plotData <- self$results$cliques_plot$state
       if (is.null(plotData) || !self$options$cliques_show_plot) return(FALSE)
-      # Check if it's a group model result
-      if (is.list(plotData) && length(plotData) > 1 && !inherits(plotData, "tna_cliques")) {
+      # Check if it's a group model result (only apply multi-panel layout if group variable is used)
+      is_group_model <- !is.null(self$options$buildModel_variables_group)
+      if (is_group_model && is.list(plotData) && length(plotData) > 1 && !inherits(plotData, "tna_cliques")) {
         n_groups <- length(plotData)
         if (n_groups <= 4) {
           par(mfrow = c(2, 2))
@@ -449,8 +469,9 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     .showBootstrapPlot = function(image, ...) {
       plotData <- self$results$bootstrap_plot$state
       if (is.null(plotData) || !self$options$bootstrap_show_plot) return(FALSE)
-      # Check if it's a group model result
-      if (is.list(plotData) && length(plotData) > 1) {
+      # Check if it's a group model result (only apply multi-panel layout if group variable is used)
+      is_group_model <- !is.null(self$options$buildModel_variables_group)
+      if (is_group_model && is.list(plotData) && length(plotData) > 1) {
         n_groups <- length(plotData)
         if (n_groups <= 4) {
           par(mfrow = c(2, 2))

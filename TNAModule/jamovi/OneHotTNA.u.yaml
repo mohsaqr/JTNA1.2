@@ -427,3 +427,16 @@ children:
               - type: CheckBox
                 name: permutation_paired
                 label: Paired test
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: bootstrap_table_max_rows
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: bootstrap_table_show_all
+      - type: CheckBox
+        name: bootstrap_table_significant_only

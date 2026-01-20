@@ -408,24 +408,38 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Populate table if we have data and table option is enabled
         if(!is.null(bs) && isTRUE(self$options$bootstrap_show_table)) {
           row_key_counter <- 1
-          
+          max_rows <- self$options$bootstrap_table_max_rows
+          show_all <- isTRUE(self$options$bootstrap_table_show_all)
+          significant_only <- isTRUE(self$options$bootstrap_table_significant_only)
+
           # Debug: Print structure to understand data format
           tryCatch({
             # Iterate through each group (A, B, C, etc.)
             for (group_name in names(bs)) {
               group_data <- bs[[group_name]]
-              
+
               # Check if group has summary data
               if (!is.null(group_data) && !is.null(group_data$summary)) {
                 summary_data <- group_data$summary
-                
+
                 # Check if summary_data has rows
                 if (is.data.frame(summary_data) && !is.null(summary_data) && !is.na(nrow(summary_data)) && nrow(summary_data) > 0) {
                   # Sort by significance (significant first), then by p-value
                   sorted_summary <- summary_data[order(-summary_data$sig, summary_data$p_value), ]
-                  
-                  # Add each edge to the table
+
+                  # Filter for significant only if requested
+                  if (significant_only) {
+                    sorted_summary <- sorted_summary[sorted_summary$sig == TRUE, ]
+                  }
+
+                  # Skip if no rows after filtering
+                  if (nrow(sorted_summary) == 0) next
+
+                  # Add each edge to the table (with row limit check)
                   for (i in 1:nrow(sorted_summary)) {
+                    # Check row limit unless show_all is enabled
+                    if (!show_all && row_key_counter > max_rows) break
+
                     rowValues <- list(
                       group = group_name,
                       from = as.character(sorted_summary[i, "from"]),
@@ -441,15 +455,18 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     self$results$bootstrapTable$addRow(rowKey=as.character(row_key_counter), values=rowValues)
                     row_key_counter <- row_key_counter + 1
                   }
+
+                  # Break outer loop if row limit reached
+                  if (!show_all && row_key_counter > max_rows) break
                 }
               }
             }
-            
+
             # If no data was added, add a debug message
             if (row_key_counter == 1) {
               self$results$bootstrapTable$setNote(key = "bootstrap_debug", note = "No bootstrap results found. Check that bootstrap analysis completed successfully.")
             }
-            
+
           }, error = function(e) {
             # Error handling - show structure info
             self$results$bootstrapTable$setNote(key = "bootstrap_error", note = paste("Bootstrap table error:", e$message))

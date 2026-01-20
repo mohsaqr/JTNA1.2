@@ -56,6 +56,9 @@ GroupCoOccurrenceTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             bootstrap_range_up = 1.25,
             bootstrap_threshold = 0.1,
             bootstrap_show_table = FALSE,
+            bootstrap_table_max_rows = 20,
+            bootstrap_table_show_all = FALSE,
+            bootstrap_table_significant_only = FALSE,
             bootstrap_show_plot = FALSE,
             bootstrap_plot_cut = 0,
             bootstrap_plot_min_value = 0.05,
@@ -351,6 +354,20 @@ GroupCoOccurrenceTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 "bootstrap_show_table",
                 bootstrap_show_table,
                 default=FALSE)
+            private$..bootstrap_table_max_rows <- jmvcore::OptionInteger$new(
+                "bootstrap_table_max_rows",
+                bootstrap_table_max_rows,
+                default=20,
+                min=1,
+                max=1000)
+            private$..bootstrap_table_show_all <- jmvcore::OptionBool$new(
+                "bootstrap_table_show_all",
+                bootstrap_table_show_all,
+                default=FALSE)
+            private$..bootstrap_table_significant_only <- jmvcore::OptionBool$new(
+                "bootstrap_table_significant_only",
+                bootstrap_table_significant_only,
+                default=FALSE)
             private$..bootstrap_show_plot <- jmvcore::OptionBool$new(
                 "bootstrap_show_plot",
                 bootstrap_show_plot,
@@ -477,6 +494,9 @@ GroupCoOccurrenceTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             self$.addOption(private$..bootstrap_range_up)
             self$.addOption(private$..bootstrap_threshold)
             self$.addOption(private$..bootstrap_show_table)
+            self$.addOption(private$..bootstrap_table_max_rows)
+            self$.addOption(private$..bootstrap_table_show_all)
+            self$.addOption(private$..bootstrap_table_significant_only)
             self$.addOption(private$..bootstrap_show_plot)
             self$.addOption(private$..bootstrap_plot_cut)
             self$.addOption(private$..bootstrap_plot_min_value)
@@ -541,6 +561,9 @@ GroupCoOccurrenceTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
         bootstrap_range_up = function() private$..bootstrap_range_up$value,
         bootstrap_threshold = function() private$..bootstrap_threshold$value,
         bootstrap_show_table = function() private$..bootstrap_show_table$value,
+        bootstrap_table_max_rows = function() private$..bootstrap_table_max_rows$value,
+        bootstrap_table_show_all = function() private$..bootstrap_table_show_all$value,
+        bootstrap_table_significant_only = function() private$..bootstrap_table_significant_only$value,
         bootstrap_show_plot = function() private$..bootstrap_show_plot$value,
         bootstrap_plot_cut = function() private$..bootstrap_plot_cut$value,
         bootstrap_plot_min_value = function() private$..bootstrap_plot_min_value$value,
@@ -604,6 +627,9 @@ GroupCoOccurrenceTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
         ..bootstrap_range_up = NA,
         ..bootstrap_threshold = NA,
         ..bootstrap_show_table = NA,
+        ..bootstrap_table_max_rows = NA,
+        ..bootstrap_table_show_all = NA,
+        ..bootstrap_table_significant_only = NA,
         ..bootstrap_show_plot = NA,
         ..bootstrap_plot_cut = NA,
         ..bootstrap_plot_min_value = NA,
@@ -654,7 +680,9 @@ GroupCoOccurrenceTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 name="",
                 title="Group Co-occurrence Network Analysis",
                 refs=list(
-                    "TNA"))
+                    "JTNA",
+                    "TNA",
+                    "TNALAK"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="errorText",
@@ -1106,7 +1134,7 @@ GroupCoOccurrenceTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             super$initialize(
                 package = "JTNA",
                 name = "GroupCoOccurrenceTNA",
-                version = c(1,4,0),
+                version = c(1,9,0),
                 options = options,
                 results = GroupCoOccurrenceTNAResults$new(options=options),
                 data = data,
@@ -1173,6 +1201,9 @@ GroupCoOccurrenceTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' @param bootstrap_range_up .
 #' @param bootstrap_threshold .
 #' @param bootstrap_show_table .
+#' @param bootstrap_table_max_rows .
+#' @param bootstrap_table_show_all .
+#' @param bootstrap_table_significant_only .
 #' @param bootstrap_show_plot .
 #' @param bootstrap_plot_cut .
 #' @param bootstrap_plot_min_value .
@@ -1277,6 +1308,9 @@ GroupCoOccurrenceTNA <- function(
     bootstrap_range_up = 1.25,
     bootstrap_threshold = 0.1,
     bootstrap_show_table = FALSE,
+    bootstrap_table_max_rows = 20,
+    bootstrap_table_show_all = FALSE,
+    bootstrap_table_significant_only = FALSE,
     bootstrap_show_plot = FALSE,
     bootstrap_plot_cut = 0,
     bootstrap_plot_min_value = 0.05,
@@ -1359,6 +1393,9 @@ GroupCoOccurrenceTNA <- function(
         bootstrap_range_up = bootstrap_range_up,
         bootstrap_threshold = bootstrap_threshold,
         bootstrap_show_table = bootstrap_show_table,
+        bootstrap_table_max_rows = bootstrap_table_max_rows,
+        bootstrap_table_show_all = bootstrap_table_show_all,
+        bootstrap_table_significant_only = bootstrap_table_significant_only,
         bootstrap_show_plot = bootstrap_show_plot,
         bootstrap_plot_cut = bootstrap_plot_cut,
         bootstrap_plot_min_value = bootstrap_plot_min_value,

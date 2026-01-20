@@ -332,6 +332,9 @@ GroupCoOccurrenceTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
 
         if(!is.null(bs) && isTRUE(self$options$bootstrap_show_table)) {
           row_key_counter <- 1
+          max_rows <- self$options$bootstrap_table_max_rows
+          show_all <- isTRUE(self$options$bootstrap_table_show_all)
+          significant_only <- isTRUE(self$options$bootstrap_table_significant_only)
 
           tryCatch({
             for (group_name in names(bs)) {
@@ -343,7 +346,17 @@ GroupCoOccurrenceTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                 if (is.data.frame(summary_data) && !is.null(summary_data) && !is.na(nrow(summary_data)) && nrow(summary_data) > 0) {
                   sorted_summary <- summary_data[order(-summary_data$sig, summary_data$p_value), ]
 
+                  # Filter for significant only if requested
+                  if (significant_only) {
+                    sorted_summary <- sorted_summary[sorted_summary$sig == TRUE, ]
+                  }
+
+                  if (nrow(sorted_summary) == 0) next
+
                   for (i in 1:nrow(sorted_summary)) {
+                    # Check row limit unless show_all is enabled
+                    if (!show_all && row_key_counter > max_rows) break
+
                     rowValues <- list(
                       group = group_name,
                       from = as.character(sorted_summary[i, "from"]),
@@ -359,6 +372,9 @@ GroupCoOccurrenceTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                     self$results$bootstrapTable$addRow(rowKey=as.character(row_key_counter), values=rowValues)
                     row_key_counter <- row_key_counter + 1
                   }
+
+                  # Break outer loop if row limit reached
+                  if (!show_all && row_key_counter > max_rows) break
                 }
               }
             }

@@ -59,6 +59,9 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bootstrap_threshold = 0.1,
             bootstrap_show_plot = FALSE,
             bootstrap_show_table = FALSE,
+            bootstrap_table_max_rows = 20,
+            bootstrap_table_show_all = FALSE,
+            bootstrap_table_significant_only = FALSE,
             bootstrap_plot_cut = 0.1,
             bootstrap_plot_min_value = 0.05,
             bootstrap_plot_edge_label_size = 1,
@@ -371,6 +374,20 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "bootstrap_show_table",
                 bootstrap_show_table,
                 default=FALSE)
+            private$..bootstrap_table_max_rows <- jmvcore::OptionInteger$new(
+                "bootstrap_table_max_rows",
+                bootstrap_table_max_rows,
+                default=20,
+                min=1,
+                max=1000)
+            private$..bootstrap_table_show_all <- jmvcore::OptionBool$new(
+                "bootstrap_table_show_all",
+                bootstrap_table_show_all,
+                default=FALSE)
+            private$..bootstrap_table_significant_only <- jmvcore::OptionBool$new(
+                "bootstrap_table_significant_only",
+                bootstrap_table_significant_only,
+                default=FALSE)
             private$..bootstrap_plot_cut <- jmvcore::OptionNumber$new(
                 "bootstrap_plot_cut",
                 bootstrap_plot_cut,
@@ -498,6 +515,9 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..bootstrap_threshold)
             self$.addOption(private$..bootstrap_show_plot)
             self$.addOption(private$..bootstrap_show_table)
+            self$.addOption(private$..bootstrap_table_max_rows)
+            self$.addOption(private$..bootstrap_table_show_all)
+            self$.addOption(private$..bootstrap_table_significant_only)
             self$.addOption(private$..bootstrap_plot_cut)
             self$.addOption(private$..bootstrap_plot_min_value)
             self$.addOption(private$..bootstrap_plot_edge_label_size)
@@ -564,6 +584,9 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         bootstrap_threshold = function() private$..bootstrap_threshold$value,
         bootstrap_show_plot = function() private$..bootstrap_show_plot$value,
         bootstrap_show_table = function() private$..bootstrap_show_table$value,
+        bootstrap_table_max_rows = function() private$..bootstrap_table_max_rows$value,
+        bootstrap_table_show_all = function() private$..bootstrap_table_show_all$value,
+        bootstrap_table_significant_only = function() private$..bootstrap_table_significant_only$value,
         bootstrap_plot_cut = function() private$..bootstrap_plot_cut$value,
         bootstrap_plot_min_value = function() private$..bootstrap_plot_min_value$value,
         bootstrap_plot_edge_label_size = function() private$..bootstrap_plot_edge_label_size$value,
@@ -629,6 +652,9 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..bootstrap_threshold = NA,
         ..bootstrap_show_plot = NA,
         ..bootstrap_show_table = NA,
+        ..bootstrap_table_max_rows = NA,
+        ..bootstrap_table_show_all = NA,
+        ..bootstrap_table_significant_only = NA,
         ..bootstrap_plot_cut = NA,
         ..bootstrap_plot_min_value = NA,
         ..bootstrap_plot_edge_label_size = NA,
@@ -680,7 +706,9 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="One-Hot Co-occurrence Network Analysis",
                 refs=list(
-                    "TNA"))
+                    "JTNA",
+                    "TNA",
+                    "TNALAK"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="errorText",
@@ -1105,7 +1133,7 @@ OneHotTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "JTNA",
                 name = "OneHotTNA",
-                version = c(1,4,0),
+                version = c(1,9,0),
                 options = options,
                 results = OneHotTNAResults$new(options=options),
                 data = data,
@@ -1175,6 +1203,9 @@ OneHotTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param bootstrap_threshold .
 #' @param bootstrap_show_plot .
 #' @param bootstrap_show_table .
+#' @param bootstrap_table_max_rows .
+#' @param bootstrap_table_show_all .
+#' @param bootstrap_table_significant_only .
 #' @param bootstrap_plot_cut .
 #' @param bootstrap_plot_min_value .
 #' @param bootstrap_plot_edge_label_size .
@@ -1278,6 +1309,9 @@ OneHotTNA <- function(
     bootstrap_threshold = 0.1,
     bootstrap_show_plot = FALSE,
     bootstrap_show_table = FALSE,
+    bootstrap_table_max_rows = 20,
+    bootstrap_table_show_all = FALSE,
+    bootstrap_table_significant_only = FALSE,
     bootstrap_plot_cut = 0.1,
     bootstrap_plot_min_value = 0.05,
     bootstrap_plot_edge_label_size = 1,
@@ -1360,6 +1394,9 @@ OneHotTNA <- function(
         bootstrap_threshold = bootstrap_threshold,
         bootstrap_show_plot = bootstrap_show_plot,
         bootstrap_show_table = bootstrap_show_table,
+        bootstrap_table_max_rows = bootstrap_table_max_rows,
+        bootstrap_table_show_all = bootstrap_table_show_all,
+        bootstrap_table_significant_only = bootstrap_table_significant_only,
         bootstrap_plot_cut = bootstrap_plot_cut,
         bootstrap_plot_min_value = bootstrap_plot_min_value,
         bootstrap_plot_edge_label_size = bootstrap_plot_edge_label_size,

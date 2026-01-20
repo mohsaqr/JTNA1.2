@@ -1,8 +1,8 @@
 ---
 name:  GroupTNA
-title: Group TNA
+title: Group Transition Network Analysis
 menuGroup: JTNA
-version: '1.4.0'
+version: '1.9.0'
 jas: '1.2'
 
 options:
@@ -413,7 +413,24 @@ options:
       title: Bootstrap Results Table
       type: Bool
       default: False
-    
+
+    - name: bootstrap_table_max_rows
+      title: Max rows
+      type: Integer
+      default: 20
+      min: 1
+      max: 1000
+
+    - name: bootstrap_table_show_all
+      title: Show all rows
+      type: Bool
+      default: False
+
+    - name: bootstrap_table_significant_only
+      title: Significant only
+      type: Bool
+      default: False
+
     - name: bootstrap_show_plot
       title: Plot
       type: Bool

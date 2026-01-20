@@ -3,7 +3,9 @@ name:  CoOccurrenceTNA
 title: Co-occurrence Network Analysis
 jrs:   '1.1'
 refs:
+  - JTNA
   - TNA
+  - TNALAK
 items:
 
     - name: errorText

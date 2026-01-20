@@ -359,6 +359,19 @@ CoOccurrenceTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                         # Sort by significance (TRUE/significant first, then FALSE/non-significant)
                         all_edges <- all_edges[order(-all_edges$sig), ]
 
+                        # Filter for significant only if requested
+                        if (isTRUE(self$options$bootstrap_table_significant_only)) {
+                            all_edges <- all_edges[all_edges$sig == TRUE, ]
+                        }
+
+                        # Limit rows unless show all is enabled
+                        if (!isTRUE(self$options$bootstrap_table_show_all)) {
+                            max_rows <- self$options$bootstrap_table_max_rows
+                            if (nrow(all_edges) > max_rows) {
+                                all_edges <- all_edges[1:max_rows, ]
+                            }
+                        }
+
                         for (i in 1:nrow(all_edges)) {
                             self$results$bootstrapTable$addRow(rowKey=i, values=list(
                                 from=as.character(all_edges[i, "from"]),
