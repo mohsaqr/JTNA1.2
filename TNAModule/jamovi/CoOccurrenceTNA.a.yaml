@@ -1,6 +1,6 @@
 ---
-name:  GroupTNA
-title: Group TNA
+name:  CoOccurrenceTNA
+title: Co-occurrence Network Analysis
 menuGroup: JTNA
 version: '1.4.0'
 jas: '1.2'
@@ -13,7 +13,7 @@ options:
       title: Action
       type: Variable
     - name: buildModel_variables_long_actor
-      title: Actor
+      title: Actor (Optional)
       type: Variable
     - name: buildModel_variables_long_time
       title: Time (Optional)
@@ -21,33 +21,11 @@ options:
     - name: buildModel_variables_long_order
       title: Order (Optional)
       type: Variable
-    - name: buildModel_variables_long_group
-      title: Group
-      type: Variable
 
     ### BUILD MODEL DATA
 
-    - name: buildModel_type
-      title: Type
-      type: List
-      options:
-        - title: Relative
-          name:  relative
-        - title: Frequency
-          name:  frequency
-        - title: Attention
-          name:  attention
-      default: relative
-
-    - name: buildModel_lambda
-      title: Lambda (decay rate)
-      type: Number
-      default: 1
-      min: 0.01
-      max: 10
-
     - name: buildModel_scaling
-      title: Scaling 
+      title: Scaling
       type: List
       options:
         - title: No scaling
@@ -70,7 +48,7 @@ options:
       title: Threshold
       type: Integer
       default: 900
-    
+
     - name: buildModel_show_plot
       title: Plot
       type: Bool
@@ -79,7 +57,7 @@ options:
     - name: buildModel_plot_cut
       title: Cut value
       type: Number
-      default: 0
+      default: 0.1
       min: 0
       max: 1
 
@@ -143,7 +121,7 @@ options:
           name: layout_with_sugiyama
         - title: Random
           name: layout_randomly
-    
+
     - name: buildModel_show_histo
       title: Histogram
       type: Bool
@@ -152,16 +130,6 @@ options:
       title: Frequencies plot
       type: Bool
       default: False
-    - name: buildModel_show_mosaic
-      title: Mosaic
-      type: Bool
-      default: False
-
-    - name: buildModel_digits
-      title: Digits
-      type: Integer
-      default: 1
-
 
     ### CENTRALITY DATA
 
@@ -251,7 +219,7 @@ options:
         title: Edge betweenness
       - name: leading_eigen
         title: Leading eigen
-      
+
 
     - name: community_gamma
       title: Gamma
@@ -259,6 +227,12 @@ options:
       default: 1
       min: 0
       max: 100
+
+    - name: community_show_table
+      title: Table
+      type: Bool
+      default: False
+
     - name: community_show_plot
       title: Plot
       type: Bool
@@ -295,7 +269,7 @@ options:
     - name: cliques_plot_cut
       title: Cut value
       type: Number
-      default: 0
+      default: 0.1
       min: 0
       max: 1
 
@@ -360,7 +334,7 @@ options:
           name: layout_with_sugiyama
         - title: Random
           name: layout_randomly
-    
+
     ### BOOTSTRAP
 
     - name: bootstrap_iteration
@@ -386,21 +360,21 @@ options:
           name: stability
         - title: Threshold
           name: threshold
-      
+
     - name: bootstrap_range_low
       title: Lower
       type: Number
       default: 0.75
       min: 0
       max: 10
-    
+
     - name: bootstrap_range_up
       title: Upper
       type: Number
       default: 1.25
       min: 0
       max: 10
-    
+
     - name: bootstrap_threshold
       title: Threshold
       type: Number
@@ -409,20 +383,20 @@ options:
       max: 1
 
     ##### PLOT
-    - name: bootstrap_show_table
-      title: Bootstrap Results Table
-      type: Bool
-      default: False
-    
     - name: bootstrap_show_plot
       title: Plot
+      type: Bool
+      default: False
+
+    - name: bootstrap_show_table
+      title: Table
       type: Bool
       default: False
 
     - name: bootstrap_plot_cut
       title: Cut value
       type: Number
-      default: 0
+      default: 0.1
       min: 0
       max: 1
 
@@ -486,140 +460,5 @@ options:
           name: layout_with_sugiyama
         - title: Random
           name: layout_randomly
-
-
-
-
-    ### Permutation
-
-    - name: permutation_show_text
-      title: Text
-      type: Bool
-      default: False
-    
-    - name: permutation_show_plot
-      title: Plot
-      type: Bool
-      default: False
-
-    - name: permutation_iter
-      title: Iter
-      type: Integer
-      default: 1000
-      min: 1
-    
-    - name: permutation_paired
-      title: Paired
-      type: Bool
-      default: False
-    
-    - name: permutation_level
-      title: Level
-      type: Number
-      default: 0.05
-      min: 0
-      max: 1
-
-    ### SEQUENCE ANALYSIS
-
-    - name: sequences_type
-      title: Type
-      type: List
-      default: index
-      options:
-        - title: Index
-          name: index
-        - title: Distribution
-          name: distribution
-
-    - name: sequences_scale
-      title: Scale
-      type: List
-      default: proportion
-      options:
-        - title: Proportion
-          name: proportion
-        - title: Count
-          name: count
-
-    - name: sequences_geom
-      title: Geometry
-      type: List
-      default: bar
-      options:
-        - title: Bar
-          name: bar
-        - title: Area
-          name: area
-
-    - name: sequences_include_na
-      title: Include missing values
-      type: Bool
-      default: true
-
-
-
-    - name: sequences_tick
-      title: Tick
-      type: Integer
-      default: 5
-      min: 1
-      max: 20
-
-    - name: sequences_show_plot
-      title: Sequence Plot
-      type: Bool
-      default: false
-
-    ### COMPARE SEQUENCES
-
-    - name: compare_sequences_show_table
-      title: Table
-      type: Bool
-      default: false
-
-    - name: compare_sequences_show_plot
-      title: Plot
-      type: Bool
-      default: false
-
-    - name: compare_sequences_sub_min
-      title: Min Subsequence Length
-      type: Integer
-      default: 2
-      min: 2
-      max: 10
-
-    - name: compare_sequences_sub_max
-      title: Max Subsequence Length
-      type: Integer
-      default: 4
-      min: 2
-      max: 10
-
-    - name: compare_sequences_min_freq
-      title: Minimum Frequency
-      type: Integer
-      default: 20
-      min: 1
-      max: 100
-
-    - name: compare_sequences_correction
-      title: Correction Method
-      type: List
-      default: bonferroni
-      options:
-        - title: Bonferroni
-          name: bonferroni
-        - title: Holm
-          name: holm
-        - title: Hochberg
-          name: hochberg
-        - title: BH (FDR)
-          name: BH
-        - title: BY
-          name: BY
-        - title: None
-          name: none
 
 ...

@@ -1,6 +1,6 @@
 ---
-name:  TNA
-title: Transition Network Analysis
+name:  CoOccurrenceTNA
+title: Co-occurrence Network Analysis
 jrs:   '1.1'
 refs:
   - TNA
@@ -11,7 +11,7 @@ items:
       type: Preformatted
       visible: False
     - name:  tnaTitle
-      title: TNA
+      title: Co-occurrence Network Analysis
       type:  Preformatted
       visible: True
     ### BUILD MODEL
@@ -28,8 +28,6 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-
-        - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
 
@@ -44,11 +42,8 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-
-        - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
         - buildModel_plot_cut
         - buildModel_plot_min_value
         - buildModel_plot_edge_label_size
@@ -62,55 +57,34 @@ items:
       height: 600
       visible: False
       renderFun: .showBuildModelHisto
-      clearWith: 
+      clearWith:
         - buildModel_variables_long_actor
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-
-        - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+
     - name: buildModel_frequencies
       type: Image
       width: 600
       height: 600
       visible: False
       renderFun: .showBuildModelFrequencies
-      clearWith: 
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-    - name: buildModel_mosaic
-      type: Image
-      width: 400
-      height: 300
-      visible: False
-      renderFun: .showBuildModelMosaic
       clearWith:
         - buildModel_variables_long_actor
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-
-        - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
-        - buildModel_digits
-
 
     ### CENTRALITY
     - name:  centralityTitle
       title: Centrality
       type:  Preformatted
       visible: False
-    
+
     - name:  centralityContent
       type:  Preformatted
       visible: False
@@ -119,10 +93,8 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
         - centrality_loops
         - centrality_normalize
         - centrality_Betweenness
@@ -148,10 +120,8 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
         - centrality_loops
         - centrality_normalize
         - centrality_Betweenness
@@ -163,6 +133,7 @@ items:
         - centrality_Diffusion
         - centrality_InStrength
         - centrality_OutStrength
+
     - name: centrality_plot
       type: Image
       width: 600
@@ -174,10 +145,8 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
         - centrality_loops
         - centrality_normalize
         - centrality_Betweenness
@@ -190,76 +159,11 @@ items:
         - centrality_InStrength
         - centrality_OutStrength
 
-    ### Edge betweenness
-
-    - name:  edgeBetweennessTitle
-      type:  Preformatted
-      title: Edge betweenness
-      visible: False
-    
-    - name: edgeBetweenness_plot
-      type: Image
-      width: 600
-      height: 600
-      visible: False
-      renderFun: .showEdgeBetweennessPlot
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-
-        - edgeBetweenness_plot_cut
-        - edgeBetweenness_plot_min_value
-        - edgeBetweenness_plot_edge_label_size
-        - edgeBetweenness_plot_node_size
-        - edgeBetweenness_plot_node_label_size
-        - edgeBetweenness_plot_layout
-
-    - name: edgeBetweennessTable
-      type: Table
-      title: Edge Betweenness
-      visible: (edgeBetweenness_show_table)
-      columns:
-        - name: from
-          title: From
-          type: text
-        - name: to
-          title: To
-          type: text
-        - name: value
-          title: Value
-          type: number
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-
-    - name: edgeBetweennessNoResultsNote
-      type: Preformatted
-      visible: false
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-
     ### COMMUNITY
     - name:  communityTitle
       type:  Preformatted
       title: Community
       visible: False
-      
 
     - name:  communityContent
       type:  Preformatted
@@ -269,13 +173,11 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
         - community_methods
         - community_gamma
-    
+
     - name: community_plot
       type: Image
       width: 600
@@ -287,10 +189,8 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
         - community_methods
         - community_gamma
 
@@ -307,12 +207,14 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
         - community_methods
         - community_gamma
+
+    - name: communityErrorText
+      type: Preformatted
+      visible: False
 
     ### CLIQUE
 
@@ -320,7 +222,7 @@ items:
       type:  Preformatted
       title: Cliques
       visible: False
-      
+
 
     - name:  cliquesContent
       type:  Preformatted
@@ -330,10 +232,8 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
         - cliques_size
         - cliques_threshold
 
@@ -346,13 +246,10 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
         - cliques_size
         - cliques_threshold
-
         - cliques_plot_min_value
         - cliques_plot_edge_label_size
         - cliques_plot_node_size
@@ -395,7 +292,7 @@ items:
         height: 600
         visible: True
         renderFun: .showCliquesPlot6
-    
+
     ### Bootstrap
 
     - name:  bootstrapTitle
@@ -403,8 +300,6 @@ items:
       title: Bootstrap
       visible: False
 
-
-    
     - name: bootstrap_plot
       type: Image
       width: 600
@@ -416,17 +311,14 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
         - bootstrap_iteration
         - bootstrap_level
         - bootstrap_method
         - bootstrap_range_low
         - bootstrap_range_up
         - bootstrap_threshold
-
         - bootstrap_plot_cut
         - bootstrap_plot_min_value
         - bootstrap_plot_edge_label_size
@@ -471,7 +363,6 @@ items:
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
-        - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
         - bootstrap_iteration
@@ -480,37 +371,5 @@ items:
         - bootstrap_range_low
         - bootstrap_range_up
         - bootstrap_threshold
-
-    - name: permutationTable
-      type: Table
-      title: Permutation Test Results
-      visible: False
-      columns:
-        - name: group_comparison
-          title: Comparison
-          type: text
-        - name: edge_name
-          title: Edge
-          type: text
-        - name: diff_true
-          title: Diff (True)
-          type: number
-        - name: effect_size
-          title: Effect Size
-          type: number
-        - name: p_value
-          title: p-value
-          type: number
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - permutation_iter
-        - permutation_paired
-        - permutation_level
 
 ...

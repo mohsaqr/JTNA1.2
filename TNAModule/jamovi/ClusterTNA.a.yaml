@@ -9,14 +9,14 @@ options:
     - name: data
       type: Data
 
+    - name: buildModel_variables_long_action
+      title: Action
+      type: Variable
     - name: buildModel_variables_long_actor
       title: Actor
       type: Variable
     - name: buildModel_variables_long_time
       title: Time (Optional)
-      type: Variable
-    - name: buildModel_variables_long_action
-      title: Action
       type: Variable
     - name: buildModel_variables_long_order
       title: Order (Optional)

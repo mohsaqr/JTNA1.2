@@ -10,12 +10,6 @@ children:
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
-            name: buildModel_variables_long_time
-            isTarget: true
-            maxItemCount: 1
-      - type: TargetLayoutBox
-        children:
-          - type: VariablesListBox
             name: buildModel_variables_long_action
             isTarget: true
             maxItemCount: 1
@@ -25,6 +19,12 @@ children:
             name: buildModel_variables_long_actor
             maxItemCount: 1
             isTarget: true
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: buildModel_variables_long_time
+            isTarget: true
+            maxItemCount: 1
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
@@ -55,10 +55,6 @@ children:
                 name: buildModel_type_frequency
                 optionName: buildModel_type
                 optionPart: frequency
-              - type: RadioButton
-                name: buildModel_type_co_occurrence
-                optionName: buildModel_type
-                optionPart: co-occurrence
               - type: RadioButton
                 name: buildModel_type_attention
                 optionName: buildModel_type

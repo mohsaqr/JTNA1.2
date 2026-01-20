@@ -1,6 +1,7 @@
-title: Cluster TNA
-name: ClusterTNA
+title: Co-occurrence Network Analysis
+name: CoOccurrenceTNA
 jus: '3.0'
+stage: 0
 compilerMode: tame
 children:
   - type: VariableSupplier
@@ -31,28 +32,6 @@ children:
             name: buildModel_variables_long_order
             maxItemCount: 1
             isTarget: true
-  - type: CollapseBox
-    label: Clustering Parameters
-    margin: large
-    collapsed: false
-    stretchFactor: 1
-    style: inline
-    children:
-      - type: LayoutBox
-        stretchFactor: 1
-        children:
-          - type: Label
-            label: Run Analysis
-            children:
-              - type: CheckBox
-                name: clustering_run
-                label: Run Clustering Analysis
-          - type: Label
-            label: Cluster Settings
-            children:
-              - type: TextBox
-                name: clustering_k
-                format: number
   - type: LayoutBox
     stretchFactor: 1
     style: inline
@@ -61,34 +40,11 @@ children:
         stretchFactor: 1
         children:
           - type: Label
-            label: Type
-            children:
-              - type: RadioButton
-                name: buildModel_type_relative
-                optionName: buildModel_type
-                optionPart: relative
-              - type: RadioButton
-                name: buildModel_type_frequency
-                optionName: buildModel_type
-                optionPart: frequency
-              - type: RadioButton
-                name: buildModel_type_co_occurrence
-                optionName: buildModel_type
-                optionPart: co-occurrence
-              - type: RadioButton
-                name: buildModel_type_attention
-                optionName: buildModel_type
-                optionPart: attention
-          - type: Label
             label: Basic Options
             children:
               - type: CheckBox
                 name: buildModel_show_matrix
                 label: Matrix
-              - type: TextBox
-                name: buildModel_lambda
-                format: number
-                enable: (buildModel_type_attention)
       - type: LayoutBox
         stretchFactor: 1
         children:
@@ -132,16 +88,13 @@ children:
             children:
               - type: CheckBox
                 name: buildModel_show_plot
-                label: TNA plot
+                label: Network plot
               - type: CheckBox
                 name: buildModel_show_histo
                 label: Histogram
               - type: CheckBox
                 name: buildModel_show_frequencies
                 label: Frequencies plot
-              - type: CheckBox
-                name: buildModel_show_mosaic
-                label: Mosaic plot
       - type: LayoutBox
         stretchFactor: 1
         children:
@@ -171,10 +124,6 @@ children:
               - type: ComboBox
                 name: buildModel_plot_layout
                 enable: (buildModel_show_plot)
-              - type: TextBox
-                name: buildModel_digits
-                format: number
-                enable: (buildModel_show_mosaic)
   - type: CollapseBox
     label: Centrality Analysis
     margin: large
@@ -252,6 +201,9 @@ children:
           - type: Label
             label: Display Options
             children:
+              - type: CheckBox
+                name: community_show_table
+                label: Table
               - type: CheckBox
                 name: community_show_plot
                 label: Plot
@@ -366,11 +318,11 @@ children:
             label: Display Options
             children:
               - type: CheckBox
-                name: bootstrap_show_table
-                label: Bootstrap Results Table
-              - type: CheckBox
                 name: bootstrap_show_plot
                 label: Plot
+              - type: CheckBox
+                name: bootstrap_show_table
+                label: Table
       - type: LayoutBox
         stretchFactor: 1
         children:
@@ -435,139 +387,3 @@ children:
               - type: ComboBox
                 name: bootstrap_plot_layout
                 enable: (bootstrap_show_plot)
-
-  - type: CollapseBox
-    label: Permutation Analysis
-    margin: large
-    stretchFactor: 1
-    style: inline
-    collapsed: true
-    children:
-      - type: LayoutBox
-        stretchFactor: 1
-        children:
-          - type: Label
-            label: Display Options
-            children:
-              - type: CheckBox
-                name: permutation_show_text
-                label: Table
-              - type: CheckBox
-                name: permutation_show_plot
-                label: Plot
-      - type: LayoutBox
-        stretchFactor: 1
-        children:
-          - type: Label
-            label: Parameters
-            children:
-              - type: TextBox
-                name: permutation_iter
-                format: number
-              - type: TextBox
-                name: permutation_level
-                format: number
-              - type: CheckBox
-                name: permutation_paired
-                label: Paired test
-  - type: CollapseBox
-    label: Sequence Analysis
-    margin: large
-    stretchFactor: 1
-    style: inline
-    collapsed: true
-    children:
-      - type: LayoutBox
-        stretchFactor: 1
-        children:
-          - type: Label
-            label: Display Options
-            children:
-              - type: CheckBox
-                name: sequences_show_plot
-                label: Sequence plot
-      - type: LayoutBox
-        stretchFactor: 1
-        children:
-          - type: Label
-            label: Plot Type
-            children:
-              - type: RadioButton
-                name: sequences_type_index
-                optionName: sequences_type
-                optionPart: index
-              - type: RadioButton
-                name: sequences_type_distribution
-                optionName: sequences_type
-                optionPart: distribution
-          - type: Label
-            label: Scale
-            children:
-              - type: RadioButton
-                name: sequences_scale_proportion
-                optionName: sequences_scale
-                optionPart: proportion
-              - type: RadioButton
-                name: sequences_scale_count
-                optionName: sequences_scale
-                optionPart: count
-      - type: LayoutBox
-        stretchFactor: 1
-        children:
-          - type: Label
-            label: Geometry
-            children:
-              - type: RadioButton
-                name: sequences_geom_bar
-                optionName: sequences_geom
-                optionPart: bar
-              - type: RadioButton
-                name: sequences_geom_area
-                optionName: sequences_geom
-                optionPart: area
-          - type: Label
-            label: Options
-            children:
-              - type: CheckBox
-                name: sequences_include_na
-                label: Include missing values
-              - type: TextBox
-                name: sequences_tick
-                format: number
-                label: Tick Interval
-  - type: CollapseBox
-    label: Compare Sequences
-    margin: large
-    stretchFactor: 1
-    style: inline
-    collapsed: true
-    children:
-      - type: LayoutBox
-        stretchFactor: 1
-        children:
-          - type: Label
-            label: Display Options
-            children:
-              - type: CheckBox
-                name: compare_sequences_show_table
-                label: Table
-              - type: CheckBox
-                name: compare_sequences_show_plot
-                label: Plot
-      - type: LayoutBox
-        stretchFactor: 1
-        children:
-          - type: Label
-            label: Parameters
-            children:
-              - type: TextBox
-                name: compare_sequences_sub_min
-                format: number
-              - type: TextBox
-                name: compare_sequences_sub_max
-                format: number
-              - type: TextBox
-                name: compare_sequences_min_freq
-                format: number
-              - type: ComboBox
-                name: compare_sequences_correction

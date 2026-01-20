@@ -459,7 +459,6 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         self$results$bootstrap_plot$setVisible(self$options$bootstrap_show_plot)
         self$results$bootstrapTable$setVisible(self$options$bootstrap_show_table)
         self$results$bootstrapTitle$setVisible(isTRUE(self$options$bootstrap_show_plot) || isTRUE(self$options$bootstrap_show_table))
-
       }
 
 

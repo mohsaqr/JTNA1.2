@@ -11,12 +11,6 @@ children:
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
-            name: buildModel_variables_long_time
-            isTarget: true
-            maxItemCount: 1
-      - type: TargetLayoutBox
-        children:
-          - type: VariablesListBox
             name: buildModel_variables_long_action
             isTarget: true
             maxItemCount: 1
@@ -26,6 +20,12 @@ children:
             name: buildModel_variables_long_actor
             maxItemCount: 1
             isTarget: true
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: buildModel_variables_long_time
+            isTarget: true
+            maxItemCount: 1
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
@@ -50,10 +50,6 @@ children:
                 name: buildModel_type_frequency
                 optionName: buildModel_type
                 optionPart: frequency
-              - type: RadioButton
-                name: buildModel_type_co_occurrence
-                optionName: buildModel_type
-                optionPart: co-occurrence
               - type: RadioButton
                 name: buildModel_type_attention
                 optionName: buildModel_type
@@ -466,71 +462,3 @@ children:
               - type: ComboBox
                 name: bootstrap_plot_layout
                 enable: (bootstrap_show_plot)
-  - type: CollapseBox
-    label: Sequence Analysis
-    margin: large
-    stretchFactor: 1
-    style: inline
-    collapsed: true
-    children:
-      - type: LayoutBox
-        stretchFactor: 1
-        children:
-          - type: Label
-            label: Display Options
-            children:
-              - type: CheckBox
-                name: sequences_show_plot
-                label: Sequence plot
-      - type: LayoutBox
-        stretchFactor: 1
-        children:
-          - type: Label
-            label: Plot Type
-            children:
-              - type: RadioButton
-                name: sequences_type_index
-                optionName: sequences_type
-                optionPart: index
-              - type: RadioButton
-                name: sequences_type_distribution
-                optionName: sequences_type
-                optionPart: distribution
-      - type: LayoutBox
-        stretchFactor: 1
-        children:
-          - type: Label
-            label: Scale
-            children:
-              - type: RadioButton
-                name: sequences_scale_proportion
-                optionName: sequences_scale
-                optionPart: proportion
-              - type: RadioButton
-                name: sequences_scale_count
-                optionName: sequences_scale
-                optionPart: count
-      - type: LayoutBox
-        stretchFactor: 1
-        children:
-          - type: Label
-            label: Geometry
-            children:
-              - type: RadioButton
-                name: sequences_geom_bar
-                optionName: sequences_geom
-                optionPart: bar
-              - type: RadioButton
-                name: sequences_geom_area
-                optionName: sequences_geom
-                optionPart: area
-          - type: Label
-            label: Options
-            children:
-              - type: CheckBox
-                name: sequences_include_na
-                label: Include missing values
-              - type: TextBox
-                name: sequences_tick
-                format: number
-                label: Tick Interval

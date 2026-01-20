@@ -9,14 +9,14 @@ options:
     - name: data
       type: Data
 
+    - name: buildModel_variables_long_action
+      title: Action
+      type: Variable
     - name: buildModel_variables_long_actor
       title: Actor (Optional)
       type: Variable
     - name: buildModel_variables_long_time
       title: Time (Optional)
-      type: Variable
-    - name: buildModel_variables_long_action
-      title: Action
       type: Variable
     - name: buildModel_variables_long_order
       title: Order (Optional)
@@ -32,8 +32,6 @@ options:
           name:  relative
         - title: Frequency
           name:  frequency
-        - title: Co-occurrence
-          name:  co-occurrence
         - title: Attention
           name:  attention
       default: relative
@@ -571,56 +569,5 @@ options:
           name: layout_with_sugiyama
         - title: Random
           name: layout_randomly
-
-    ### SEQUENCE ANALYSIS
-
-    - name: sequences_type
-      title: Type
-      type: List
-      default: index
-      options:
-        - title: Index
-          name: index
-        - title: Distribution
-          name: distribution
-
-    - name: sequences_scale
-      title: Scale
-      type: List
-      default: proportion
-      options:
-        - title: Proportion
-          name: proportion
-        - title: Count
-          name: count
-
-    - name: sequences_geom
-      title: Geometry
-      type: List
-      default: bar
-      options:
-        - title: Bar
-          name: bar
-        - title: Area
-          name: area
-
-    - name: sequences_include_na
-      title: Include missing values
-      type: Bool
-      default: true
-
-
-
-    - name: sequences_tick
-      title: Tick
-      type: Integer
-      default: 5
-      min: 1
-      max: 20
-
-    - name: sequences_show_plot
-      title: Sequence Plot
-      type: Bool
-      default: false
 
 ...

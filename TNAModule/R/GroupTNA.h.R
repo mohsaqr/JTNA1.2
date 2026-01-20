@@ -6,9 +6,9 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            buildModel_variables_long_action = NULL,
             buildModel_variables_long_actor = NULL,
             buildModel_variables_long_time = NULL,
-            buildModel_variables_long_action = NULL,
             buildModel_variables_long_order = NULL,
             buildModel_variables_long_group = NULL,
             buildModel_type = "relative",
@@ -91,15 +91,15 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
+            private$..buildModel_variables_long_action <- jmvcore::OptionVariable$new(
+                "buildModel_variables_long_action",
+                buildModel_variables_long_action)
             private$..buildModel_variables_long_actor <- jmvcore::OptionVariable$new(
                 "buildModel_variables_long_actor",
                 buildModel_variables_long_actor)
             private$..buildModel_variables_long_time <- jmvcore::OptionVariable$new(
                 "buildModel_variables_long_time",
                 buildModel_variables_long_time)
-            private$..buildModel_variables_long_action <- jmvcore::OptionVariable$new(
-                "buildModel_variables_long_action",
-                buildModel_variables_long_action)
             private$..buildModel_variables_long_order <- jmvcore::OptionVariable$new(
                 "buildModel_variables_long_order",
                 buildModel_variables_long_order)
@@ -112,7 +112,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "relative",
                     "frequency",
-                    "co-occurrence",
                     "attention"),
                 default="relative")
             private$..buildModel_lambda <- jmvcore::OptionNumber$new(
@@ -538,9 +537,9 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "BY",
                     "none"))
 
+            self$.addOption(private$..buildModel_variables_long_action)
             self$.addOption(private$..buildModel_variables_long_actor)
             self$.addOption(private$..buildModel_variables_long_time)
-            self$.addOption(private$..buildModel_variables_long_action)
             self$.addOption(private$..buildModel_variables_long_order)
             self$.addOption(private$..buildModel_variables_long_group)
             self$.addOption(private$..buildModel_type)
@@ -618,9 +617,9 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..compare_sequences_correction)
         }),
     active = list(
+        buildModel_variables_long_action = function() private$..buildModel_variables_long_action$value,
         buildModel_variables_long_actor = function() private$..buildModel_variables_long_actor$value,
         buildModel_variables_long_time = function() private$..buildModel_variables_long_time$value,
-        buildModel_variables_long_action = function() private$..buildModel_variables_long_action$value,
         buildModel_variables_long_order = function() private$..buildModel_variables_long_order$value,
         buildModel_variables_long_group = function() private$..buildModel_variables_long_group$value,
         buildModel_type = function() private$..buildModel_type$value,
@@ -697,9 +696,9 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         compare_sequences_min_freq = function() private$..compare_sequences_min_freq$value,
         compare_sequences_correction = function() private$..compare_sequences_correction$value),
     private = list(
+        ..buildModel_variables_long_action = NA,
         ..buildModel_variables_long_actor = NA,
         ..buildModel_variables_long_time = NA,
-        ..buildModel_variables_long_action = NA,
         ..buildModel_variables_long_order = NA,
         ..buildModel_variables_long_group = NA,
         ..buildModel_type = NA,
@@ -1388,9 +1387,9 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' 
 #' @param data .
+#' @param buildModel_variables_long_action .
 #' @param buildModel_variables_long_actor .
 #' @param buildModel_variables_long_time .
-#' @param buildModel_variables_long_action .
 #' @param buildModel_variables_long_order .
 #' @param buildModel_variables_long_group .
 #' @param buildModel_type .
@@ -1513,9 +1512,9 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 GroupTNA <- function(
     data,
+    buildModel_variables_long_action,
     buildModel_variables_long_actor,
     buildModel_variables_long_time,
-    buildModel_variables_long_action,
     buildModel_variables_long_order,
     buildModel_variables_long_group,
     buildModel_type = "relative",
@@ -1595,25 +1594,25 @@ GroupTNA <- function(
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("GroupTNA requires jmvcore to be installed (restart may be required)")
 
+    if ( ! missing(buildModel_variables_long_action)) buildModel_variables_long_action <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_action))
     if ( ! missing(buildModel_variables_long_actor)) buildModel_variables_long_actor <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_actor))
     if ( ! missing(buildModel_variables_long_time)) buildModel_variables_long_time <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_time))
-    if ( ! missing(buildModel_variables_long_action)) buildModel_variables_long_action <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_action))
     if ( ! missing(buildModel_variables_long_order)) buildModel_variables_long_order <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_order))
     if ( ! missing(buildModel_variables_long_group)) buildModel_variables_long_group <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_group))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
+            `if`( ! missing(buildModel_variables_long_action), buildModel_variables_long_action, NULL),
             `if`( ! missing(buildModel_variables_long_actor), buildModel_variables_long_actor, NULL),
             `if`( ! missing(buildModel_variables_long_time), buildModel_variables_long_time, NULL),
-            `if`( ! missing(buildModel_variables_long_action), buildModel_variables_long_action, NULL),
             `if`( ! missing(buildModel_variables_long_order), buildModel_variables_long_order, NULL),
             `if`( ! missing(buildModel_variables_long_group), buildModel_variables_long_group, NULL))
 
 
     options <- GroupTNAOptions$new(
+        buildModel_variables_long_action = buildModel_variables_long_action,
         buildModel_variables_long_actor = buildModel_variables_long_actor,
         buildModel_variables_long_time = buildModel_variables_long_time,
-        buildModel_variables_long_action = buildModel_variables_long_action,
         buildModel_variables_long_order = buildModel_variables_long_order,
         buildModel_variables_long_group = buildModel_variables_long_group,
         buildModel_type = buildModel_type,

@@ -6,9 +6,9 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            buildModel_variables_long_action = NULL,
             buildModel_variables_long_actor = NULL,
             buildModel_variables_long_time = NULL,
-            buildModel_variables_long_action = NULL,
             buildModel_variables_long_order = NULL,
             clustering_k = 2,
             clustering_run = FALSE,
@@ -92,15 +92,15 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
+            private$..buildModel_variables_long_action <- jmvcore::OptionVariable$new(
+                "buildModel_variables_long_action",
+                buildModel_variables_long_action)
             private$..buildModel_variables_long_actor <- jmvcore::OptionVariable$new(
                 "buildModel_variables_long_actor",
                 buildModel_variables_long_actor)
             private$..buildModel_variables_long_time <- jmvcore::OptionVariable$new(
                 "buildModel_variables_long_time",
                 buildModel_variables_long_time)
-            private$..buildModel_variables_long_action <- jmvcore::OptionVariable$new(
-                "buildModel_variables_long_action",
-                buildModel_variables_long_action)
             private$..buildModel_variables_long_order <- jmvcore::OptionVariable$new(
                 "buildModel_variables_long_order",
                 buildModel_variables_long_order)
@@ -548,9 +548,9 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "BY",
                     "none"))
 
+            self$.addOption(private$..buildModel_variables_long_action)
             self$.addOption(private$..buildModel_variables_long_actor)
             self$.addOption(private$..buildModel_variables_long_time)
-            self$.addOption(private$..buildModel_variables_long_action)
             self$.addOption(private$..buildModel_variables_long_order)
             self$.addOption(private$..clustering_k)
             self$.addOption(private$..clustering_run)
@@ -629,9 +629,9 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..compare_sequences_correction)
         }),
     active = list(
+        buildModel_variables_long_action = function() private$..buildModel_variables_long_action$value,
         buildModel_variables_long_actor = function() private$..buildModel_variables_long_actor$value,
         buildModel_variables_long_time = function() private$..buildModel_variables_long_time$value,
-        buildModel_variables_long_action = function() private$..buildModel_variables_long_action$value,
         buildModel_variables_long_order = function() private$..buildModel_variables_long_order$value,
         clustering_k = function() private$..clustering_k$value,
         clustering_run = function() private$..clustering_run$value,
@@ -709,9 +709,9 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         compare_sequences_min_freq = function() private$..compare_sequences_min_freq$value,
         compare_sequences_correction = function() private$..compare_sequences_correction$value),
     private = list(
+        ..buildModel_variables_long_action = NA,
         ..buildModel_variables_long_actor = NA,
         ..buildModel_variables_long_time = NA,
-        ..buildModel_variables_long_action = NA,
         ..buildModel_variables_long_order = NA,
         ..clustering_k = NA,
         ..clustering_run = NA,
@@ -1465,9 +1465,9 @@ ClusterTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' 
 #' @param data .
+#' @param buildModel_variables_long_action .
 #' @param buildModel_variables_long_actor .
 #' @param buildModel_variables_long_time .
-#' @param buildModel_variables_long_action .
 #' @param buildModel_variables_long_order .
 #' @param clustering_k .
 #' @param clustering_run .
@@ -1591,9 +1591,9 @@ ClusterTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 ClusterTNA <- function(
     data,
+    buildModel_variables_long_action,
     buildModel_variables_long_actor,
     buildModel_variables_long_time,
-    buildModel_variables_long_action,
     buildModel_variables_long_order,
     clustering_k = 2,
     clustering_run = FALSE,
@@ -1674,23 +1674,23 @@ ClusterTNA <- function(
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("ClusterTNA requires jmvcore to be installed (restart may be required)")
 
+    if ( ! missing(buildModel_variables_long_action)) buildModel_variables_long_action <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_action))
     if ( ! missing(buildModel_variables_long_actor)) buildModel_variables_long_actor <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_actor))
     if ( ! missing(buildModel_variables_long_time)) buildModel_variables_long_time <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_time))
-    if ( ! missing(buildModel_variables_long_action)) buildModel_variables_long_action <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_action))
     if ( ! missing(buildModel_variables_long_order)) buildModel_variables_long_order <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_order))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
+            `if`( ! missing(buildModel_variables_long_action), buildModel_variables_long_action, NULL),
             `if`( ! missing(buildModel_variables_long_actor), buildModel_variables_long_actor, NULL),
             `if`( ! missing(buildModel_variables_long_time), buildModel_variables_long_time, NULL),
-            `if`( ! missing(buildModel_variables_long_action), buildModel_variables_long_action, NULL),
             `if`( ! missing(buildModel_variables_long_order), buildModel_variables_long_order, NULL))
 
 
     options <- ClusterTNAOptions$new(
+        buildModel_variables_long_action = buildModel_variables_long_action,
         buildModel_variables_long_actor = buildModel_variables_long_actor,
         buildModel_variables_long_time = buildModel_variables_long_time,
-        buildModel_variables_long_action = buildModel_variables_long_action,
         buildModel_variables_long_order = buildModel_variables_long_order,
         clustering_k = clustering_k,
         clustering_run = clustering_run,
