@@ -57,6 +57,12 @@ analyses:
     menuGroup: JTNA
     menuTitle: Cluster TNA
     category: analyses
+  - title: One-Hot Co-occurrence Network Analysis
+    name: OneHotTNA
+    ns: JTNA
+    menuGroup: JTNA
+    menuTitle: One-Hot Co-occurrence Network Analysis
+    category: analyses
 usesNative: true
 minApp: 1.8.0
 
