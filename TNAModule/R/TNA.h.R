@@ -39,6 +39,14 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             centrality_Diffusion = FALSE,
             centrality_InStrength = TRUE,
             centrality_OutStrength = TRUE,
+            centrality_stability_show_table = FALSE,
+            centrality_stability_show_plot = FALSE,
+            centrality_stability_InStrength = TRUE,
+            centrality_stability_OutStrength = TRUE,
+            centrality_stability_Betweenness = TRUE,
+            centrality_stability_iteration = 100,
+            centrality_stability_threshold = 0.7,
+            centrality_stability_certainty = 0.95,
             edgeBetweenness_show_table = FALSE,
             edgeBetweenness_show_plot = FALSE,
             edgeBetweenness_plot_cut = 0.1,
@@ -77,7 +85,13 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bootstrap_plot_edge_label_size = 1,
             bootstrap_plot_node_size = 1,
             bootstrap_plot_node_label_size = 1,
-            bootstrap_plot_layout = NULL, ...) {
+            bootstrap_plot_layout = NULL,
+            sequences_show_plot = FALSE,
+            sequences_type = "index",
+            sequences_scale = "proportion",
+            sequences_geom = "bar",
+            sequences_include_na = FALSE,
+            sequences_tick = 5, ...) {
 
             super$initialize(
                 package="JTNA",
@@ -248,6 +262,44 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "centrality_OutStrength",
                 centrality_OutStrength,
                 default=TRUE)
+            private$..centrality_stability_show_table <- jmvcore::OptionBool$new(
+                "centrality_stability_show_table",
+                centrality_stability_show_table,
+                default=FALSE)
+            private$..centrality_stability_show_plot <- jmvcore::OptionBool$new(
+                "centrality_stability_show_plot",
+                centrality_stability_show_plot,
+                default=FALSE)
+            private$..centrality_stability_InStrength <- jmvcore::OptionBool$new(
+                "centrality_stability_InStrength",
+                centrality_stability_InStrength,
+                default=TRUE)
+            private$..centrality_stability_OutStrength <- jmvcore::OptionBool$new(
+                "centrality_stability_OutStrength",
+                centrality_stability_OutStrength,
+                default=TRUE)
+            private$..centrality_stability_Betweenness <- jmvcore::OptionBool$new(
+                "centrality_stability_Betweenness",
+                centrality_stability_Betweenness,
+                default=TRUE)
+            private$..centrality_stability_iteration <- jmvcore::OptionInteger$new(
+                "centrality_stability_iteration",
+                centrality_stability_iteration,
+                default=100,
+                min=10,
+                max=10000)
+            private$..centrality_stability_threshold <- jmvcore::OptionNumber$new(
+                "centrality_stability_threshold",
+                centrality_stability_threshold,
+                default=0.7,
+                min=0,
+                max=1)
+            private$..centrality_stability_certainty <- jmvcore::OptionNumber$new(
+                "centrality_stability_certainty",
+                centrality_stability_certainty,
+                default=0.95,
+                min=0,
+                max=1)
             private$..edgeBetweenness_show_table <- jmvcore::OptionBool$new(
                 "edgeBetweenness_show_table",
                 edgeBetweenness_show_table,
@@ -506,6 +558,41 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "layout_with_lgl",
                     "layout_with_sugiyama",
                     "layout_randomly"))
+            private$..sequences_show_plot <- jmvcore::OptionBool$new(
+                "sequences_show_plot",
+                sequences_show_plot,
+                default=FALSE)
+            private$..sequences_type <- jmvcore::OptionList$new(
+                "sequences_type",
+                sequences_type,
+                default="index",
+                options=list(
+                    "index",
+                    "distribution"))
+            private$..sequences_scale <- jmvcore::OptionList$new(
+                "sequences_scale",
+                sequences_scale,
+                default="proportion",
+                options=list(
+                    "proportion",
+                    "count"))
+            private$..sequences_geom <- jmvcore::OptionList$new(
+                "sequences_geom",
+                sequences_geom,
+                default="bar",
+                options=list(
+                    "bar",
+                    "area"))
+            private$..sequences_include_na <- jmvcore::OptionBool$new(
+                "sequences_include_na",
+                sequences_include_na,
+                default=FALSE)
+            private$..sequences_tick <- jmvcore::OptionInteger$new(
+                "sequences_tick",
+                sequences_tick,
+                default=5,
+                min=1,
+                max=20)
 
             self$.addOption(private$..buildModel_variables_long_action)
             self$.addOption(private$..buildModel_variables_long_actor)
@@ -540,6 +627,14 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..centrality_Diffusion)
             self$.addOption(private$..centrality_InStrength)
             self$.addOption(private$..centrality_OutStrength)
+            self$.addOption(private$..centrality_stability_show_table)
+            self$.addOption(private$..centrality_stability_show_plot)
+            self$.addOption(private$..centrality_stability_InStrength)
+            self$.addOption(private$..centrality_stability_OutStrength)
+            self$.addOption(private$..centrality_stability_Betweenness)
+            self$.addOption(private$..centrality_stability_iteration)
+            self$.addOption(private$..centrality_stability_threshold)
+            self$.addOption(private$..centrality_stability_certainty)
             self$.addOption(private$..edgeBetweenness_show_table)
             self$.addOption(private$..edgeBetweenness_show_plot)
             self$.addOption(private$..edgeBetweenness_plot_cut)
@@ -579,6 +674,12 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..bootstrap_plot_node_size)
             self$.addOption(private$..bootstrap_plot_node_label_size)
             self$.addOption(private$..bootstrap_plot_layout)
+            self$.addOption(private$..sequences_show_plot)
+            self$.addOption(private$..sequences_type)
+            self$.addOption(private$..sequences_scale)
+            self$.addOption(private$..sequences_geom)
+            self$.addOption(private$..sequences_include_na)
+            self$.addOption(private$..sequences_tick)
         }),
     active = list(
         buildModel_variables_long_action = function() private$..buildModel_variables_long_action$value,
@@ -614,6 +715,14 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         centrality_Diffusion = function() private$..centrality_Diffusion$value,
         centrality_InStrength = function() private$..centrality_InStrength$value,
         centrality_OutStrength = function() private$..centrality_OutStrength$value,
+        centrality_stability_show_table = function() private$..centrality_stability_show_table$value,
+        centrality_stability_show_plot = function() private$..centrality_stability_show_plot$value,
+        centrality_stability_InStrength = function() private$..centrality_stability_InStrength$value,
+        centrality_stability_OutStrength = function() private$..centrality_stability_OutStrength$value,
+        centrality_stability_Betweenness = function() private$..centrality_stability_Betweenness$value,
+        centrality_stability_iteration = function() private$..centrality_stability_iteration$value,
+        centrality_stability_threshold = function() private$..centrality_stability_threshold$value,
+        centrality_stability_certainty = function() private$..centrality_stability_certainty$value,
         edgeBetweenness_show_table = function() private$..edgeBetweenness_show_table$value,
         edgeBetweenness_show_plot = function() private$..edgeBetweenness_show_plot$value,
         edgeBetweenness_plot_cut = function() private$..edgeBetweenness_plot_cut$value,
@@ -652,7 +761,13 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         bootstrap_plot_edge_label_size = function() private$..bootstrap_plot_edge_label_size$value,
         bootstrap_plot_node_size = function() private$..bootstrap_plot_node_size$value,
         bootstrap_plot_node_label_size = function() private$..bootstrap_plot_node_label_size$value,
-        bootstrap_plot_layout = function() private$..bootstrap_plot_layout$value),
+        bootstrap_plot_layout = function() private$..bootstrap_plot_layout$value,
+        sequences_show_plot = function() private$..sequences_show_plot$value,
+        sequences_type = function() private$..sequences_type$value,
+        sequences_scale = function() private$..sequences_scale$value,
+        sequences_geom = function() private$..sequences_geom$value,
+        sequences_include_na = function() private$..sequences_include_na$value,
+        sequences_tick = function() private$..sequences_tick$value),
     private = list(
         ..buildModel_variables_long_action = NA,
         ..buildModel_variables_long_actor = NA,
@@ -687,6 +802,14 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..centrality_Diffusion = NA,
         ..centrality_InStrength = NA,
         ..centrality_OutStrength = NA,
+        ..centrality_stability_show_table = NA,
+        ..centrality_stability_show_plot = NA,
+        ..centrality_stability_InStrength = NA,
+        ..centrality_stability_OutStrength = NA,
+        ..centrality_stability_Betweenness = NA,
+        ..centrality_stability_iteration = NA,
+        ..centrality_stability_threshold = NA,
+        ..centrality_stability_certainty = NA,
         ..edgeBetweenness_show_table = NA,
         ..edgeBetweenness_show_plot = NA,
         ..edgeBetweenness_plot_cut = NA,
@@ -725,7 +848,13 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..bootstrap_plot_edge_label_size = NA,
         ..bootstrap_plot_node_size = NA,
         ..bootstrap_plot_node_label_size = NA,
-        ..bootstrap_plot_layout = NA)
+        ..bootstrap_plot_layout = NA,
+        ..sequences_show_plot = NA,
+        ..sequences_type = NA,
+        ..sequences_scale = NA,
+        ..sequences_geom = NA,
+        ..sequences_include_na = NA,
+        ..sequences_tick = NA)
 )
 
 TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -745,6 +874,9 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         centralityContent = function() private$.items[["centralityContent"]],
         centralityTable = function() private$.items[["centralityTable"]],
         centrality_plot = function() private$.items[["centrality_plot"]],
+        centralityStabilityTitle = function() private$.items[["centralityStabilityTitle"]],
+        centralityStabilityTable = function() private$.items[["centralityStabilityTable"]],
+        centrality_stability_plot = function() private$.items[["centrality_stability_plot"]],
         edgeBetweennessTitle = function() private$.items[["edgeBetweennessTitle"]],
         edgeBetweenness_plot = function() private$.items[["edgeBetweenness_plot"]],
         edgeBetweennessTable = function() private$.items[["edgeBetweennessTable"]],
@@ -759,7 +891,8 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         bootstrapTitle = function() private$.items[["bootstrapTitle"]],
         bootstrap_plot = function() private$.items[["bootstrap_plot"]],
         bootstrapTable = function() private$.items[["bootstrapTable"]],
-        permutationTable = function() private$.items[["permutationTable"]]),
+        permutationTable = function() private$.items[["permutationTable"]],
+        sequences_plot = function() private$.items[["sequences_plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -952,6 +1085,64 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "centrality_Diffusion",
                     "centrality_InStrength",
                     "centrality_OutStrength")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="centralityStabilityTitle",
+                title="Centrality Stability",
+                visible=FALSE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="centralityStabilityTable",
+                title="Centrality Stability (CS-Coefficients)",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="measure", 
+                        `title`="Measure", 
+                        `type`="text"),
+                    list(
+                        `name`="cs_coefficient", 
+                        `title`="CS-Coefficient", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "centrality_loops",
+                    "centrality_normalize",
+                    "centrality_stability_iteration",
+                    "centrality_stability_threshold",
+                    "centrality_stability_certainty",
+                    "centrality_stability_InStrength",
+                    "centrality_stability_OutStrength",
+                    "centrality_stability_Betweenness")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="centrality_stability_plot",
+                width=600,
+                height=500,
+                visible=FALSE,
+                renderFun=".showCentralityStabilityPlot",
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "centrality_loops",
+                    "centrality_normalize",
+                    "centrality_stability_iteration",
+                    "centrality_stability_threshold",
+                    "centrality_stability_certainty",
+                    "centrality_stability_InStrength",
+                    "centrality_stability_OutStrength",
+                    "centrality_stability_Betweenness")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="edgeBetweennessTitle",
@@ -1288,7 +1479,28 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_threshold",
                     "permutation_iter",
                     "permutation_paired",
-                    "permutation_level")))}))
+                    "permutation_level")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="sequences_plot",
+                title="Sequence Analysis Plot",
+                width=600,
+                height=400,
+                visible=FALSE,
+                renderFun=".showSequencesPlot",
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "sequences_type",
+                    "sequences_scale",
+                    "sequences_geom",
+                    "sequences_include_na",
+                    "sequences_tick")))}))
 
 TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "TNABase",
@@ -1354,6 +1566,14 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param centrality_Diffusion .
 #' @param centrality_InStrength .
 #' @param centrality_OutStrength .
+#' @param centrality_stability_show_table .
+#' @param centrality_stability_show_plot .
+#' @param centrality_stability_InStrength .
+#' @param centrality_stability_OutStrength .
+#' @param centrality_stability_Betweenness .
+#' @param centrality_stability_iteration .
+#' @param centrality_stability_threshold .
+#' @param centrality_stability_certainty .
 #' @param edgeBetweenness_show_table .
 #' @param edgeBetweenness_show_plot .
 #' @param edgeBetweenness_plot_cut .
@@ -1393,6 +1613,12 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param bootstrap_plot_node_size .
 #' @param bootstrap_plot_node_label_size .
 #' @param bootstrap_plot_layout .
+#' @param sequences_show_plot .
+#' @param sequences_type .
+#' @param sequences_scale .
+#' @param sequences_geom .
+#' @param sequences_include_na .
+#' @param sequences_tick .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -1408,6 +1634,9 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$centralityContent} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$centralityTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$centrality_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$centralityStabilityTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$centralityStabilityTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$centrality_stability_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$edgeBetweennessTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$edgeBetweenness_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$edgeBetweennessTable} \tab \tab \tab \tab \tab a table \cr
@@ -1428,6 +1657,7 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$bootstrap_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$permutationTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$sequences_plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -1472,6 +1702,14 @@ TNA <- function(
     centrality_Diffusion = FALSE,
     centrality_InStrength = TRUE,
     centrality_OutStrength = TRUE,
+    centrality_stability_show_table = FALSE,
+    centrality_stability_show_plot = FALSE,
+    centrality_stability_InStrength = TRUE,
+    centrality_stability_OutStrength = TRUE,
+    centrality_stability_Betweenness = TRUE,
+    centrality_stability_iteration = 100,
+    centrality_stability_threshold = 0.7,
+    centrality_stability_certainty = 0.95,
     edgeBetweenness_show_table = FALSE,
     edgeBetweenness_show_plot = FALSE,
     edgeBetweenness_plot_cut = 0.1,
@@ -1510,7 +1748,13 @@ TNA <- function(
     bootstrap_plot_edge_label_size = 1,
     bootstrap_plot_node_size = 1,
     bootstrap_plot_node_label_size = 1,
-    bootstrap_plot_layout) {
+    bootstrap_plot_layout,
+    sequences_show_plot = FALSE,
+    sequences_type = "index",
+    sequences_scale = "proportion",
+    sequences_geom = "bar",
+    sequences_include_na = FALSE,
+    sequences_tick = 5) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("TNA requires jmvcore to be installed (restart may be required)")
@@ -1562,6 +1806,14 @@ TNA <- function(
         centrality_Diffusion = centrality_Diffusion,
         centrality_InStrength = centrality_InStrength,
         centrality_OutStrength = centrality_OutStrength,
+        centrality_stability_show_table = centrality_stability_show_table,
+        centrality_stability_show_plot = centrality_stability_show_plot,
+        centrality_stability_InStrength = centrality_stability_InStrength,
+        centrality_stability_OutStrength = centrality_stability_OutStrength,
+        centrality_stability_Betweenness = centrality_stability_Betweenness,
+        centrality_stability_iteration = centrality_stability_iteration,
+        centrality_stability_threshold = centrality_stability_threshold,
+        centrality_stability_certainty = centrality_stability_certainty,
         edgeBetweenness_show_table = edgeBetweenness_show_table,
         edgeBetweenness_show_plot = edgeBetweenness_show_plot,
         edgeBetweenness_plot_cut = edgeBetweenness_plot_cut,
@@ -1600,7 +1852,13 @@ TNA <- function(
         bootstrap_plot_edge_label_size = bootstrap_plot_edge_label_size,
         bootstrap_plot_node_size = bootstrap_plot_node_size,
         bootstrap_plot_node_label_size = bootstrap_plot_node_label_size,
-        bootstrap_plot_layout = bootstrap_plot_layout)
+        bootstrap_plot_layout = bootstrap_plot_layout,
+        sequences_show_plot = sequences_show_plot,
+        sequences_type = sequences_type,
+        sequences_scale = sequences_scale,
+        sequences_geom = sequences_geom,
+        sequences_include_na = sequences_include_na,
+        sequences_tick = sequences_tick)
 
     analysis <- TNAClass$new(
         options = options,

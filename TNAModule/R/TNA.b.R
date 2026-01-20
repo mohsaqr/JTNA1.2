@@ -156,8 +156,6 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$results$buildModel_mosaic$setVisible(self$options$buildModel_show_mosaic) # plot
 
             }
-            
-
 
             ### Centrality
 
@@ -263,6 +261,64 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$results$centrality_plot$setVisible(self$options$centrality_show_plot)
                 self$results$centralityTable$setVisible(self$options$centrality_show_table)
 
+            }
+
+            ### Centrality Stability
+
+            if(!is.null(model) && (self$options$centrality_stability_show_table || self$options$centrality_stability_show_plot)) {
+
+                # Build measures vector based on selected stability measures
+                stabilityMeasures <- character(0)
+                if(self$options$centrality_stability_InStrength) stabilityMeasures <- c(stabilityMeasures, "InStrength")
+                if(self$options$centrality_stability_OutStrength) stabilityMeasures <- c(stabilityMeasures, "OutStrength")
+                if(self$options$centrality_stability_Betweenness) stabilityMeasures <- c(stabilityMeasures, "Betweenness")
+
+                # Default to basic measures if none selected
+                if(length(stabilityMeasures) == 0) {
+                    stabilityMeasures <- c("InStrength", "OutStrength", "Betweenness")
+                }
+
+                # Check if we need to compute stability
+                csResult <- self$results$centrality_stability_plot$state
+                if(is.null(csResult)) {
+
+                    csResult <- tryCatch({
+                        tna::estimate_cs(
+                            x = model,
+                            loops = self$options$centrality_loops,
+                            normalize = self$options$centrality_normalize,
+                            measures = stabilityMeasures,
+                            iter = self$options$centrality_stability_iteration,
+                            threshold = self$options$centrality_stability_threshold,
+                            certainty = self$options$centrality_stability_certainty,
+                            progressbar = FALSE
+                        )
+                    }, error = function(e) {
+                        self$results$errorText$setContent(paste("Centrality stability error:", e$message))
+                        self$results$errorText$setVisible(TRUE)
+                        NULL
+                    })
+
+                    if(!is.null(csResult)) {
+                        self$results$centrality_stability_plot$setState(csResult)
+                    }
+                }
+
+                # Populate stability table with CS-coefficients
+                if(!is.null(csResult) && self$options$centrality_stability_show_table) {
+                    for(measure in names(csResult)) {
+                        if(!is.null(csResult[[measure]]$cs_coefficient)) {
+                            self$results$centralityStabilityTable$addRow(rowKey=measure, values=list(
+                                measure = measure,
+                                cs_coefficient = csResult[[measure]]$cs_coefficient
+                            ))
+                        }
+                    }
+                }
+
+                self$results$centralityStabilityTitle$setVisible(self$options$centrality_stability_show_table || self$options$centrality_stability_show_plot)
+                self$results$centralityStabilityTable$setVisible(self$options$centrality_stability_show_table)
+                self$results$centrality_stability_plot$setVisible(self$options$centrality_stability_show_plot)
             }
 
             ### Edge betweenness
@@ -488,6 +544,16 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             }
 
+            ### Sequence Analysis
+
+            if(!is.null(model) && self$options$sequences_show_plot) {
+                # Store model for plot rendering
+                if(!self$results$sequences_plot$isFilled()) {
+                    self$results$sequences_plot$setState(model)
+                }
+                self$results$sequences_plot$setVisible(TRUE)
+            }
+
         },
         .showBuildModelPlot=function(image, ...) {
             plotData <- self$results$buildModelContent$state
@@ -539,22 +605,63 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         .showBuildModelMosaic=function(image, ...) {
             plotData <- self$results$buildModelContent$state
-            
+
             if(!is.null(plotData) && self$options$buildModel_show_mosaic && self$options$buildModel_type == "frequency")  {
                 p <- plot_mosaic(x=plotData, digits=self$options$buildModel_digits)
                 print(p)
-            }   
+            }
             TRUE
+        },
+        .showSequencesPlot=function(image, ...) {
+            plotData <- self$results$sequences_plot$state
+
+            if(is.null(plotData) || !self$options$sequences_show_plot) {
+                return(FALSE)
+            }
+
+            tryCatch({
+                p <- tna::plot_sequences(
+                    x = plotData,
+                    type = self$options$sequences_type,
+                    scale = self$options$sequences_scale,
+                    geom = self$options$sequences_geom,
+                    include_na = self$options$sequences_include_na,
+                    tick = self$options$sequences_tick
+                )
+                print(p)
+                TRUE
+            }, error = function(e) {
+                self$results$errorText$setContent(paste("Sequence plot error:", e$message))
+                self$results$errorText$setVisible(TRUE)
+                FALSE
+            })
         },
         .showCentralityPlot=function(image, ...) {
 
             plotData <- self$results$centralityTable$state
 
             if(!is.null(plotData) && self$options$centrality_show_plot)  {
-                centPlot <- plot(plotData) 
+                centPlot <- plot(plotData)
                 print(centPlot)
             }
-            TRUE     
+            TRUE
+        },
+        .showCentralityStabilityPlot=function(image, ...) {
+            plotData <- self$results$centrality_stability_plot$state
+
+            if(is.null(plotData) || !self$options$centrality_stability_show_plot) {
+                return(FALSE)
+            }
+
+            tryCatch({
+                p <- plot(plotData)
+                print(p)
+                TRUE
+            }, error = function(e) {
+                self$results$errorText$setContent(paste("Centrality stability plot error:", e$message))
+                self$results$errorText$setVisible(TRUE)
+                FALSE
+            })
         },
         .showEdgeBetweennessPlot=function(image, ...) {
             plotData <- self$results$edgeBetweenness_plot$state

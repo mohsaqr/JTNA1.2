@@ -163,7 +163,6 @@ options:
       type: Integer
       default: 1
 
-
     ### CENTRALITY DATA
 
     - name: centrality_loops
@@ -231,6 +230,53 @@ options:
       title: OutStrength
       type: Bool
       default: True
+
+    ### CENTRALITY STABILITY
+    - name: centrality_stability_show_table
+      title: Stability Table
+      type: Bool
+      default: False
+
+    - name: centrality_stability_show_plot
+      title: Stability Plot
+      type: Bool
+      default: False
+
+    - name: centrality_stability_InStrength
+      title: In Strength
+      type: Bool
+      default: True
+
+    - name: centrality_stability_OutStrength
+      title: Out Strength
+      type: Bool
+      default: True
+
+    - name: centrality_stability_Betweenness
+      title: Betweenness
+      type: Bool
+      default: True
+
+    - name: centrality_stability_iteration
+      title: Iterations
+      type: Integer
+      default: 100
+      min: 10
+      max: 10000
+
+    - name: centrality_stability_threshold
+      title: Threshold
+      type: Number
+      default: 0.7
+      min: 0
+      max: 1
+
+    - name: centrality_stability_certainty
+      title: Certainty
+      type: Number
+      default: 0.95
+      min: 0
+      max: 1
 
     ### EDGE BETWEENNESS
     ##### PLOT
@@ -590,5 +636,54 @@ options:
           name: layout_with_sugiyama
         - title: Random
           name: layout_randomly
+
+    ### SEQUENCE ANALYSIS
+
+    - name: sequences_show_plot
+      title: Sequence Plot
+      type: Bool
+      default: False
+
+    - name: sequences_type
+      title: Type
+      type: List
+      default: index
+      options:
+        - title: Index
+          name: index
+        - title: Distribution
+          name: distribution
+
+    - name: sequences_scale
+      title: Scale
+      type: List
+      default: proportion
+      options:
+        - title: Proportion
+          name: proportion
+        - title: Count
+          name: count
+
+    - name: sequences_geom
+      title: Geometry
+      type: List
+      default: bar
+      options:
+        - title: Bar
+          name: bar
+        - title: Area
+          name: area
+
+    - name: sequences_include_na
+      title: Include missing values
+      type: Bool
+      default: False
+
+    - name: sequences_tick
+      title: Tick
+      type: Integer
+      default: 5
+      min: 1
+      max: 20
 
 ...

@@ -111,7 +111,6 @@ items:
 
         - buildModel_digits
 
-
     ### CENTRALITY
     - name:  centralityTitle
       title: Centrality
@@ -196,6 +195,63 @@ items:
         - centrality_Diffusion
         - centrality_InStrength
         - centrality_OutStrength
+
+    ### CENTRALITY STABILITY
+    - name: centralityStabilityTitle
+      type: Preformatted
+      title: Centrality Stability
+      visible: False
+
+    - name: centralityStabilityTable
+      type: Table
+      title: Centrality Stability (CS-Coefficients)
+      visible: False
+      columns:
+        - name: measure
+          title: Measure
+          type: text
+        - name: cs_coefficient
+          title: CS-Coefficient
+          type: number
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - centrality_loops
+        - centrality_normalize
+        - centrality_stability_iteration
+        - centrality_stability_threshold
+        - centrality_stability_certainty
+        - centrality_stability_InStrength
+        - centrality_stability_OutStrength
+        - centrality_stability_Betweenness
+
+    - name: centrality_stability_plot
+      type: Image
+      width: 600
+      height: 500
+      visible: False
+      renderFun: .showCentralityStabilityPlot
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - centrality_loops
+        - centrality_normalize
+        - centrality_stability_iteration
+        - centrality_stability_threshold
+        - centrality_stability_certainty
+        - centrality_stability_InStrength
+        - centrality_stability_OutStrength
+        - centrality_stability_Betweenness
 
     ### Edge betweenness
 
@@ -519,5 +575,28 @@ items:
         - permutation_iter
         - permutation_paired
         - permutation_level
+
+    ### SEQUENCE ANALYSIS
+
+    - name: sequences_plot
+      type: Image
+      title: Sequence Analysis Plot
+      width: 600
+      height: 400
+      visible: False
+      renderFun: .showSequencesPlot
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - sequences_type
+        - sequences_scale
+        - sequences_geom
+        - sequences_include_na
+        - sequences_tick
 
 ...

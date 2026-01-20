@@ -65,5 +65,16 @@ analyses:
     category: analyses
 usesNative: true
 minApp: 1.8.0
+datasets:
+  - name: Regulation_long
+    path: Regulation_long.csv
+    description: >-
+      Regulation data in long format. Contains Actor, Achievers, Group, Time,
+      and Action columns. Actions include: cohesion, consensus, discuss,
+      synthesis, and more.
+    tags:
+      - TNA
+      - regulation
+      - long format
 
 ...

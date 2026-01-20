@@ -216,6 +216,52 @@ children:
                 name: centrality_Diffusion
                 label: Diffusion
   - type: CollapseBox
+    label: Centrality Stability
+    margin: large
+    stretchFactor: 1
+    style: inline
+    collapsed: true
+    children:
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: centrality_stability_show_table
+                label: Stability Table
+              - type: CheckBox
+                name: centrality_stability_show_plot
+                label: Stability Plot
+          - type: Label
+            label: Measures
+            children:
+              - type: CheckBox
+                name: centrality_stability_InStrength
+                label: In Strength
+              - type: CheckBox
+                name: centrality_stability_OutStrength
+                label: Out Strength
+              - type: CheckBox
+                name: centrality_stability_Betweenness
+                label: Betweenness
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Parameters
+            children:
+              - type: TextBox
+                name: centrality_stability_iteration
+                format: number
+              - type: TextBox
+                name: centrality_stability_threshold
+                format: number
+              - type: TextBox
+                name: centrality_stability_certainty
+                format: number
+  - type: CollapseBox
     label: Edge Betweenness
     margin: large
     stretchFactor: 1
@@ -475,3 +521,68 @@ children:
         name: bootstrap_table_show_all
       - type: CheckBox
         name: bootstrap_table_significant_only
+  - type: CollapseBox
+    label: Sequence Analysis
+    margin: large
+    stretchFactor: 1
+    style: inline
+    collapsed: true
+    children:
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: sequences_show_plot
+                label: Sequence plot
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Plot Type
+            children:
+              - type: RadioButton
+                name: sequences_type_index
+                optionName: sequences_type
+                optionPart: index
+              - type: RadioButton
+                name: sequences_type_distribution
+                optionName: sequences_type
+                optionPart: distribution
+          - type: Label
+            label: Scale
+            children:
+              - type: RadioButton
+                name: sequences_scale_proportion
+                optionName: sequences_scale
+                optionPart: proportion
+              - type: RadioButton
+                name: sequences_scale_count
+                optionName: sequences_scale
+                optionPart: count
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Geometry
+            children:
+              - type: RadioButton
+                name: sequences_geom_bar
+                optionName: sequences_geom
+                optionPart: bar
+              - type: RadioButton
+                name: sequences_geom_area
+                optionName: sequences_geom
+                optionPart: area
+          - type: Label
+            label: Options
+            children:
+              - type: CheckBox
+                name: sequences_include_na
+                label: Include missing values
+              - type: TextBox
+                name: sequences_tick
+                format: number
+                label: Tick Interval
