@@ -25,6 +25,12 @@ children:
             name: buildModel_variables_session
             isTarget: true
             maxItemCount: 1
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: buildModel_variables_group
+            isTarget: true
+            maxItemCount: 1
   - type: LayoutBox
     stretchFactor: 1
     style: inline

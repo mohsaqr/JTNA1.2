@@ -27,6 +27,7 @@ items:
         - buildModel_variables_onehot
         - buildModel_variables_actor
         - buildModel_variables_session
+        - buildModel_variables_group
         - buildModel_window
         - buildModel_scaling
 
@@ -40,6 +41,7 @@ items:
         - buildModel_variables_onehot
         - buildModel_variables_actor
         - buildModel_variables_session
+        - buildModel_variables_group
         - buildModel_window
         - buildModel_scaling
         - buildModel_plot_cut
@@ -59,6 +61,7 @@ items:
         - buildModel_variables_onehot
         - buildModel_variables_actor
         - buildModel_variables_session
+        - buildModel_variables_group
         - buildModel_window
         - buildModel_scaling
 
@@ -72,6 +75,7 @@ items:
         - buildModel_variables_onehot
         - buildModel_variables_actor
         - buildModel_variables_session
+        - buildModel_variables_group
         - buildModel_window
         - buildModel_scaling
 
@@ -88,6 +92,7 @@ items:
         - buildModel_variables_onehot
         - buildModel_variables_actor
         - buildModel_variables_session
+        - buildModel_variables_group
         - buildModel_window
         - buildModel_scaling
         - centrality_loops
@@ -107,12 +112,15 @@ items:
       title: Centrality Measures
       visible: False
       columns:
+        - name: group
+          type: text
         - name: state
           type: text
       clearWith:
         - buildModel_variables_onehot
         - buildModel_variables_actor
         - buildModel_variables_session
+        - buildModel_variables_group
         - buildModel_window
         - buildModel_scaling
         - centrality_loops
@@ -137,6 +145,7 @@ items:
         - buildModel_variables_onehot
         - buildModel_variables_actor
         - buildModel_variables_session
+        - buildModel_variables_group
         - buildModel_window
         - buildModel_scaling
         - centrality_loops
@@ -168,6 +177,7 @@ items:
         - buildModel_variables_onehot
         - buildModel_variables_actor
         - buildModel_variables_session
+        - buildModel_variables_group
         - buildModel_window
         - buildModel_scaling
         - community_methods
@@ -186,6 +196,7 @@ items:
         - buildModel_variables_onehot
         - buildModel_variables_actor
         - buildModel_variables_session
+        - buildModel_variables_group
         - buildModel_window
         - buildModel_scaling
         - community_methods
@@ -201,6 +212,7 @@ items:
         - buildModel_variables_onehot
         - buildModel_variables_actor
         - buildModel_variables_session
+        - buildModel_variables_group
         - buildModel_window
         - buildModel_scaling
         - community_methods
@@ -220,6 +232,7 @@ items:
         - buildModel_variables_onehot
         - buildModel_variables_actor
         - buildModel_variables_session
+        - buildModel_variables_group
         - buildModel_window
         - buildModel_scaling
         - cliques_size
@@ -235,6 +248,7 @@ items:
         - buildModel_variables_onehot
         - buildModel_variables_actor
         - buildModel_variables_session
+        - buildModel_variables_group
         - buildModel_window
         - buildModel_scaling
         - cliques_size
@@ -289,6 +303,7 @@ items:
         - buildModel_variables_onehot
         - buildModel_variables_actor
         - buildModel_variables_session
+        - buildModel_variables_group
         - buildModel_window
         - buildModel_scaling
         - bootstrap_iteration
@@ -308,6 +323,7 @@ items:
         - buildModel_variables_onehot
         - buildModel_variables_actor
         - buildModel_variables_session
+        - buildModel_variables_group
         - buildModel_window
         - buildModel_scaling
         - bootstrap_iteration

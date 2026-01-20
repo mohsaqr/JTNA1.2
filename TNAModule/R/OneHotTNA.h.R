@@ -9,6 +9,7 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             buildModel_variables_onehot = NULL,
             buildModel_variables_actor = NULL,
             buildModel_variables_session = NULL,
+            buildModel_variables_group = NULL,
             buildModel_window = 1,
             buildModel_scaling = "noScaling",
             buildModel_show_matrix = FALSE,
@@ -78,6 +79,9 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..buildModel_variables_session <- jmvcore::OptionVariable$new(
                 "buildModel_variables_session",
                 buildModel_variables_session)
+            private$..buildModel_variables_group <- jmvcore::OptionVariable$new(
+                "buildModel_variables_group",
+                buildModel_variables_group)
             private$..buildModel_window <- jmvcore::OptionInteger$new(
                 "buildModel_window",
                 buildModel_window,
@@ -403,6 +407,7 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..buildModel_variables_onehot)
             self$.addOption(private$..buildModel_variables_actor)
             self$.addOption(private$..buildModel_variables_session)
+            self$.addOption(private$..buildModel_variables_group)
             self$.addOption(private$..buildModel_window)
             self$.addOption(private$..buildModel_scaling)
             self$.addOption(private$..buildModel_show_matrix)
@@ -461,6 +466,7 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         buildModel_variables_onehot = function() private$..buildModel_variables_onehot$value,
         buildModel_variables_actor = function() private$..buildModel_variables_actor$value,
         buildModel_variables_session = function() private$..buildModel_variables_session$value,
+        buildModel_variables_group = function() private$..buildModel_variables_group$value,
         buildModel_window = function() private$..buildModel_window$value,
         buildModel_scaling = function() private$..buildModel_scaling$value,
         buildModel_show_matrix = function() private$..buildModel_show_matrix$value,
@@ -518,6 +524,7 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..buildModel_variables_onehot = NA,
         ..buildModel_variables_actor = NA,
         ..buildModel_variables_session = NA,
+        ..buildModel_variables_group = NA,
         ..buildModel_window = NA,
         ..buildModel_scaling = NA,
         ..buildModel_show_matrix = NA,
@@ -631,6 +638,7 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_onehot",
                     "buildModel_variables_actor",
                     "buildModel_variables_session",
+                    "buildModel_variables_group",
                     "buildModel_window",
                     "buildModel_scaling")))
             self$add(jmvcore::Image$new(
@@ -644,6 +652,7 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_onehot",
                     "buildModel_variables_actor",
                     "buildModel_variables_session",
+                    "buildModel_variables_group",
                     "buildModel_window",
                     "buildModel_scaling",
                     "buildModel_plot_cut",
@@ -663,6 +672,7 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_onehot",
                     "buildModel_variables_actor",
                     "buildModel_variables_session",
+                    "buildModel_variables_group",
                     "buildModel_window",
                     "buildModel_scaling")))
             self$add(jmvcore::Image$new(
@@ -676,6 +686,7 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_onehot",
                     "buildModel_variables_actor",
                     "buildModel_variables_session",
+                    "buildModel_variables_group",
                     "buildModel_window",
                     "buildModel_scaling")))
             self$add(jmvcore::Preformatted$new(
@@ -691,6 +702,7 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_onehot",
                     "buildModel_variables_actor",
                     "buildModel_variables_session",
+                    "buildModel_variables_group",
                     "buildModel_window",
                     "buildModel_scaling",
                     "centrality_loops",
@@ -711,12 +723,16 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible=FALSE,
                 columns=list(
                     list(
+                        `name`="group", 
+                        `type`="text"),
+                    list(
                         `name`="state", 
                         `type`="text")),
                 clearWith=list(
                     "buildModel_variables_onehot",
                     "buildModel_variables_actor",
                     "buildModel_variables_session",
+                    "buildModel_variables_group",
                     "buildModel_window",
                     "buildModel_scaling",
                     "centrality_loops",
@@ -741,6 +757,7 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_onehot",
                     "buildModel_variables_actor",
                     "buildModel_variables_session",
+                    "buildModel_variables_group",
                     "buildModel_window",
                     "buildModel_scaling",
                     "centrality_loops",
@@ -772,6 +789,7 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_onehot",
                     "buildModel_variables_actor",
                     "buildModel_variables_session",
+                    "buildModel_variables_group",
                     "buildModel_window",
                     "buildModel_scaling",
                     "community_methods",
@@ -792,6 +810,7 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_onehot",
                     "buildModel_variables_actor",
                     "buildModel_variables_session",
+                    "buildModel_variables_group",
                     "buildModel_window",
                     "buildModel_scaling",
                     "community_methods",
@@ -807,6 +826,7 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_onehot",
                     "buildModel_variables_actor",
                     "buildModel_variables_session",
+                    "buildModel_variables_group",
                     "buildModel_window",
                     "buildModel_scaling",
                     "community_methods",
@@ -824,6 +844,7 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_onehot",
                     "buildModel_variables_actor",
                     "buildModel_variables_session",
+                    "buildModel_variables_group",
                     "buildModel_window",
                     "buildModel_scaling",
                     "cliques_size",
@@ -839,6 +860,7 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_onehot",
                     "buildModel_variables_actor",
                     "buildModel_variables_session",
+                    "buildModel_variables_group",
                     "buildModel_window",
                     "buildModel_scaling",
                     "cliques_size",
@@ -900,6 +922,7 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_onehot",
                     "buildModel_variables_actor",
                     "buildModel_variables_session",
+                    "buildModel_variables_group",
                     "buildModel_window",
                     "buildModel_scaling",
                     "bootstrap_iteration",
@@ -919,6 +942,7 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_onehot",
                     "buildModel_variables_actor",
                     "buildModel_variables_session",
+                    "buildModel_variables_group",
                     "buildModel_window",
                     "buildModel_scaling",
                     "bootstrap_iteration",
@@ -962,6 +986,7 @@ OneHotTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param buildModel_variables_onehot .
 #' @param buildModel_variables_actor .
 #' @param buildModel_variables_session .
+#' @param buildModel_variables_group .
 #' @param buildModel_window .
 #' @param buildModel_scaling .
 #' @param buildModel_show_matrix .
@@ -1053,6 +1078,7 @@ OneHotTNA <- function(
     buildModel_variables_onehot,
     buildModel_variables_actor,
     buildModel_variables_session,
+    buildModel_variables_group,
     buildModel_window = 1,
     buildModel_scaling = "noScaling",
     buildModel_show_matrix = FALSE,
@@ -1113,18 +1139,21 @@ OneHotTNA <- function(
     if ( ! missing(buildModel_variables_onehot)) buildModel_variables_onehot <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_onehot))
     if ( ! missing(buildModel_variables_actor)) buildModel_variables_actor <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_actor))
     if ( ! missing(buildModel_variables_session)) buildModel_variables_session <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_session))
+    if ( ! missing(buildModel_variables_group)) buildModel_variables_group <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_group))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(buildModel_variables_onehot), buildModel_variables_onehot, NULL),
             `if`( ! missing(buildModel_variables_actor), buildModel_variables_actor, NULL),
-            `if`( ! missing(buildModel_variables_session), buildModel_variables_session, NULL))
+            `if`( ! missing(buildModel_variables_session), buildModel_variables_session, NULL),
+            `if`( ! missing(buildModel_variables_group), buildModel_variables_group, NULL))
 
 
     options <- OneHotTNAOptions$new(
         buildModel_variables_onehot = buildModel_variables_onehot,
         buildModel_variables_actor = buildModel_variables_actor,
         buildModel_variables_session = buildModel_variables_session,
+        buildModel_variables_group = buildModel_variables_group,
         buildModel_window = buildModel_window,
         buildModel_scaling = buildModel_scaling,
         buildModel_show_matrix = buildModel_show_matrix,

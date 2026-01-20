@@ -21,6 +21,10 @@ options:
       title: Session (Optional)
       type: Variable
 
+    - name: buildModel_variables_group
+      title: Group (Optional)
+      type: Variable
+
     - name: buildModel_window
       title: Window Size
       type: Integer

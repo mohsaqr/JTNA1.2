@@ -18,9 +18,11 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       onehot_cols <- self$options$buildModel_variables_onehot
       actor_col <- self$options$buildModel_variables_actor
       session_col <- self$options$buildModel_variables_session
+      group_col <- self$options$buildModel_variables_group
       window_size <- self$options$buildModel_window
 
       model <- NULL
+      is_group_model <- !is.null(group_col)
 
       if (self$results$buildModelContent$isFilled()) {
         model <- self$results$buildModelContent$state
@@ -35,6 +37,12 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ifelse(df[[col]] == 1, col, NA)
           }))
           colnames(seq_data) <- onehot_cols
+
+          # Track group variable if provided
+          group_vector <- NULL
+          if (is_group_model) {
+            seq_data$..group_var.. <- as.character(df[[group_col]])
+          }
 
           # Step 2: Aggregate by actor + session/window if provided
           if (!is.null(actor_col) || !is.null(session_col)) {
@@ -56,8 +64,9 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Aggregate: take first non-NA value per column per group
             seq_data$..group_id.. <- group_id
+            cols_to_agg <- if (is_group_model) c(onehot_cols, "..group_var..") else onehot_cols
             seq_data <- aggregate(
-              seq_data[onehot_cols],
+              seq_data[cols_to_agg],
               by = list(..group_id.. = seq_data$..group_id..),
               FUN = function(x) {
                 non_na <- na.omit(x)
@@ -69,8 +78,9 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # No actor/session, just window by rows
             row_window <- floor((seq_len(nrow(df)) - 1) / window_size)
             seq_data$..group_id.. <- row_window
+            cols_to_agg <- if (is_group_model) c(onehot_cols, "..group_var..") else onehot_cols
             seq_data <- aggregate(
-              seq_data[onehot_cols],
+              seq_data[cols_to_agg],
               by = list(..group_id.. = seq_data$..group_id..),
               FUN = function(x) {
                 non_na <- na.omit(x)
@@ -80,12 +90,22 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             seq_data$..group_id.. <- NULL
           }
 
-          # Step 3: Build model using tna::build_model with type="co-occurrence"
+          # Extract group vector and remove from seq_data
+          if (is_group_model) {
+            group_vector <- seq_data$..group_var..
+            seq_data$..group_var.. <- NULL
+          }
+
+          # Step 3: Build model
           if (scaling == "noScaling") {
             scaling <- character(0L)
           }
 
-          model <- tna::build_model(x = seq_data, type = "co-occurrence", scaling = scaling)
+          if (is_group_model) {
+            model <- tna::group_model(x = seq_data, group = group_vector, type = "co-occurrence", scaling = scaling)
+          } else {
+            model <- tna::build_model(x = seq_data, type = "co-occurrence", scaling = scaling)
+          }
 
         }, error = function(e) {
           self$results$errorText$setContent(paste("Error:", e$message))
@@ -141,7 +161,15 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Populate table
         if (!is.null(cent) && is.data.frame(cent) && nrow(cent) > 0) {
           for (i in 1:nrow(cent)) {
-            rowValues <- list(state = rownames(cent)[i])
+            rowValues <- list()
+            # Add group column if it's a group model
+            if ("group" %in% colnames(cent)) {
+              rowValues$group <- as.character(cent[i, "group"])
+              rowValues$state <- as.character(cent[i, "state"])
+            } else {
+              rowValues$group <- ""
+              rowValues$state <- rownames(cent)[i]
+            }
             for (measure in vectorCharacter) {
               if (measure %in% colnames(cent)) rowValues[[measure]] <- as.numeric(cent[i, measure])
             }
@@ -254,6 +282,15 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       if (is.null(plotData)) return(FALSE)
 
       tryCatch({
+        # Check if it's a group model (list of models)
+        if (inherits(plotData, "group_tna") || (is.list(plotData) && length(plotData) > 1 && !inherits(plotData, "tna"))) {
+          n_groups <- length(plotData)
+          if (n_groups <= 4) {
+            par(mfrow = c(2, 2))
+          } else {
+            par(mfrow = c(ceiling(sqrt(n_groups)), ceiling(sqrt(n_groups))))
+          }
+        }
         plot(x = plotData,
           cut = self$options$buildModel_plot_cut,
           minimum = self$options$buildModel_plot_min_value,
@@ -299,6 +336,15 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       plotData <- self$results$community_plot$state
       if (is.null(plotData) || !self$options$community_show_plot) return(FALSE)
       methods <- self$options$community_methods
+      # Check if it's a group model result
+      if (is.list(plotData) && length(plotData) > 1) {
+        n_groups <- length(plotData)
+        if (n_groups <= 4) {
+          par(mfrow = c(2, 2))
+        } else {
+          par(mfrow = c(ceiling(sqrt(n_groups)), ceiling(sqrt(n_groups))))
+        }
+      }
       plot(x = plotData, method = methods)
       TRUE
     },
@@ -306,6 +352,15 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     .showCliquesPlot = function(image, ...) {
       plotData <- self$results$cliques_plot$state
       if (is.null(plotData) || !self$options$cliques_show_plot) return(FALSE)
+      # Check if it's a group model result
+      if (is.list(plotData) && length(plotData) > 1 && !inherits(plotData, "tna_cliques")) {
+        n_groups <- length(plotData)
+        if (n_groups <= 4) {
+          par(mfrow = c(2, 2))
+        } else {
+          par(mfrow = c(ceiling(sqrt(n_groups)), ceiling(sqrt(n_groups))))
+        }
+      }
       plot(x = plotData, ask = FALSE,
         cut = self$options$cliques_plot_cut,
         minimum = self$options$cliques_plot_min_value,
@@ -320,6 +375,15 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     .showBootstrapPlot = function(image, ...) {
       plotData <- self$results$bootstrap_plot$state
       if (is.null(plotData) || !self$options$bootstrap_show_plot) return(FALSE)
+      # Check if it's a group model result
+      if (is.list(plotData) && length(plotData) > 1) {
+        n_groups <- length(plotData)
+        if (n_groups <= 4) {
+          par(mfrow = c(2, 2))
+        } else {
+          par(mfrow = c(ceiling(sqrt(n_groups)), ceiling(sqrt(n_groups))))
+        }
+      }
       plot(x = plotData,
         cut = self$options$bootstrap_plot_cut,
         minimum = self$options$bootstrap_plot_min_value,
