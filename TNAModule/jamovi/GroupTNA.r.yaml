@@ -8,6 +8,11 @@ refs:
   - TNALAK
 items:
 
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: True
+
     - name: errorText
       title: Error
       type: Preformatted

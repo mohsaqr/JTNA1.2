@@ -7,6 +7,23 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     .run = function() {
       library("tna")
 
+      # Set instructions content
+      self$results$instructions$setContent(
+        '<div style="border: 2px solid #e6f4fe; border-radius: 15px; padding: 15px; background-color: #e6f4fe; margin-top: 10px;">
+        <div style="text-align:justify;">
+        <ul>
+          <li>Data should have <b>one-hot encoded columns</b> (0/1) for each action.</li>
+          <li><b>One-Hot Columns</b>: Select binary columns representing actions (required, at least 2). Column names become node labels.</li>
+          <li><b>Actor</b>: Column identifying individuals (optional).</li>
+          <li><b>Session</b>: Column identifying sessions or time periods (optional).</li>
+          <li><b>Group</b>: Column for group comparison (optional). Separate networks will be built for each group.</li>
+          <li><b>Window Size</b>: Actions within this many rows are considered co-occurring.</li>
+          <li>The <b>tna</b> R package is used. See <a href="https://doi.org/10.1177/01466216251348840" target="_blank">Tikka et al. (2025)</a>.</li>
+        </ul>
+        </div>
+        </div>'
+      )
+
       # Check if one-hot columns are provided
       if (length(self$options$buildModel_variables_onehot) < 2) {
         self$results$errorText$setContent("Please select at least 2 one-hot columns (actions)")

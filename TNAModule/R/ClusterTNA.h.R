@@ -820,6 +820,7 @@ ClusterTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "ClusterTNAResults",
     inherit = jmvcore::Group,
     active = list(
+        instructions = function() private$.items[["instructions"]],
         errorText = function() private$.items[["errorText"]],
         tnaTitle = function() private$.items[["tnaTitle"]],
         buildModelTitle = function() private$.items[["buildModelTitle"]],
@@ -860,6 +861,11 @@ ClusterTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "JTNA",
                     "TNA",
                     "TNALAK"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="instructions",
+                title="Instructions",
+                visible=TRUE))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="errorText",
@@ -1493,10 +1499,16 @@ ClusterTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' 
 #' @param data .
-#' @param buildModel_variables_long_action .
-#' @param buildModel_variables_long_actor .
-#' @param buildModel_variables_long_time .
-#' @param buildModel_variables_long_order .
+#' @param buildModel_variables_long_action The column containing the
+#'   actions/states/events to analyze. Each unique value becomes a node in the
+#'   network.
+#' @param buildModel_variables_long_actor The column identifying
+#'   individuals/actors. Actors will be clustered based on similarity of their
+#'   transition patterns.
+#' @param buildModel_variables_long_time Timestamp column for ordering events
+#'   chronologically. Use this OR Order, not both.
+#' @param buildModel_variables_long_order Numeric column indicating the
+#'   sequence position of each event. Use this OR Time, not both.
 #' @param clustering_k .
 #' @param clustering_run .
 #' @param buildModel_type .
@@ -1577,6 +1589,7 @@ ClusterTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param compare_sequences_correction .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$errorText} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$tnaTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$buildModelTitle} \tab \tab \tab \tab \tab a preformatted \cr

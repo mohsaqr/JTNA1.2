@@ -7,6 +7,22 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     .run = function() {
       library("tna")
 
+      # Set instructions content
+      self$results$instructions$setContent(
+        '<div style="border: 2px solid #e6f4fe; border-radius: 15px; padding: 15px; background-color: #e6f4fe; margin-top: 10px;">
+        <div style="text-align:justify;">
+        <ul>
+          <li>Data should be in <b>long format</b> with one row per event/action.</li>
+          <li><b>Action</b>: Column containing the actions/states/events (required).</li>
+          <li><b>Actor</b>: Column identifying individuals (required).</li>
+          <li><b>Group</b>: Column defining groups for comparison (required). Separate networks will be built for each group.</li>
+          <li><b>Time</b> or <b>Order</b>: For ordering events chronologically (optional).</li>
+          <li>The <b>tna</b> R package is used. See <a href="https://doi.org/10.1177/01466216251348840" target="_blank">Tikka et al. (2025)</a>.</li>
+        </ul>
+        </div>
+        </div>'
+      )
+
       type <- self$options$buildModel_type
       scaling <- self$options$buildModel_scaling
 

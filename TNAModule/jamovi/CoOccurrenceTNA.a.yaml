@@ -12,15 +12,19 @@ options:
     - name: buildModel_variables_long_action
       title: Action
       type: Variable
+      description: The column containing the actions/states/events to analyze. Each unique value becomes a node in the co-occurrence network.
     - name: buildModel_variables_long_actor
       title: Actor (Optional)
       type: Variable
+      description: The column identifying individuals/actors. Used to separate sequences by person. If omitted, all data is treated as one sequence.
     - name: buildModel_variables_long_time
       title: Time (Optional)
       type: Variable
+      description: Timestamp column for ordering events chronologically. Use this OR Order, not both.
     - name: buildModel_variables_long_order
       title: Order (Optional)
       type: Variable
+      description: Numeric column indicating the sequence position of each event. Use this OR Time, not both.
 
     ### BUILD MODEL DATA
 

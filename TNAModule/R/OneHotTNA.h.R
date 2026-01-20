@@ -672,6 +672,7 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "OneHotTNAResults",
     inherit = jmvcore::Group,
     active = list(
+        instructions = function() private$.items[["instructions"]],
         errorText = function() private$.items[["errorText"]],
         tnaTitle = function() private$.items[["tnaTitle"]],
         buildModelTitle = function() private$.items[["buildModelTitle"]],
@@ -709,6 +710,11 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "JTNA",
                     "TNA",
                     "TNALAK"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="instructions",
+                title="Instructions",
+                visible=TRUE))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="errorText",
@@ -1150,11 +1156,18 @@ OneHotTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' 
 #' @param data .
-#' @param buildModel_variables_onehot .
-#' @param buildModel_variables_actor .
-#' @param buildModel_variables_session .
-#' @param buildModel_variables_group .
-#' @param buildModel_window .
+#' @param buildModel_variables_onehot Select the binary (0/1) columns
+#'   representing actions. Each column should contain 1 when the action
+#'   occurred, 0 otherwise. Column names will become node labels in the network.
+#' @param buildModel_variables_actor The column identifying
+#'   individuals/actors. If provided, co-occurrences are calculated within each
+#'   actor's data.
+#' @param buildModel_variables_session The column identifying sessions or time
+#'   periods. Used to group observations within actors.
+#' @param buildModel_variables_group The column defining groups for
+#'   comparison. If provided, separate networks will be built for each group.
+#' @param buildModel_window The window size for detecting co-occurrences.
+#'   Actions within this many rows of each other are considered co-occurring.
 #' @param buildModel_scaling .
 #' @param buildModel_show_matrix .
 #' @param buildModel_show_plot .
@@ -1219,6 +1232,7 @@ OneHotTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param permutation_level .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$errorText} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$tnaTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$buildModelTitle} \tab \tab \tab \tab \tab a preformatted \cr

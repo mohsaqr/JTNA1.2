@@ -648,6 +648,7 @@ GroupCoOccurrenceTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
     "GroupCoOccurrenceTNAResults",
     inherit = jmvcore::Group,
     active = list(
+        instructions = function() private$.items[["instructions"]],
         errorText = function() private$.items[["errorText"]],
         tnaTitle = function() private$.items[["tnaTitle"]],
         buildModelTitle = function() private$.items[["buildModelTitle"]],
@@ -683,6 +684,11 @@ GroupCoOccurrenceTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                     "JTNA",
                     "TNA",
                     "TNALAK"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="instructions",
+                title="Instructions",
+                visible=TRUE))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="errorText",
@@ -1151,11 +1157,18 @@ GroupCoOccurrenceTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #'
 #' 
 #' @param data .
-#' @param buildModel_variables_long_action .
-#' @param buildModel_variables_long_actor .
-#' @param buildModel_variables_long_time .
-#' @param buildModel_variables_long_order .
-#' @param buildModel_variables_long_group .
+#' @param buildModel_variables_long_action The column containing the
+#'   actions/states/events to analyze. Each unique value becomes a node in the
+#'   co-occurrence network.
+#' @param buildModel_variables_long_actor The column identifying
+#'   individuals/actors. Used to separate sequences by person.
+#' @param buildModel_variables_long_time Timestamp column for ordering events
+#'   chronologically. Use this OR Order, not both.
+#' @param buildModel_variables_long_order Numeric column indicating the
+#'   sequence position of each event. Use this OR Time, not both.
+#' @param buildModel_variables_long_group The column defining groups for
+#'   comparison (e.g., treatment vs control). A separate co-occurrence network
+#'   will be built for each group.
 #' @param buildModel_scaling .
 #' @param buildModel_show_matrix .
 #' @param buildModel_threshold .
@@ -1218,6 +1231,7 @@ GroupCoOccurrenceTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' @param permutation_level .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$errorText} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$tnaTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$buildModelTitle} \tab \tab \tab \tab \tab a preformatted \cr

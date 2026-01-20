@@ -12,18 +12,22 @@ options:
     - name: buildModel_variables_onehot
       title: One-Hot Columns (Actions)
       type: Variables
+      description: Select the binary (0/1) columns representing actions. Each column should contain 1 when the action occurred, 0 otherwise. Column names will become node labels in the network.
 
     - name: buildModel_variables_actor
       title: Actor (Optional)
       type: Variable
+      description: The column identifying individuals/actors. If provided, co-occurrences are calculated within each actor's data.
 
     - name: buildModel_variables_session
       title: Session (Optional)
       type: Variable
+      description: The column identifying sessions or time periods. Used to group observations within actors.
 
     - name: buildModel_variables_group
       title: Group (Optional)
       type: Variable
+      description: The column defining groups for comparison. If provided, separate networks will be built for each group.
 
     - name: buildModel_window
       title: Window Size
@@ -31,6 +35,7 @@ options:
       default: 1
       min: 1
       max: 100
+      description: The window size for detecting co-occurrences. Actions within this many rows of each other are considered co-occurring.
 
     ### BUILD MODEL DATA
 
