@@ -93,6 +93,7 @@ options:
     - name: buildModel_plot_layout
       title: Layout
       type: List
+      default: circle
       options:
         - title: Circle
           name: circle
@@ -432,6 +433,7 @@ options:
     - name: bootstrap_plot_layout
       title: Layout
       type: List
+      default: circle
       options:
         - title: Circle
           name: circle
