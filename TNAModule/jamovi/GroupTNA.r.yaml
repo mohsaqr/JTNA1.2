@@ -535,4 +535,67 @@ items:
         - compare_sequences_min_freq
         - compare_sequences_correction
 
+    ### SEQUENCE INDICES
+
+    - name: indicesTitle
+      type: Preformatted
+      title: Sequence Indices
+      visible: False
+
+    - name: indicesTable
+      type: Table
+      title: Sequence Indices
+      visible: False
+      columns:
+        - name: sequence_id
+          title: Seq
+          type: integer
+        - name: actor
+          title: Actor
+          type: text
+        - name: group
+          title: Group
+          type: text
+        - name: valid_n
+          title: Valid N
+          type: integer
+        - name: unique_states
+          title: Unique
+          type: integer
+        - name: longitudinal_entropy
+          title: Entropy
+          type: number
+        - name: simpson_diversity
+          title: Simpson
+          type: number
+        - name: mean_spell_duration
+          title: Mean Spell
+          type: number
+        - name: self_loop_tendency
+          title: Self-Loop
+          type: number
+        - name: transition_rate
+          title: Trans Rate
+          type: number
+        - name: first_state
+          title: First
+          type: text
+        - name: last_state
+          title: Last
+          type: text
+        - name: dominant_state
+          title: Dominant
+          type: text
+        - name: complexity_index
+          title: Complexity
+          type: number
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_variables_long_group
+        - indices_favorable
+        - indices_omega
+
 ...

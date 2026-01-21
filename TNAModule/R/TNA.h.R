@@ -105,7 +105,12 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             pattern_ends_with = NULL,
             pattern_contains = NULL,
             pattern_table_max_rows = 20,
-            pattern_table_show_all = FALSE, ...) {
+            pattern_table_show_all = FALSE,
+            indices_show_table = FALSE,
+            indices_favorable = NULL,
+            indices_omega = 1,
+            indices_table_max_rows = 50,
+            indices_table_show_all = FALSE, ...) {
 
             super$initialize(
                 package="JTNA",
@@ -682,6 +687,30 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "pattern_table_show_all",
                 pattern_table_show_all,
                 default=FALSE)
+            private$..indices_show_table <- jmvcore::OptionBool$new(
+                "indices_show_table",
+                indices_show_table,
+                default=FALSE)
+            private$..indices_favorable <- jmvcore::OptionLevel$new(
+                "indices_favorable",
+                indices_favorable,
+                variable="(buildModel_variables_long_action)")
+            private$..indices_omega <- jmvcore::OptionNumber$new(
+                "indices_omega",
+                indices_omega,
+                default=1,
+                min=0.01,
+                max=10)
+            private$..indices_table_max_rows <- jmvcore::OptionInteger$new(
+                "indices_table_max_rows",
+                indices_table_max_rows,
+                default=50,
+                min=1,
+                max=10000)
+            private$..indices_table_show_all <- jmvcore::OptionBool$new(
+                "indices_table_show_all",
+                indices_table_show_all,
+                default=FALSE)
 
             self$.addOption(private$..buildModel_variables_long_action)
             self$.addOption(private$..buildModel_variables_long_actor)
@@ -783,6 +812,11 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..pattern_contains)
             self$.addOption(private$..pattern_table_max_rows)
             self$.addOption(private$..pattern_table_show_all)
+            self$.addOption(private$..indices_show_table)
+            self$.addOption(private$..indices_favorable)
+            self$.addOption(private$..indices_omega)
+            self$.addOption(private$..indices_table_max_rows)
+            self$.addOption(private$..indices_table_show_all)
         }),
     active = list(
         buildModel_variables_long_action = function() private$..buildModel_variables_long_action$value,
@@ -884,7 +918,12 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         pattern_ends_with = function() private$..pattern_ends_with$value,
         pattern_contains = function() private$..pattern_contains$value,
         pattern_table_max_rows = function() private$..pattern_table_max_rows$value,
-        pattern_table_show_all = function() private$..pattern_table_show_all$value),
+        pattern_table_show_all = function() private$..pattern_table_show_all$value,
+        indices_show_table = function() private$..indices_show_table$value,
+        indices_favorable = function() private$..indices_favorable$value,
+        indices_omega = function() private$..indices_omega$value,
+        indices_table_max_rows = function() private$..indices_table_max_rows$value,
+        indices_table_show_all = function() private$..indices_table_show_all$value),
     private = list(
         ..buildModel_variables_long_action = NA,
         ..buildModel_variables_long_actor = NA,
@@ -985,7 +1024,12 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..pattern_ends_with = NA,
         ..pattern_contains = NA,
         ..pattern_table_max_rows = NA,
-        ..pattern_table_show_all = NA)
+        ..pattern_table_show_all = NA,
+        ..indices_show_table = NA,
+        ..indices_favorable = NA,
+        ..indices_omega = NA,
+        ..indices_table_max_rows = NA,
+        ..indices_table_show_all = NA)
 )
 
 TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -1025,7 +1069,9 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         permutationTable = function() private$.items[["permutationTable"]],
         sequences_plot = function() private$.items[["sequences_plot"]],
         patternTitle = function() private$.items[["patternTitle"]],
-        patternTable = function() private$.items[["patternTable"]]),
+        patternTable = function() private$.items[["patternTable"]],
+        indicesTitle = function() private$.items[["indicesTitle"]],
+        indicesTable = function() private$.items[["indicesTable"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -1683,7 +1729,78 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "pattern_min_count",
                     "pattern_starts_with",
                     "pattern_ends_with",
-                    "pattern_contains")))}))
+                    "pattern_contains")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="indicesTitle",
+                title="Sequence Indices",
+                visible=FALSE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="indicesTable",
+                title="Sequence Indices",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="sequence_id", 
+                        `title`="Seq", 
+                        `type`="integer"),
+                    list(
+                        `name`="actor", 
+                        `title`="Actor", 
+                        `type`="text"),
+                    list(
+                        `name`="valid_n", 
+                        `title`="Valid N", 
+                        `type`="integer"),
+                    list(
+                        `name`="unique_states", 
+                        `title`="Unique", 
+                        `type`="integer"),
+                    list(
+                        `name`="longitudinal_entropy", 
+                        `title`="Entropy", 
+                        `type`="number"),
+                    list(
+                        `name`="simpson_diversity", 
+                        `title`="Simpson", 
+                        `type`="number"),
+                    list(
+                        `name`="mean_spell_duration", 
+                        `title`="Mean Spell", 
+                        `type`="number"),
+                    list(
+                        `name`="self_loop_tendency", 
+                        `title`="Self-Loop", 
+                        `type`="number"),
+                    list(
+                        `name`="transition_rate", 
+                        `title`="Trans Rate", 
+                        `type`="number"),
+                    list(
+                        `name`="first_state", 
+                        `title`="First", 
+                        `type`="text"),
+                    list(
+                        `name`="last_state", 
+                        `title`="Last", 
+                        `type`="text"),
+                    list(
+                        `name`="dominant_state", 
+                        `title`="Dominant", 
+                        `type`="text"),
+                    list(
+                        `name`="complexity_index", 
+                        `title`="Complexity", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "indices_group",
+                    "indices_favorable",
+                    "indices_omega")))}))
 
 TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "TNABase",
@@ -1816,6 +1933,12 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param pattern_contains .
 #' @param pattern_table_max_rows .
 #' @param pattern_table_show_all .
+#' @param indices_show_table .
+#' @param indices_favorable State considered favorable for computing
+#'   integrative potential.
+#' @param indices_omega Parameter for computing integrative potential.
+#' @param indices_table_max_rows .
+#' @param indices_table_show_all .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -1857,6 +1980,8 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$sequences_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$patternTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$patternTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$indicesTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$indicesTable} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -1967,7 +2092,12 @@ TNA <- function(
     pattern_ends_with,
     pattern_contains,
     pattern_table_max_rows = 20,
-    pattern_table_show_all = FALSE) {
+    pattern_table_show_all = FALSE,
+    indices_show_table = FALSE,
+    indices_favorable,
+    indices_omega = 1,
+    indices_table_max_rows = 50,
+    indices_table_show_all = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("TNA requires jmvcore to be installed (restart may be required)")
@@ -2085,7 +2215,12 @@ TNA <- function(
         pattern_ends_with = pattern_ends_with,
         pattern_contains = pattern_contains,
         pattern_table_max_rows = pattern_table_max_rows,
-        pattern_table_show_all = pattern_table_show_all)
+        pattern_table_show_all = pattern_table_show_all,
+        indices_show_table = indices_show_table,
+        indices_favorable = indices_favorable,
+        indices_omega = indices_omega,
+        indices_table_max_rows = indices_table_max_rows,
+        indices_table_show_all = indices_table_show_all)
 
     analysis <- TNAClass$new(
         options = options,

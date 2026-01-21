@@ -666,6 +666,130 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         self$results$compareSequencesTable$setVisible(self$options$compare_sequences_show_table)
       }
+
+      ### Sequence Indices
+      if(self$options$indices_show_table) {
+        self$results$indicesTitle$setContent("Calculating Sequence Indices...")
+        self$results$indicesTitle$setVisible(TRUE)
+
+        tryCatch({
+          # Prepare data for sequence indices
+          action_col <- self$options$buildModel_variables_long_action
+          actor_col <- self$options$buildModel_variables_long_actor
+          time_col <- self$options$buildModel_variables_long_time
+          order_col <- self$options$buildModel_variables_long_order
+          group_col <- self$options$buildModel_variables_long_group
+
+          args_prepare_data <- list(
+            data = self$data,
+            action = action_col
+          )
+          if(!is.null(actor_col) && length(actor_col) > 0 && actor_col != "") {
+            args_prepare_data$actor <- actor_col
+          }
+          if(!is.null(time_col) && length(time_col) > 0 && time_col != "") {
+            args_prepare_data$time <- time_col
+          }
+          if(!is.null(order_col) && length(order_col) > 0 && order_col != "") {
+            args_prepare_data$order <- order_col
+          }
+
+          dataForIndices <- do.call(prepare_data, args_prepare_data)
+
+          if(is.null(dataForIndices)) {
+            self$results$indicesTitle$setContent("Error: Could not prepare sequence data")
+          } else {
+            seq_data <- dataForIndices$sequence_data
+
+            # Convert all columns to character (codyna requires character data)
+            seq_data <- as.data.frame(lapply(seq_data, as.character), stringsAsFactors = FALSE)
+
+            # Call sequence_indices
+            fav_state <- self$options$indices_favorable
+            has_favorable <- !is.null(fav_state) && length(fav_state) > 0 && !identical(fav_state, "")
+            if (has_favorable) {
+              indices <- codyna::sequence_indices(
+                data = seq_data,
+                favorable = fav_state,
+                omega = self$options$indices_omega
+              )
+            } else {
+              indices <- codyna::sequence_indices(
+                data = seq_data,
+                omega = self$options$indices_omega
+              )
+            }
+
+            # Add sequence ID
+            indices$sequence_id <- 1:nrow(indices)
+
+            # Add actor if provided
+            if(!is.null(actor_col) && length(actor_col) > 0 && actor_col != "") {
+              unique_actors <- unique(self$data[[actor_col]])
+              indices$actor <- as.character(unique_actors)
+            } else {
+              indices$actor <- NA
+            }
+
+            # Add group if provided
+            if(!is.null(group_col) && length(group_col) > 0 && group_col != "") {
+              if(!is.null(actor_col) && length(actor_col) > 0 && actor_col != "") {
+                unique_actors <- unique(self$data[[actor_col]])
+                group_values <- sapply(unique_actors, function(a) {
+                  self$data[[group_col]][self$data[[actor_col]] == a][1]
+                })
+                indices$group <- as.character(group_values)
+              } else {
+                indices$group <- as.character(self$data[[group_col]][1])
+              }
+            } else {
+              indices$group <- NA
+            }
+
+            # Apply row limit
+            total_rows <- nrow(indices)
+            if (!isTRUE(self$options$indices_table_show_all)) {
+              max_rows <- self$options$indices_table_max_rows
+              if (total_rows > max_rows) {
+                indices <- indices[1:max_rows, ]
+              }
+            }
+
+            # Populate the table
+            if(nrow(indices) > 0) {
+              for(i in 1:nrow(indices)) {
+                self$results$indicesTable$addRow(rowKey=i, values=list(
+                  sequence_id = indices$sequence_id[i],
+                  actor = if(is.na(indices$actor[i])) "" else as.character(indices$actor[i]),
+                  group = if(is.na(indices$group[i])) "" else as.character(indices$group[i]),
+                  valid_n = as.integer(indices$valid_n[i]),
+                  unique_states = as.integer(indices$unique_states[i]),
+                  longitudinal_entropy = round(indices$longitudinal_entropy[i], 3),
+                  simpson_diversity = round(indices$simpson_diversity[i], 3),
+                  mean_spell_duration = round(indices$mean_spell_duration[i], 3),
+                  self_loop_tendency = round(indices$self_loop_tendency[i], 3),
+                  transition_rate = round(indices$transition_rate[i], 3),
+                  first_state = as.character(indices$first_state[i]),
+                  last_state = as.character(indices$last_state[i]),
+                  dominant_state = as.character(indices$dominant_state[i]),
+                  complexity_index = round(indices$complexity_index[i], 3)
+                ))
+              }
+
+              # Show count in title
+              if (nrow(indices) < total_rows) {
+                self$results$indicesTitle$setContent(paste("Showing", nrow(indices), "of", total_rows, "sequences"))
+              } else {
+                self$results$indicesTitle$setContent(paste("Sequence Indices for", total_rows, "sequences"))
+              }
+            }
+
+            self$results$indicesTable$setVisible(TRUE)
+          }
+        }, error = function(e) {
+          self$results$indicesTitle$setContent(paste("Sequence Indices error:", e$message))
+        })
+      }
     },
     .showBuildModelPlot=function(image, ...) {
       plotData <- self$results$buildModelContent$state

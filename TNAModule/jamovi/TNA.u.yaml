@@ -682,3 +682,40 @@ children:
                 format: number
               - type: CheckBox
                 name: pattern_table_show_all
+
+  - type: CollapseBox
+    label: Sequence Indices
+    collapsed: true
+    children:
+    - type: LayoutBox
+      margin: large
+      children:
+        - type: Label
+          label: Display Options
+          children:
+            - type: CheckBox
+              name: indices_show_table
+              label: Show indices table
+        - type: Label
+          label: Favorable State (optional)
+          children:
+            - type: LevelSelector
+              name: indices_favorable
+              variable: (buildModel_variables_long_action)
+    - type: LayoutBox
+      stretchFactor: 1
+      children:
+        - type: Label
+          label: Parameters
+          children:
+            - type: TextBox
+              name: indices_omega
+              format: number
+        - type: Label
+          label: Table Options
+          children:
+            - type: TextBox
+              name: indices_table_max_rows
+              format: number
+            - type: CheckBox
+              name: indices_table_show_all

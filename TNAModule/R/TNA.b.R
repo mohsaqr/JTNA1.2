@@ -618,7 +618,8 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     pattern_type <- self$options$pattern_type
 
                     # Build arguments for discover_patterns
-                    if(pattern_type == "custom" && nchar(self$options$pattern_custom) > 0) {
+                    custom_pattern <- self$options$pattern_custom
+                    if(pattern_type == "custom" && !is.null(custom_pattern) && nchar(custom_pattern) > 0) {
                         # Custom pattern search
                         patterns <- codyna::discover_patterns(
                             data = seq_data,
@@ -692,6 +693,118 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 }, error = function(e) {
                     self$results$patternTitle$setContent(paste("Pattern Discovery error:", e$message))
+                })
+            }
+
+            ### Sequence Indices
+            if(self$options$indices_show_table) {
+                self$results$indicesTitle$setContent("Step 1: Starting...")
+                self$results$indicesTitle$setVisible(TRUE)
+
+                tryCatch({
+                    self$results$indicesTitle$setContent("Step 2: Checking dataForTNA...")
+
+                    # Re-prepare data if dataForTNA is NULL (when model is cached)
+                    if(is.null(dataForTNA) && !is.null(self$data) && ncol(self$data) >= 1) {
+                        self$results$indicesTitle$setContent("Step 3: Preparing data...")
+                        action_col <- self$options$buildModel_variables_long_action
+                        actor_col <- self$options$buildModel_variables_long_actor
+                        time_col <- self$options$buildModel_variables_long_time
+                        order_col <- self$options$buildModel_variables_long_order
+
+                        # Check action_col is valid
+                        if(is.null(action_col) || length(action_col) == 0) {
+                            self$results$indicesTitle$setContent("Error: Action variable is required")
+                            return()
+                        }
+
+                        args_prepare_data <- list(
+                            data = self$data,
+                            action = action_col
+                        )
+                        if(!is.null(actor_col) && length(actor_col) > 0) {
+                            args_prepare_data$actor <- actor_col
+                        }
+                        if(!is.null(time_col) && length(time_col) > 0) {
+                            args_prepare_data$time <- time_col
+                        }
+                        if(!is.null(order_col) && length(order_col) > 0) {
+                            args_prepare_data$order <- order_col
+                        }
+
+                        self$results$indicesTitle$setContent("Step 4: Calling prepare_data...")
+                        dataForTNA <- do.call(prepare_data, args_prepare_data)
+                    }
+
+                    if(is.null(dataForTNA)) {
+                        self$results$indicesTitle$setContent("Error: dataForTNA is NULL")
+                        return()
+                    }
+
+                    self$results$indicesTitle$setContent("Preparing sequence data...")
+                    seq_data <- dataForTNA$sequence_data
+
+                    # Convert all columns to character (codyna requires character data)
+                    seq_data <- as.data.frame(lapply(seq_data, as.character), stringsAsFactors = FALSE)
+
+                    self$results$indicesTitle$setContent("Calculating indices...")
+                    # Call sequence_indices
+                    indices <- codyna::sequence_indices(data = seq_data)
+
+                    # Add sequence ID
+                    indices$sequence_id <- 1:nrow(indices)
+
+                    # Add actor if provided
+                    actor_col <- self$options$buildModel_variables_long_actor
+                    if(!is.null(actor_col) && length(actor_col) > 0 && actor_col != "") {
+                        # Get unique actors in order (same order as sequences)
+                        unique_actors <- unique(self$data[[actor_col]])
+                        indices$actor <- as.character(unique_actors)
+                    } else {
+                        indices$actor <- NA
+                    }
+
+                    # Apply row limit
+                    total_rows <- nrow(indices)
+                    if (!isTRUE(self$options$indices_table_show_all)) {
+                        max_rows <- self$options$indices_table_max_rows
+                        if (total_rows > max_rows) {
+                            indices <- indices[1:max_rows, ]
+                        }
+                    }
+
+                    # Populate the table
+                    if(nrow(indices) > 0) {
+                        for(i in 1:nrow(indices)) {
+                            self$results$indicesTable$addRow(rowKey=i, values=list(
+                                sequence_id = indices$sequence_id[i],
+                                actor = if(is.na(indices$actor[i])) "" else as.character(indices$actor[i]),
+                                valid_n = as.integer(indices$valid_n[i]),
+                                unique_states = as.integer(indices$unique_states[i]),
+                                longitudinal_entropy = round(indices$longitudinal_entropy[i], 3),
+                                simpson_diversity = round(indices$simpson_diversity[i], 3),
+                                mean_spell_duration = round(indices$mean_spell_duration[i], 3),
+                                self_loop_tendency = round(indices$self_loop_tendency[i], 3),
+                                transition_rate = round(indices$transition_rate[i], 3),
+                                first_state = as.character(indices$first_state[i]),
+                                last_state = as.character(indices$last_state[i]),
+                                dominant_state = as.character(indices$dominant_state[i]),
+                                complexity_index = round(indices$complexity_index[i], 3)
+                            ))
+                        }
+
+                        # Show count in title
+                        if (nrow(indices) < total_rows) {
+                            self$results$indicesTitle$setContent(paste("Showing", nrow(indices), "of", total_rows, "sequences"))
+                        } else {
+                            self$results$indicesTitle$setContent(paste("Sequence Indices for", total_rows, "sequences"))
+                        }
+                    }
+
+                    self$results$indicesTable$setVisible(TRUE)
+
+                }, error = function(e) {
+                    self$results$indicesTitle$setContent(paste("Sequence Indices error:", e$message))
                 })
             }
 

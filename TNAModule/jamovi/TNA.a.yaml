@@ -781,4 +781,37 @@ options:
       type: Bool
       default: False
 
+    ### SEQUENCE INDICES
+
+    - name: indices_show_table
+      title: Show Table
+      type: Bool
+      default: False
+
+    - name: indices_favorable
+      title: Favorable State
+      type: Level
+      variable: (buildModel_variables_long_action)
+      description: State considered favorable for computing integrative potential.
+
+    - name: indices_omega
+      title: Omega
+      type: Number
+      default: 1
+      min: 0.01
+      max: 10
+      description: Parameter for computing integrative potential.
+
+    - name: indices_table_max_rows
+      title: Max rows
+      type: Integer
+      default: 50
+      min: 1
+      max: 10000
+
+    - name: indices_table_show_all
+      title: Show all rows
+      type: Bool
+      default: False
+
 ...
