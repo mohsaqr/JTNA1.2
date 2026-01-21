@@ -29,5 +29,5 @@ Imports:
     ggplot2,
     codyna
 Remotes:
-    sonsoleslp/tna,
+    sonsoleslp/tna@dev,
     santikka/codyna

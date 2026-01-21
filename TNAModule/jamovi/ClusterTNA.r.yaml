@@ -13,6 +13,11 @@ items:
       type: Html
       visible: True
 
+    - name: clusteringNote
+      title: Note
+      type: Html
+      visible: True
+
     - name: errorText
       title: Error
       type: Preformatted
@@ -38,8 +43,6 @@ items:
         - clustering_k
         - clustering_dissimilarity
         - clustering_method
-        - clustering_weighted
-        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -598,5 +601,68 @@ items:
         - compare_sequences_sub_max
         - compare_sequences_min_freq
         - compare_sequences_correction
+
+    ### SEQUENCE INDICES
+
+    - name: indicesTitle
+      type: Preformatted
+      title: Sequence Indices
+      visible: False
+
+    - name: indicesTable
+      type: Table
+      title: Sequence Indices
+      visible: False
+      columns:
+        - name: sequence_id
+          title: Seq
+          type: integer
+        - name: actor
+          title: Actor
+          type: text
+        - name: cluster
+          title: Cluster
+          type: integer
+        - name: valid_n
+          title: Valid N
+          type: integer
+        - name: unique_states
+          title: Unique
+          type: integer
+        - name: longitudinal_entropy
+          title: Entropy
+          type: number
+        - name: simpson_diversity
+          title: Simpson
+          type: number
+        - name: mean_spell_duration
+          title: Mean Spell
+          type: number
+        - name: self_loop_tendency
+          title: Self-Loop
+          type: number
+        - name: transition_rate
+          title: Trans Rate
+          type: number
+        - name: first_state
+          title: First
+          type: text
+        - name: last_state
+          title: Last
+          type: text
+        - name: dominant_state
+          title: Dominant
+          type: text
+        - name: complexity_index
+          title: Complexity
+          type: number
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - clustering_k
+        - indices_favorable
+        - indices_omega
 
 ...

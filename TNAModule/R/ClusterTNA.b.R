@@ -23,6 +23,15 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         </div>'
       )
 
+      # Set clustering note
+      self$results$clusteringNote$setContent(
+        '<div style="border: 2px solid #e6f4fe; border-radius: 15px; padding: 15px; background-color: #e6f4fe; margin-top: 10px;">
+        <p style="text-align:center; font-weight: bold; color: #1a5276; font-size: 14px;">
+        ⏳ Note: Clustering may take time depending on your data size. Please be patient.
+        </p>
+        </div>'
+      )
+
       # Check required variables
       if(is.null(self$options$buildModel_variables_long_action) ||
          is.null(self$options$buildModel_variables_long_actor)) {
@@ -64,38 +73,20 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           do.call(tna::prepare_data, args)
         ))
 
-        # Step 2: Cluster using PAM (stringdist crashes in jamovi)
+        # Step 2: Cluster using tna::cluster_sequences()
         seqData <- as.data.frame(prepData$sequence_data)
 
-        # For distance calculation only, replace NA with placeholder
-        seqDataForDist <- seqData
-        seqDataForDist[is.na(seqDataForDist)] <- "__NA__"
-
-        # Convert to numeric matrix for distance
-        seqMatrix <- as.matrix(seqDataForDist)
-        seqNumeric <- apply(seqMatrix, 2, function(x) as.numeric(as.factor(x)))
-
-        # Use fast Manhattan distance (base R, compiled C code)
-        distMatrix <- dist(seqNumeric, method = "manhattan")
-
-        # Cluster with PAM
+        # Use tna's cluster_sequences function with user-selected options
         k <- self$options$clustering_k
-        pamResult <- cluster::pam(distMatrix, k = k)
-        assignments <- pamResult$clustering
-        sizes <- as.integer(table(assignments))
+        dissimilarity <- self$options$clustering_dissimilarity
+        method <- self$options$clustering_method
 
-        # Create tna_clustering object for group_model
-        # Use original seqData (with NAs intact, not "*")
-        clusters <- list(
+        clusters <- tna::cluster_sequences(
           data = seqData,
           k = k,
-          assignments = as.integer(assignments),
-          silhouette = pamResult$silinfo$avg.width,
-          sizes = sizes,
-          method = "pam",
-          distance = distMatrix
+          dissimilarity = dissimilarity,
+          method = method
         )
-        class(clusters) <- "tna_clustering"
 
         # Step 3: Build group model
         model <- suppressMessages(suppressWarnings(
@@ -388,6 +379,126 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
 
         self$results$compareSequencesTable$setVisible(self$options$compare_sequences_show_table)
+      }
+
+      ### Sequence Indices
+      if(self$options$indices_show_table) {
+        self$results$indicesTitle$setContent("Calculating Sequence Indices...")
+        self$results$indicesTitle$setVisible(TRUE)
+
+        tryCatch({
+          # Prepare data for sequence indices
+          action_col <- self$options$buildModel_variables_long_action
+          actor_col <- self$options$buildModel_variables_long_actor
+          time_col <- self$options$buildModel_variables_long_time
+          order_col <- self$options$buildModel_variables_long_order
+
+          # Check action_col is valid
+          if(is.null(action_col) || length(action_col) == 0) {
+            self$results$indicesTitle$setContent("Error: Action variable is required")
+          } else {
+            args_prepare_data <- list(
+              data = self$data,
+              action = action_col
+            )
+            if(!is.null(actor_col) && length(actor_col) > 0) {
+              args_prepare_data$actor <- actor_col
+            }
+            if(!is.null(time_col) && length(time_col) > 0) {
+              args_prepare_data$time <- time_col
+            }
+            if(!is.null(order_col) && length(order_col) > 0) {
+              args_prepare_data$order <- order_col
+            }
+
+            dataForIndices <- do.call(prepare_data, args_prepare_data)
+
+            if(is.null(dataForIndices)) {
+              self$results$indicesTitle$setContent("Error: Could not prepare sequence data")
+            } else {
+              seq_data <- dataForIndices$sequence_data
+
+              # Convert all columns to character (codyna requires character data)
+              seq_data <- as.data.frame(lapply(seq_data, as.character), stringsAsFactors = FALSE)
+
+              # Call sequence_indices
+              fav_state <- self$options$indices_favorable
+              has_favorable <- !is.null(fav_state) && length(fav_state) > 0 && !identical(fav_state, "")
+              if (has_favorable) {
+                indices <- codyna::sequence_indices(
+                  data = seq_data,
+                  favorable = fav_state,
+                  omega = self$options$indices_omega
+                )
+              } else {
+                indices <- codyna::sequence_indices(
+                  data = seq_data,
+                  omega = self$options$indices_omega
+                )
+              }
+
+              # Add sequence ID
+              indices$sequence_id <- 1:nrow(indices)
+
+              # Add actor if provided
+              if(!is.null(actor_col) && length(actor_col) > 0) {
+                unique_actors <- unique(self$data[[actor_col]])
+                indices$actor <- as.character(unique_actors)
+              } else {
+                indices$actor <- NA
+              }
+
+              # Add cluster assignments from the model
+              if(!is.null(model) && !is.null(model$clusters) && !is.null(model$clusters$assignments)) {
+                indices$cluster <- as.integer(model$clusters$assignments)
+              } else {
+                indices$cluster <- NA
+              }
+
+              # Apply row limit
+              total_rows <- nrow(indices)
+              if (!isTRUE(self$options$indices_table_show_all)) {
+                max_rows <- self$options$indices_table_max_rows
+                if (total_rows > max_rows) {
+                  indices <- indices[1:max_rows, ]
+                }
+              }
+
+              # Populate the table
+              if(nrow(indices) > 0) {
+                for(i in 1:nrow(indices)) {
+                  self$results$indicesTable$addRow(rowKey=i, values=list(
+                    sequence_id = indices$sequence_id[i],
+                    actor = if(is.na(indices$actor[i])) "" else as.character(indices$actor[i]),
+                    cluster = if(is.na(indices$cluster[i])) NA else as.integer(indices$cluster[i]),
+                    valid_n = as.integer(indices$valid_n[i]),
+                    unique_states = as.integer(indices$unique_states[i]),
+                    longitudinal_entropy = round(indices$longitudinal_entropy[i], 3),
+                    simpson_diversity = round(indices$simpson_diversity[i], 3),
+                    mean_spell_duration = round(indices$mean_spell_duration[i], 3),
+                    self_loop_tendency = round(indices$self_loop_tendency[i], 3),
+                    transition_rate = round(indices$transition_rate[i], 3),
+                    first_state = as.character(indices$first_state[i]),
+                    last_state = as.character(indices$last_state[i]),
+                    dominant_state = as.character(indices$dominant_state[i]),
+                    complexity_index = round(indices$complexity_index[i], 3)
+                  ))
+                }
+
+                # Show count in title
+                if (nrow(indices) < total_rows) {
+                  self$results$indicesTitle$setContent(paste("Showing", nrow(indices), "of", total_rows, "sequences"))
+                } else {
+                  self$results$indicesTitle$setContent(paste("Sequence Indices for", total_rows, "sequences"))
+                }
+              }
+
+              self$results$indicesTable$setVisible(TRUE)
+            }
+          }
+        }, error = function(e) {
+          self$results$indicesTitle$setContent(paste("Sequence Indices error:", e$message))
+        })
       }
     },
 
