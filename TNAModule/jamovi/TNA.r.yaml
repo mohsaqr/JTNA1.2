@@ -599,4 +599,51 @@ items:
         - sequences_include_na
         - sequences_tick
 
+    ### PATTERN DISCOVERY
+
+    - name: patternTitle
+      type: Preformatted
+      title: Pattern Discovery
+      visible: False
+
+    - name: patternTable
+      type: Table
+      title: Discovered Patterns
+      visible: False
+      columns:
+        - name: pattern
+          title: Pattern
+          type: text
+        - name: length
+          title: Length
+          type: integer
+        - name: count
+          title: Count
+          type: integer
+        - name: proportion
+          title: Proportion
+          type: number
+        - name: support
+          title: Support
+          type: number
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - pattern_type
+        - pattern_custom
+        - pattern_len_min
+        - pattern_len_max
+        - pattern_gap_min
+        - pattern_gap_max
+        - pattern_min_support
+        - pattern_min_count
+        - pattern_starts_with
+        - pattern_ends_with
+        - pattern_contains
+
 ...

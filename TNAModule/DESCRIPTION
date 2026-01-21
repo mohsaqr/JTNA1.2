@@ -23,9 +23,11 @@ URL: https://github.com/sonsoleslp/tna/, http://sonsoles.me/tna/
 BugReports: https://github.com/sonsoleslp/tna/issues/
 Depends: R (>= 4.1.0)
 RoxygenNote: 7.3.2
-Imports: 
-    jmvcore (>= 0.8.5), 
+Imports:
+    jmvcore (>= 0.8.5),
     R6,
-    ggplot2
-Remotes: 
-    sonsoleslp/tna
+    ggplot2,
+    codyna
+Remotes:
+    sonsoleslp/tna,
+    santikka/codyna

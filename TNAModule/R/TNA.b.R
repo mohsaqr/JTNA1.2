@@ -7,6 +7,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .run = function() {
 
             library("tna")
+            library("codyna")
 
             # Set instructions content
             self$results$instructions$setContent(
@@ -47,6 +48,8 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$results$buildModelTitle$setVisible(FALSE)
             }
 
+            dataForTNA <- NULL
+
             if(self$results$buildModelContent$isFilled()) {
                 model <- self$results$buildModelContent$state
             }
@@ -54,7 +57,6 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 # Wrap data preparation in error handling
                 tryCatch({
-                    dataForTNA <- NULL
 
                     copyData <- self$data
                     copyData[[self$options$buildModel_variables_long_action]] <- as.character(copyData[[self$options$buildModel_variables_long_action]])
@@ -140,10 +142,19 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             if(!is.null(model)) {
-                    
+
                 if(!self$results$buildModelContent$isFilled()) {
                     self$results$buildModelContent$setContent(model)
                     self$results$buildModelContent$setState(model)
+                }
+
+                # Store dataForTNA for Pattern Discovery
+                if(!is.null(dataForTNA) && !self$results$patternTable$isFilled()) {
+                    self$results$patternTable$setState(dataForTNA)
+                }
+                # Retrieve dataForTNA if it was stored
+                if(is.null(dataForTNA) && !is.null(self$results$patternTable$state)) {
+                    dataForTNA <- self$results$patternTable$state
                 }
                 self$results$buildModelContent$setVisible(self$options$buildModel_show_matrix)
 
@@ -552,6 +563,136 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     self$results$sequences_plot$setState(model)
                 }
                 self$results$sequences_plot$setVisible(TRUE)
+            }
+
+            ### Pattern Discovery
+
+            if(self$options$pattern_show_table) {
+                # Always show title when checkbox is checked
+                self$results$patternTitle$setContent("Pattern Discovery Running...")
+                self$results$patternTitle$setVisible(TRUE)
+
+                tryCatch({
+                    # Re-prepare data if dataForTNA is NULL (e.g., when model is cached)
+                    if(is.null(dataForTNA) && !is.null(self$data) && ncol(self$data) >= 1) {
+                        copyData <- self$data
+                        copyData[[self$options$buildModel_variables_long_action]] <- as.character(copyData[[self$options$buildModel_variables_long_action]])
+
+                        if(!is.null(self$options$buildModel_variables_long_actor)) {
+                            copyData[[self$options$buildModel_variables_long_actor]] <- as.character(copyData[[self$options$buildModel_variables_long_actor]])
+                        }
+
+                        columnToUseLong <- c(
+                            self$options$buildModel_variables_long_time,
+                            self$options$buildModel_variables_long_actor,
+                            self$options$buildModel_variables_long_action,
+                            self$options$buildModel_variables_long_order
+                        )
+                        longData <- copyData[columnToUseLong]
+
+                        args_prepare_data <- list(
+                            data = longData,
+                            actor = self$options$buildModel_variables_long_actor,
+                            time = self$options$buildModel_variables_long_time,
+                            action = self$options$buildModel_variables_long_action,
+                            time_threshold = self$options$buildModel_threshold,
+                            order = self$options$buildModel_variables_long_order
+                        )
+                        args_prepare_data <- args_prepare_data[!sapply(args_prepare_data, is.null)]
+                        dataForTNA <- do.call(prepare_data, args_prepare_data)
+                    }
+
+                    if(is.null(dataForTNA)) {
+                        self$results$patternTitle$setContent("ERROR: Could not prepare data")
+                        return()
+                    }
+                    if(is.null(dataForTNA$sequence_data)) {
+                        self$results$patternTitle$setContent(paste("ERROR: sequence_data is NULL. Names:", paste(names(dataForTNA), collapse=", ")))
+                        return()
+                    }
+
+                    # Get sequence data in wide format from prepared data
+                    seq_data <- dataForTNA$sequence_data
+
+                    # Determine pattern type and parameters
+                    pattern_type <- self$options$pattern_type
+
+                    # Build arguments for discover_patterns
+                    if(pattern_type == "custom" && nchar(self$options$pattern_custom) > 0) {
+                        # Custom pattern search
+                        patterns <- codyna::discover_patterns(
+                            data = seq_data,
+                            pattern = self$options$pattern_custom,
+                            min_support = self$options$pattern_min_support,
+                            min_count = self$options$pattern_min_count
+                        )
+                    } else {
+                        # Type-based pattern discovery
+                        len_range <- self$options$pattern_len_min:self$options$pattern_len_max
+                        gap_range <- self$options$pattern_gap_min:self$options$pattern_gap_max
+
+                        patterns <- codyna::discover_patterns(
+                            data = seq_data,
+                            type = pattern_type,
+                            len = len_range,
+                            gap = gap_range,
+                            min_support = self$options$pattern_min_support,
+                            min_count = self$options$pattern_min_count
+                        )
+                    }
+
+                    # Apply optional filters (Level type returns NULL when not selected)
+                    if(!is.null(self$options$pattern_starts_with)) {
+                        patterns <- patterns[startsWith(patterns$pattern, self$options$pattern_starts_with), ]
+                    }
+                    if(!is.null(self$options$pattern_ends_with)) {
+                        patterns <- patterns[endsWith(patterns$pattern, self$options$pattern_ends_with), ]
+                    }
+                    # Contains filter supports multiple values (Levels type returns vector)
+                    if(!is.null(self$options$pattern_contains) && length(self$options$pattern_contains) > 0) {
+                        # Pattern must contain ALL selected values
+                        keep <- rep(TRUE, nrow(patterns))
+                        for(val in self$options$pattern_contains) {
+                            keep <- keep & grepl(val, patterns$pattern, fixed=TRUE)
+                        }
+                        patterns <- patterns[keep, ]
+                    }
+
+                    # Populate table with row limit
+                    if(!is.null(patterns) && nrow(patterns) > 0) {
+                        total_patterns <- nrow(patterns)
+
+                        # Apply row limit unless show_all is checked
+                        if (!isTRUE(self$options$pattern_table_show_all)) {
+                            max_rows <- self$options$pattern_table_max_rows
+                            if (nrow(patterns) > max_rows) {
+                                patterns <- patterns[1:max_rows, ]
+                            }
+                        }
+
+                        for(i in 1:nrow(patterns)) {
+                            self$results$patternTable$addRow(rowKey=i, values=list(
+                                pattern = as.character(patterns$pattern[i]),
+                                length = as.integer(patterns$length[i]),
+                                count = as.integer(patterns$count[i]),
+                                proportion = patterns$proportion[i],
+                                support = patterns$support[i]
+                            ))
+                        }
+
+                        # Show count in title
+                        if (nrow(patterns) < total_patterns) {
+                            self$results$patternTitle$setContent(paste("Showing", nrow(patterns), "of", total_patterns, "patterns"))
+                        } else {
+                            self$results$patternTitle$setContent(paste("Found", total_patterns, "patterns"))
+                        }
+                    }
+
+                    self$results$patternTable$setVisible(TRUE)
+
+                }, error = function(e) {
+                    self$results$patternTitle$setContent(paste("Pattern Discovery error:", e$message))
+                })
             }
 
         },

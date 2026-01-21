@@ -91,7 +91,21 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             sequences_scale = "proportion",
             sequences_geom = "bar",
             sequences_include_na = FALSE,
-            sequences_tick = 5, ...) {
+            sequences_tick = 5,
+            pattern_show_table = FALSE,
+            pattern_type = "ngram",
+            pattern_custom = "",
+            pattern_len_min = 2,
+            pattern_len_max = 5,
+            pattern_gap_min = 1,
+            pattern_gap_max = 3,
+            pattern_min_support = 0.01,
+            pattern_min_count = 2,
+            pattern_starts_with = NULL,
+            pattern_ends_with = NULL,
+            pattern_contains = NULL,
+            pattern_table_max_rows = 20,
+            pattern_table_show_all = FALSE, ...) {
 
             super$initialize(
                 package="JTNA",
@@ -593,6 +607,81 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=5,
                 min=1,
                 max=20)
+            private$..pattern_show_table <- jmvcore::OptionBool$new(
+                "pattern_show_table",
+                pattern_show_table,
+                default=FALSE)
+            private$..pattern_type <- jmvcore::OptionList$new(
+                "pattern_type",
+                pattern_type,
+                default="ngram",
+                options=list(
+                    "ngram",
+                    "gapped",
+                    "repeated",
+                    "custom"))
+            private$..pattern_custom <- jmvcore::OptionString$new(
+                "pattern_custom",
+                pattern_custom,
+                default="")
+            private$..pattern_len_min <- jmvcore::OptionInteger$new(
+                "pattern_len_min",
+                pattern_len_min,
+                default=2,
+                min=2,
+                max=20)
+            private$..pattern_len_max <- jmvcore::OptionInteger$new(
+                "pattern_len_max",
+                pattern_len_max,
+                default=5,
+                min=2,
+                max=20)
+            private$..pattern_gap_min <- jmvcore::OptionInteger$new(
+                "pattern_gap_min",
+                pattern_gap_min,
+                default=1,
+                min=1,
+                max=10)
+            private$..pattern_gap_max <- jmvcore::OptionInteger$new(
+                "pattern_gap_max",
+                pattern_gap_max,
+                default=3,
+                min=1,
+                max=10)
+            private$..pattern_min_support <- jmvcore::OptionNumber$new(
+                "pattern_min_support",
+                pattern_min_support,
+                default=0.01,
+                min=0,
+                max=1)
+            private$..pattern_min_count <- jmvcore::OptionInteger$new(
+                "pattern_min_count",
+                pattern_min_count,
+                default=2,
+                min=1,
+                max=1000)
+            private$..pattern_starts_with <- jmvcore::OptionLevel$new(
+                "pattern_starts_with",
+                pattern_starts_with,
+                variable="(buildModel_variables_long_action)")
+            private$..pattern_ends_with <- jmvcore::OptionLevel$new(
+                "pattern_ends_with",
+                pattern_ends_with,
+                variable="(buildModel_variables_long_action)")
+            private$..pattern_contains <- jmvcore::OptionLevel$new(
+                "pattern_contains",
+                pattern_contains,
+                variable="(buildModel_variables_long_action)")
+            private$..pattern_table_max_rows <- jmvcore::OptionInteger$new(
+                "pattern_table_max_rows",
+                pattern_table_max_rows,
+                default=20,
+                min=1,
+                max=1000)
+            private$..pattern_table_show_all <- jmvcore::OptionBool$new(
+                "pattern_table_show_all",
+                pattern_table_show_all,
+                default=FALSE)
 
             self$.addOption(private$..buildModel_variables_long_action)
             self$.addOption(private$..buildModel_variables_long_actor)
@@ -680,6 +769,20 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..sequences_geom)
             self$.addOption(private$..sequences_include_na)
             self$.addOption(private$..sequences_tick)
+            self$.addOption(private$..pattern_show_table)
+            self$.addOption(private$..pattern_type)
+            self$.addOption(private$..pattern_custom)
+            self$.addOption(private$..pattern_len_min)
+            self$.addOption(private$..pattern_len_max)
+            self$.addOption(private$..pattern_gap_min)
+            self$.addOption(private$..pattern_gap_max)
+            self$.addOption(private$..pattern_min_support)
+            self$.addOption(private$..pattern_min_count)
+            self$.addOption(private$..pattern_starts_with)
+            self$.addOption(private$..pattern_ends_with)
+            self$.addOption(private$..pattern_contains)
+            self$.addOption(private$..pattern_table_max_rows)
+            self$.addOption(private$..pattern_table_show_all)
         }),
     active = list(
         buildModel_variables_long_action = function() private$..buildModel_variables_long_action$value,
@@ -767,7 +870,21 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         sequences_scale = function() private$..sequences_scale$value,
         sequences_geom = function() private$..sequences_geom$value,
         sequences_include_na = function() private$..sequences_include_na$value,
-        sequences_tick = function() private$..sequences_tick$value),
+        sequences_tick = function() private$..sequences_tick$value,
+        pattern_show_table = function() private$..pattern_show_table$value,
+        pattern_type = function() private$..pattern_type$value,
+        pattern_custom = function() private$..pattern_custom$value,
+        pattern_len_min = function() private$..pattern_len_min$value,
+        pattern_len_max = function() private$..pattern_len_max$value,
+        pattern_gap_min = function() private$..pattern_gap_min$value,
+        pattern_gap_max = function() private$..pattern_gap_max$value,
+        pattern_min_support = function() private$..pattern_min_support$value,
+        pattern_min_count = function() private$..pattern_min_count$value,
+        pattern_starts_with = function() private$..pattern_starts_with$value,
+        pattern_ends_with = function() private$..pattern_ends_with$value,
+        pattern_contains = function() private$..pattern_contains$value,
+        pattern_table_max_rows = function() private$..pattern_table_max_rows$value,
+        pattern_table_show_all = function() private$..pattern_table_show_all$value),
     private = list(
         ..buildModel_variables_long_action = NA,
         ..buildModel_variables_long_actor = NA,
@@ -854,7 +971,21 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..sequences_scale = NA,
         ..sequences_geom = NA,
         ..sequences_include_na = NA,
-        ..sequences_tick = NA)
+        ..sequences_tick = NA,
+        ..pattern_show_table = NA,
+        ..pattern_type = NA,
+        ..pattern_custom = NA,
+        ..pattern_len_min = NA,
+        ..pattern_len_max = NA,
+        ..pattern_gap_min = NA,
+        ..pattern_gap_max = NA,
+        ..pattern_min_support = NA,
+        ..pattern_min_count = NA,
+        ..pattern_starts_with = NA,
+        ..pattern_ends_with = NA,
+        ..pattern_contains = NA,
+        ..pattern_table_max_rows = NA,
+        ..pattern_table_show_all = NA)
 )
 
 TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -892,7 +1023,9 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         bootstrap_plot = function() private$.items[["bootstrap_plot"]],
         bootstrapTable = function() private$.items[["bootstrapTable"]],
         permutationTable = function() private$.items[["permutationTable"]],
-        sequences_plot = function() private$.items[["sequences_plot"]]),
+        sequences_plot = function() private$.items[["sequences_plot"]],
+        patternTitle = function() private$.items[["patternTitle"]],
+        patternTable = function() private$.items[["patternTable"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -1500,7 +1633,57 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "sequences_scale",
                     "sequences_geom",
                     "sequences_include_na",
-                    "sequences_tick")))}))
+                    "sequences_tick")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="patternTitle",
+                title="Pattern Discovery",
+                visible=FALSE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="patternTable",
+                title="Discovered Patterns",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="pattern", 
+                        `title`="Pattern", 
+                        `type`="text"),
+                    list(
+                        `name`="length", 
+                        `title`="Length", 
+                        `type`="integer"),
+                    list(
+                        `name`="count", 
+                        `title`="Count", 
+                        `type`="integer"),
+                    list(
+                        `name`="proportion", 
+                        `title`="Proportion", 
+                        `type`="number"),
+                    list(
+                        `name`="support", 
+                        `title`="Support", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "pattern_type",
+                    "pattern_custom",
+                    "pattern_len_min",
+                    "pattern_len_max",
+                    "pattern_gap_min",
+                    "pattern_gap_max",
+                    "pattern_min_support",
+                    "pattern_min_count",
+                    "pattern_starts_with",
+                    "pattern_ends_with",
+                    "pattern_contains")))}))
 
 TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "TNABase",
@@ -1619,6 +1802,20 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param sequences_geom .
 #' @param sequences_include_na .
 #' @param sequences_tick .
+#' @param pattern_show_table .
+#' @param pattern_type .
+#' @param pattern_custom .
+#' @param pattern_len_min .
+#' @param pattern_len_max .
+#' @param pattern_gap_min .
+#' @param pattern_gap_max .
+#' @param pattern_min_support .
+#' @param pattern_min_count .
+#' @param pattern_starts_with .
+#' @param pattern_ends_with .
+#' @param pattern_contains .
+#' @param pattern_table_max_rows .
+#' @param pattern_table_show_all .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -1658,6 +1855,8 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$permutationTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$sequences_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$patternTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$patternTable} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -1754,7 +1953,21 @@ TNA <- function(
     sequences_scale = "proportion",
     sequences_geom = "bar",
     sequences_include_na = FALSE,
-    sequences_tick = 5) {
+    sequences_tick = 5,
+    pattern_show_table = FALSE,
+    pattern_type = "ngram",
+    pattern_custom = "",
+    pattern_len_min = 2,
+    pattern_len_max = 5,
+    pattern_gap_min = 1,
+    pattern_gap_max = 3,
+    pattern_min_support = 0.01,
+    pattern_min_count = 2,
+    pattern_starts_with,
+    pattern_ends_with,
+    pattern_contains,
+    pattern_table_max_rows = 20,
+    pattern_table_show_all = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("TNA requires jmvcore to be installed (restart may be required)")
@@ -1858,7 +2071,21 @@ TNA <- function(
         sequences_scale = sequences_scale,
         sequences_geom = sequences_geom,
         sequences_include_na = sequences_include_na,
-        sequences_tick = sequences_tick)
+        sequences_tick = sequences_tick,
+        pattern_show_table = pattern_show_table,
+        pattern_type = pattern_type,
+        pattern_custom = pattern_custom,
+        pattern_len_min = pattern_len_min,
+        pattern_len_max = pattern_len_max,
+        pattern_gap_min = pattern_gap_min,
+        pattern_gap_max = pattern_gap_max,
+        pattern_min_support = pattern_min_support,
+        pattern_min_count = pattern_min_count,
+        pattern_starts_with = pattern_starts_with,
+        pattern_ends_with = pattern_ends_with,
+        pattern_contains = pattern_contains,
+        pattern_table_max_rows = pattern_table_max_rows,
+        pattern_table_show_all = pattern_table_show_all)
 
     analysis <- TNAClass$new(
         options = options,

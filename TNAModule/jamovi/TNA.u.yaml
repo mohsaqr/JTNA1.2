@@ -508,19 +508,16 @@ children:
               - type: ComboBox
                 name: bootstrap_plot_layout
                 enable: (bootstrap_show_plot)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: bootstrap_table_max_rows
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: bootstrap_table_show_all
-      - type: CheckBox
-        name: bootstrap_table_significant_only
+          - type: Label
+            label: Table Options
+            children:
+              - type: TextBox
+                name: bootstrap_table_max_rows
+                format: number
+              - type: CheckBox
+                name: bootstrap_table_show_all
+              - type: CheckBox
+                name: bootstrap_table_significant_only
   - type: CollapseBox
     label: Sequence Analysis
     margin: large
@@ -586,3 +583,102 @@ children:
                 name: sequences_tick
                 format: number
                 label: Tick Interval
+  - type: CollapseBox
+    label: Pattern Discovery
+    margin: large
+    stretchFactor: 1
+    style: inline
+    collapsed: true
+    children:
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: pattern_show_table
+                label: Show patterns table
+          - type: Label
+            label: Pattern Type
+            children:
+              - type: RadioButton
+                name: pattern_type_ngram
+                optionName: pattern_type
+                optionPart: ngram
+              - type: RadioButton
+                name: pattern_type_gapped
+                optionName: pattern_type
+                optionPart: gapped
+              - type: RadioButton
+                name: pattern_type_repeated
+                optionName: pattern_type
+                optionPart: repeated
+              - type: RadioButton
+                name: pattern_type_custom
+                optionName: pattern_type
+                optionPart: custom
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Custom Pattern
+            children:
+              - type: TextBox
+                name: pattern_custom
+                format: string
+                enable: (pattern_type_custom)
+          - type: Label
+            label: Length (N-gram/Repeated)
+            children:
+              - type: TextBox
+                name: pattern_len_min
+                format: number
+                enable: (pattern_type_ngram || pattern_type_repeated)
+              - type: TextBox
+                name: pattern_len_max
+                format: number
+                enable: (pattern_type_ngram || pattern_type_repeated)
+          - type: Label
+            label: Gap (Gapped)
+            children:
+              - type: TextBox
+                name: pattern_gap_min
+                format: number
+                enable: (pattern_type_gapped)
+              - type: TextBox
+                name: pattern_gap_max
+                format: number
+                enable: (pattern_type_gapped)
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Thresholds
+            children:
+              - type: TextBox
+                name: pattern_min_support
+                format: number
+              - type: TextBox
+                name: pattern_min_count
+                format: number
+          - type: Label
+            label: Filters (optional)
+            children:
+              - type: LevelSelector
+                name: pattern_starts_with
+                variable: (buildModel_variables_long_action)
+              - type: LevelSelector
+                name: pattern_ends_with
+                variable: (buildModel_variables_long_action)
+              - type: LevelSelector
+                name: pattern_contains
+                variable: (buildModel_variables_long_action)
+          - type: Label
+            label: Table Options
+            children:
+              - type: TextBox
+                name: pattern_table_max_rows
+                format: number
+              - type: CheckBox
+                name: pattern_table_show_all
