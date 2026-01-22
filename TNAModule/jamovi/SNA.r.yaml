@@ -54,6 +54,20 @@ items:
         - sna_plot_node_size
         - sna_plot_node_label_size
         - sna_plot_layout
+        - sna_plot_repulsion
+        - sna_plot_vsize
+        - sna_plot_borders
+        - sna_plot_border_width
+        - sna_plot_esize
+        - sna_plot_asize
+        - sna_plot_curve
+        - sna_plot_curveAll
+        - sna_plot_theme
+        - sna_plot_posCol
+        - sna_plot_negCol
+        - sna_plot_details
+        - sna_plot_width
+        - sna_plot_height
 
     ### CENTRALITY
     - name: centralityTitle

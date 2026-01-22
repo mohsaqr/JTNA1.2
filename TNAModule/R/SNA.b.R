@@ -110,6 +110,12 @@ SNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if(!is.null(model)) {
                 self$results$snaModelContent$setVisible(self$options$sna_show_matrix)
                 self$results$sna_plot$setVisible(self$options$sna_show_plot)
+
+                # Set dynamic plot size
+                self$results$sna_plot$setSize(
+                    self$options$sna_plot_width,
+                    self$options$sna_plot_height
+                )
             }
 
             ### Centrality Analysis
@@ -181,18 +187,49 @@ SNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             if(!is.null(plotData) && self$options$sna_show_plot) {
                 tryCatch({
-                    plot(x=plotData,
-                        cut=self$options$sna_plot_cut,
-                        minimum=self$options$sna_plot_min_value,
-                        edge.label.cex=self$options$sna_plot_edge_label_size,
-                        node.width=self$options$sna_plot_node_size,
-                        label.cex=self$options$sna_plot_node_label_size,
-                        layout=self$options$sna_plot_layout,
-                        bg="transparent"
+                    # Handle positive edge color
+                    posCol <- if(self$options$sna_plot_posCol == "default") NULL else self$options$sna_plot_posCol
+
+                    # Handle negative edge color
+                    negCol <- if(self$options$sna_plot_negCol == "default") NULL else self$options$sna_plot_negCol
+
+                    # Build plot arguments
+                    plotArgs <- list(
+                        x = plotData,
+                        cut = self$options$sna_plot_cut,
+                        minimum = self$options$sna_plot_min_value,
+                        edge.label.cex = self$options$sna_plot_edge_label_size,
+                        node.width = self$options$sna_plot_node_size,
+                        label.cex = self$options$sna_plot_node_label_size,
+                        layout = self$options$sna_plot_layout,
+                        bg = "transparent",
+                        # New parameters
+                        repulsion = self$options$sna_plot_repulsion,
+                        vsize = self$options$sna_plot_vsize,
+                        borders = self$options$sna_plot_borders,
+                        border.width = self$options$sna_plot_border_width,
+                        esize = self$options$sna_plot_esize,
+                        asize = self$options$sna_plot_asize,
+                        theme = self$options$sna_plot_theme,
+                        details = self$options$sna_plot_details
                     )
+
+                    # Add curve parameters if curvature is set
+                    if(self$options$sna_plot_curve > 0) {
+                        plotArgs$curve <- self$options$sna_plot_curve
+                        plotArgs$curveAll <- self$options$sna_plot_curveAll
+                    }
+
+                    # Add color parameters if not default
+                    if(!is.null(posCol)) plotArgs$posCol <- posCol
+                    if(!is.null(negCol)) plotArgs$negCol <- negCol
+
+                    # Execute plot
+                    do.call(plot, plotArgs)
+
                 }, error = function(e) {
                     layout_name <- self$options$sna_plot_layout
-                    self$results$errorText$setContent(paste0("Layout '", layout_name, "' is not available for this network. Please try a different layout."))
+                    self$results$errorText$setContent(paste0("Plot error: ", e$message))
                     self$results$errorText$setVisible(TRUE)
                 })
             }

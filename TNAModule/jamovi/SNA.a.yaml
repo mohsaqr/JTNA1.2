@@ -119,6 +119,142 @@ options:
         - title: Random
           name: layout_randomly
 
+    # Layout Parameters
+    - name: sna_plot_repulsion
+      title: Repulsion
+      type: Number
+      default: 1
+      min: 0.1
+      max: 10
+
+    # Node Appearance
+    - name: sna_plot_vsize
+      title: Node size (vsize)
+      type: Number
+      default: 8
+      min: 1
+      max: 30
+
+    - name: sna_plot_borders
+      title: Show node borders
+      type: Bool
+      default: True
+
+    - name: sna_plot_border_width
+      title: Border width
+      type: Number
+      default: 1
+      min: 0
+      max: 5
+
+    # Edge Appearance
+    - name: sna_plot_esize
+      title: Edge size (esize)
+      type: Number
+      default: 6
+      min: 1
+      max: 30
+
+    - name: sna_plot_asize
+      title: Arrow size
+      type: Number
+      default: 4
+      min: 1
+      max: 15
+
+    - name: sna_plot_curve
+      title: Edge curvature
+      type: Number
+      default: 0
+      min: 0
+      max: 5
+
+    - name: sna_plot_curveAll
+      title: Curve all edges
+      type: Bool
+      default: False
+
+    # Color Settings
+    - name: sna_plot_theme
+      title: Color theme
+      type: List
+      default: colorblind
+      options:
+        - title: Colorblind
+          name: colorblind
+        - title: Classic
+          name: classic
+        - title: Gray
+          name: gray
+        - title: Hollywood
+          name: Hollywood
+        - title: Borkulo
+          name: Borkulo
+        - title: TeamFortress
+          name: TeamFortress
+        - title: Reddit
+          name: Reddit
+        - title: Leuven
+          name: Leuven
+        - title: Fried
+          name: Fried
+
+    - name: sna_plot_posCol
+      title: Positive edge color
+      type: List
+      default: default
+      options:
+        - title: Default (theme)
+          name: default
+        - title: Green
+          name: green
+        - title: Blue
+          name: blue
+        - title: Dark Green
+          name: darkgreen
+        - title: Navy
+          name: navy
+        - title: Purple
+          name: purple
+
+    - name: sna_plot_negCol
+      title: Negative edge color
+      type: List
+      default: default
+      options:
+        - title: Default (theme)
+          name: default
+        - title: Red
+          name: red
+        - title: Orange
+          name: orange
+        - title: Dark Red
+          name: darkred
+        - title: Maroon
+          name: maroon
+        - title: Brown
+          name: brown
+
+    # Plot Display
+    - name: sna_plot_details
+      title: Show details (min/max/cut)
+      type: Bool
+      default: False
+
+    - name: sna_plot_width
+      title: Plot width
+      type: Integer
+      default: 600
+      min: 300
+      max: 1200
+
+    - name: sna_plot_height
+      title: Plot height
+      type: Integer
+      default: 600
+      min: 300
+      max: 1200
+
     # Centrality Options
     - name: centrality_show_table
       title: Table

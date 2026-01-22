@@ -77,11 +77,25 @@ children:
               - type: CheckBox
                 name: sna_show_plot
                 label: Network plot
+              - type: CheckBox
+                name: sna_plot_details
+                label: Show details (min/max/cut)
+                enable: (sna_show_plot)
+          - type: Label
+            label: Layout
+            children:
+              - type: ComboBox
+                name: sna_plot_layout
+                enable: (sna_show_plot)
+              - type: TextBox
+                name: sna_plot_repulsion
+                format: number
+                enable: (sna_show_plot)
       - type: LayoutBox
         stretchFactor: 1
         children:
           - type: Label
-            label: Plot Parameters
+            label: Edge Parameters
             children:
               - type: TextBox
                 name: sna_plot_cut
@@ -92,7 +106,36 @@ children:
                 format: number
                 enable: (sna_show_plot)
               - type: TextBox
+                name: sna_plot_esize
+                format: number
+                enable: (sna_show_plot)
+              - type: TextBox
+                name: sna_plot_asize
+                format: number
+                enable: (sna_show_plot)
+              - type: TextBox
                 name: sna_plot_edge_label_size
+                format: number
+                enable: (sna_show_plot)
+          - type: Label
+            label: Edge Curve
+            children:
+              - type: TextBox
+                name: sna_plot_curve
+                format: number
+                enable: (sna_show_plot)
+              - type: CheckBox
+                name: sna_plot_curveAll
+                label: Curve all edges
+                enable: (sna_show_plot)
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Node Parameters
+            children:
+              - type: TextBox
+                name: sna_plot_vsize
                 format: number
                 enable: (sna_show_plot)
               - type: TextBox
@@ -103,8 +146,39 @@ children:
                 name: sna_plot_node_label_size
                 format: number
                 enable: (sna_show_plot)
+              - type: CheckBox
+                name: sna_plot_borders
+                label: Show borders
+                enable: (sna_show_plot)
+              - type: TextBox
+                name: sna_plot_border_width
+                format: number
+                enable: (sna_show_plot && sna_plot_borders)
+          - type: Label
+            label: Colors
+            children:
               - type: ComboBox
-                name: sna_plot_layout
+                name: sna_plot_theme
+                enable: (sna_show_plot)
+              - type: ComboBox
+                name: sna_plot_posCol
+                enable: (sna_show_plot)
+              - type: ComboBox
+                name: sna_plot_negCol
+                enable: (sna_show_plot)
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Plot Size
+            children:
+              - type: TextBox
+                name: sna_plot_width
+                format: number
+                enable: (sna_show_plot)
+              - type: TextBox
+                name: sna_plot_height
+                format: number
                 enable: (sna_show_plot)
   - type: CollapseBox
     label: Centrality Analysis

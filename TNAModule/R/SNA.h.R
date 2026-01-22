@@ -18,6 +18,20 @@ SNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             sna_plot_node_size = 1,
             sna_plot_node_label_size = 1,
             sna_plot_layout = NULL,
+            sna_plot_repulsion = 1,
+            sna_plot_vsize = 8,
+            sna_plot_borders = TRUE,
+            sna_plot_border_width = 1,
+            sna_plot_esize = 6,
+            sna_plot_asize = 4,
+            sna_plot_curve = 0,
+            sna_plot_curveAll = FALSE,
+            sna_plot_theme = "colorblind",
+            sna_plot_posCol = "default",
+            sna_plot_negCol = "default",
+            sna_plot_details = FALSE,
+            sna_plot_width = 600,
+            sna_plot_height = 600,
             centrality_show_table = FALSE,
             centrality_show_plot = FALSE,
             centrality_OutStrength = TRUE,
@@ -106,6 +120,102 @@ SNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "layout_with_lgl",
                     "layout_with_sugiyama",
                     "layout_randomly"))
+            private$..sna_plot_repulsion <- jmvcore::OptionNumber$new(
+                "sna_plot_repulsion",
+                sna_plot_repulsion,
+                default=1,
+                min=0.1,
+                max=10)
+            private$..sna_plot_vsize <- jmvcore::OptionNumber$new(
+                "sna_plot_vsize",
+                sna_plot_vsize,
+                default=8,
+                min=1,
+                max=30)
+            private$..sna_plot_borders <- jmvcore::OptionBool$new(
+                "sna_plot_borders",
+                sna_plot_borders,
+                default=TRUE)
+            private$..sna_plot_border_width <- jmvcore::OptionNumber$new(
+                "sna_plot_border_width",
+                sna_plot_border_width,
+                default=1,
+                min=0,
+                max=5)
+            private$..sna_plot_esize <- jmvcore::OptionNumber$new(
+                "sna_plot_esize",
+                sna_plot_esize,
+                default=6,
+                min=1,
+                max=30)
+            private$..sna_plot_asize <- jmvcore::OptionNumber$new(
+                "sna_plot_asize",
+                sna_plot_asize,
+                default=4,
+                min=1,
+                max=15)
+            private$..sna_plot_curve <- jmvcore::OptionNumber$new(
+                "sna_plot_curve",
+                sna_plot_curve,
+                default=0,
+                min=0,
+                max=5)
+            private$..sna_plot_curveAll <- jmvcore::OptionBool$new(
+                "sna_plot_curveAll",
+                sna_plot_curveAll,
+                default=FALSE)
+            private$..sna_plot_theme <- jmvcore::OptionList$new(
+                "sna_plot_theme",
+                sna_plot_theme,
+                default="colorblind",
+                options=list(
+                    "colorblind",
+                    "classic",
+                    "gray",
+                    "Hollywood",
+                    "Borkulo",
+                    "TeamFortress",
+                    "Reddit",
+                    "Leuven",
+                    "Fried"))
+            private$..sna_plot_posCol <- jmvcore::OptionList$new(
+                "sna_plot_posCol",
+                sna_plot_posCol,
+                default="default",
+                options=list(
+                    "default",
+                    "green",
+                    "blue",
+                    "darkgreen",
+                    "navy",
+                    "purple"))
+            private$..sna_plot_negCol <- jmvcore::OptionList$new(
+                "sna_plot_negCol",
+                sna_plot_negCol,
+                default="default",
+                options=list(
+                    "default",
+                    "red",
+                    "orange",
+                    "darkred",
+                    "maroon",
+                    "brown"))
+            private$..sna_plot_details <- jmvcore::OptionBool$new(
+                "sna_plot_details",
+                sna_plot_details,
+                default=FALSE)
+            private$..sna_plot_width <- jmvcore::OptionInteger$new(
+                "sna_plot_width",
+                sna_plot_width,
+                default=600,
+                min=300,
+                max=1200)
+            private$..sna_plot_height <- jmvcore::OptionInteger$new(
+                "sna_plot_height",
+                sna_plot_height,
+                default=600,
+                min=300,
+                max=1200)
             private$..centrality_show_table <- jmvcore::OptionBool$new(
                 "centrality_show_table",
                 centrality_show_table,
@@ -147,6 +257,20 @@ SNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..sna_plot_node_size)
             self$.addOption(private$..sna_plot_node_label_size)
             self$.addOption(private$..sna_plot_layout)
+            self$.addOption(private$..sna_plot_repulsion)
+            self$.addOption(private$..sna_plot_vsize)
+            self$.addOption(private$..sna_plot_borders)
+            self$.addOption(private$..sna_plot_border_width)
+            self$.addOption(private$..sna_plot_esize)
+            self$.addOption(private$..sna_plot_asize)
+            self$.addOption(private$..sna_plot_curve)
+            self$.addOption(private$..sna_plot_curveAll)
+            self$.addOption(private$..sna_plot_theme)
+            self$.addOption(private$..sna_plot_posCol)
+            self$.addOption(private$..sna_plot_negCol)
+            self$.addOption(private$..sna_plot_details)
+            self$.addOption(private$..sna_plot_width)
+            self$.addOption(private$..sna_plot_height)
             self$.addOption(private$..centrality_show_table)
             self$.addOption(private$..centrality_show_plot)
             self$.addOption(private$..centrality_OutStrength)
@@ -168,6 +292,20 @@ SNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         sna_plot_node_size = function() private$..sna_plot_node_size$value,
         sna_plot_node_label_size = function() private$..sna_plot_node_label_size$value,
         sna_plot_layout = function() private$..sna_plot_layout$value,
+        sna_plot_repulsion = function() private$..sna_plot_repulsion$value,
+        sna_plot_vsize = function() private$..sna_plot_vsize$value,
+        sna_plot_borders = function() private$..sna_plot_borders$value,
+        sna_plot_border_width = function() private$..sna_plot_border_width$value,
+        sna_plot_esize = function() private$..sna_plot_esize$value,
+        sna_plot_asize = function() private$..sna_plot_asize$value,
+        sna_plot_curve = function() private$..sna_plot_curve$value,
+        sna_plot_curveAll = function() private$..sna_plot_curveAll$value,
+        sna_plot_theme = function() private$..sna_plot_theme$value,
+        sna_plot_posCol = function() private$..sna_plot_posCol$value,
+        sna_plot_negCol = function() private$..sna_plot_negCol$value,
+        sna_plot_details = function() private$..sna_plot_details$value,
+        sna_plot_width = function() private$..sna_plot_width$value,
+        sna_plot_height = function() private$..sna_plot_height$value,
         centrality_show_table = function() private$..centrality_show_table$value,
         centrality_show_plot = function() private$..centrality_show_plot$value,
         centrality_OutStrength = function() private$..centrality_OutStrength$value,
@@ -188,6 +326,20 @@ SNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..sna_plot_node_size = NA,
         ..sna_plot_node_label_size = NA,
         ..sna_plot_layout = NA,
+        ..sna_plot_repulsion = NA,
+        ..sna_plot_vsize = NA,
+        ..sna_plot_borders = NA,
+        ..sna_plot_border_width = NA,
+        ..sna_plot_esize = NA,
+        ..sna_plot_asize = NA,
+        ..sna_plot_curve = NA,
+        ..sna_plot_curveAll = NA,
+        ..sna_plot_theme = NA,
+        ..sna_plot_posCol = NA,
+        ..sna_plot_negCol = NA,
+        ..sna_plot_details = NA,
+        ..sna_plot_width = NA,
+        ..sna_plot_height = NA,
         ..centrality_show_table = NA,
         ..centrality_show_plot = NA,
         ..centrality_OutStrength = NA,
@@ -266,7 +418,21 @@ SNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "sna_plot_edge_label_size",
                     "sna_plot_node_size",
                     "sna_plot_node_label_size",
-                    "sna_plot_layout")))
+                    "sna_plot_layout",
+                    "sna_plot_repulsion",
+                    "sna_plot_vsize",
+                    "sna_plot_borders",
+                    "sna_plot_border_width",
+                    "sna_plot_esize",
+                    "sna_plot_asize",
+                    "sna_plot_curve",
+                    "sna_plot_curveAll",
+                    "sna_plot_theme",
+                    "sna_plot_posCol",
+                    "sna_plot_negCol",
+                    "sna_plot_details",
+                    "sna_plot_width",
+                    "sna_plot_height")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="centralityTitle",
@@ -349,6 +515,20 @@ SNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param sna_plot_node_size .
 #' @param sna_plot_node_label_size .
 #' @param sna_plot_layout .
+#' @param sna_plot_repulsion .
+#' @param sna_plot_vsize .
+#' @param sna_plot_borders .
+#' @param sna_plot_border_width .
+#' @param sna_plot_esize .
+#' @param sna_plot_asize .
+#' @param sna_plot_curve .
+#' @param sna_plot_curveAll .
+#' @param sna_plot_theme .
+#' @param sna_plot_posCol .
+#' @param sna_plot_negCol .
+#' @param sna_plot_details .
+#' @param sna_plot_width .
+#' @param sna_plot_height .
 #' @param centrality_show_table .
 #' @param centrality_show_plot .
 #' @param centrality_OutStrength .
@@ -390,6 +570,20 @@ SNA <- function(
     sna_plot_node_size = 1,
     sna_plot_node_label_size = 1,
     sna_plot_layout,
+    sna_plot_repulsion = 1,
+    sna_plot_vsize = 8,
+    sna_plot_borders = TRUE,
+    sna_plot_border_width = 1,
+    sna_plot_esize = 6,
+    sna_plot_asize = 4,
+    sna_plot_curve = 0,
+    sna_plot_curveAll = FALSE,
+    sna_plot_theme = "colorblind",
+    sna_plot_posCol = "default",
+    sna_plot_negCol = "default",
+    sna_plot_details = FALSE,
+    sna_plot_width = 600,
+    sna_plot_height = 600,
     centrality_show_table = FALSE,
     centrality_show_plot = FALSE,
     centrality_OutStrength = TRUE,
@@ -425,6 +619,20 @@ SNA <- function(
         sna_plot_node_size = sna_plot_node_size,
         sna_plot_node_label_size = sna_plot_node_label_size,
         sna_plot_layout = sna_plot_layout,
+        sna_plot_repulsion = sna_plot_repulsion,
+        sna_plot_vsize = sna_plot_vsize,
+        sna_plot_borders = sna_plot_borders,
+        sna_plot_border_width = sna_plot_border_width,
+        sna_plot_esize = sna_plot_esize,
+        sna_plot_asize = sna_plot_asize,
+        sna_plot_curve = sna_plot_curve,
+        sna_plot_curveAll = sna_plot_curveAll,
+        sna_plot_theme = sna_plot_theme,
+        sna_plot_posCol = sna_plot_posCol,
+        sna_plot_negCol = sna_plot_negCol,
+        sna_plot_details = sna_plot_details,
+        sna_plot_width = sna_plot_width,
+        sna_plot_height = sna_plot_height,
         centrality_show_table = centrality_show_table,
         centrality_show_plot = centrality_show_plot,
         centrality_OutStrength = centrality_OutStrength,
