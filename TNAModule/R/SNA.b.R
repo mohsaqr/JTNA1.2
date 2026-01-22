@@ -87,7 +87,17 @@ SNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                     # Store model in state
                     self$results$snaModelContent$setState(model)
-                    self$results$snaModelContent$setContent(model)
+
+                    # Create a string representation of the weights matrix for display
+                    # (avoid using print(model) which has a bug with NULL inits)
+                    matrixStr <- paste(capture.output(print(model$weights)), collapse = "\n")
+                    displayContent <- paste0(
+                        "State Labels:\n  ",
+                        paste(model$labels, collapse = ", "),
+                        "\n\nEdge Weight Matrix:\n",
+                        matrixStr
+                    )
+                    self$results$snaModelContent$setContent(displayContent)
 
                 }, error = function(e) {
                     self$results$errorText$setContent(paste("Error building SNA model:", e$message))
