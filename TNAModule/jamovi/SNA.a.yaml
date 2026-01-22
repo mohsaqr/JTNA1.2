@@ -2,7 +2,7 @@
 name:  SNA
 title: Social Network Analysis
 menuGroup: JTNA
-version: '1.10.0'
+version: '1.9.2'
 jas: '1.2'
 
 options:
@@ -25,6 +25,11 @@ options:
       type: Variable
       description: The column containing edge weights. If not provided, defaults to 1 for unweighted networks.
 
+    - name: sna_group
+      title: Group (Optional)
+      type: Variable
+      description: The column containing group labels. If provided, separate networks will be built and plotted for each group.
+
     - name: sna_aggregate
       title: Aggregation Function
       type: List
@@ -40,8 +45,13 @@ options:
       default: sum
 
     # Display Options
-    - name: sna_show_matrix
-      title: Matrix
+    - name: sna_show_summary
+      title: Summary Table
+      type: Bool
+      default: True
+
+    - name: sna_show_degree_plot
+      title: Degree Distribution Plot
       type: Bool
       default: False
 
@@ -49,6 +59,31 @@ options:
       title: Plot
       type: Bool
       default: True
+
+    # Quick Plot Controls (shown right after Network Plot checkbox)
+    - name: sna_plot_node_size_slider
+      title: Node Size
+      type: Number
+      default: 8
+      min: 1
+      max: 30
+
+    - name: sna_plot_edge_size_slider
+      title: Edge Size
+      type: Number
+      default: 6
+      min: 1
+      max: 30
+
+    - name: sna_plot_show_node_labels
+      title: Show node labels
+      type: Bool
+      default: False
+
+    - name: sna_plot_show_edge_labels
+      title: Show edge labels
+      type: Bool
+      default: False
 
     # Plot Parameters
     - name: sna_plot_cut
@@ -148,17 +183,10 @@ options:
       max: 5
 
     # Edge Appearance
-    - name: sna_plot_esize
-      title: Edge size (esize)
-      type: Number
-      default: 6
-      min: 1
-      max: 30
-
     - name: sna_plot_asize
       title: Arrow size
       type: Number
-      default: 4
+      default: 2
       min: 1
       max: 15
 
@@ -199,8 +227,8 @@ options:
         - title: Fried
           name: Fried
 
-    - name: sna_plot_posCol
-      title: Positive edge color
+    - name: sna_plot_edge_color
+      title: Edge color
       type: List
       default: default
       options:
@@ -210,30 +238,16 @@ options:
           name: green
         - title: Blue
           name: blue
-        - title: Dark Green
-          name: darkgreen
-        - title: Navy
-          name: navy
-        - title: Purple
-          name: purple
-
-    - name: sna_plot_negCol
-      title: Negative edge color
-      type: List
-      default: default
-      options:
-        - title: Default (theme)
-          name: default
         - title: Red
           name: red
         - title: Orange
           name: orange
-        - title: Dark Red
-          name: darkred
-        - title: Maroon
-          name: maroon
-        - title: Brown
-          name: brown
+        - title: Purple
+          name: purple
+        - title: Gray
+          name: gray
+        - title: Black
+          name: black
 
     # Plot Display
     - name: sna_plot_details
@@ -257,22 +271,17 @@ options:
 
     # Centrality Options
     - name: centrality_show_table
-      title: Table
-      type: Bool
-      default: False
-
-    - name: centrality_show_plot
-      title: Plot
+      title: Show Centrality Table
       type: Bool
       default: False
 
     - name: centrality_OutStrength
-      title: OutStrength
+      title: Out Strength
       type: Bool
       default: True
 
     - name: centrality_InStrength
-      title: InStrength
+      title: In Strength
       type: Bool
       default: True
 
@@ -281,14 +290,97 @@ options:
       type: Bool
       default: True
 
+    - name: centrality_BetweennessRSP
+      title: Betweenness RSP
+      type: Bool
+      default: False
+
+    - name: centrality_Closeness
+      title: Closeness
+      type: Bool
+      default: False
+
+    - name: centrality_ClosenessIn
+      title: Closeness In
+      type: Bool
+      default: False
+
+    - name: centrality_ClosenessOut
+      title: Closeness Out
+      type: Bool
+      default: False
+
+    - name: centrality_Diffusion
+      title: Diffusion
+      type: Bool
+      default: False
+
+    - name: centrality_Clustering
+      title: Clustering
+      type: Bool
+      default: False
+
+    # Centrality Parameters
     - name: centrality_loops
-      title: loops
+      title: Include self-loops
       type: Bool
       default: False
 
     - name: centrality_normalize
-      title: normalize
+      title: Normalize values
       type: Bool
       default: False
+
+    # Community Detection Options
+    - name: community_show_table
+      title: Show Community Table
+      type: Bool
+      default: False
+
+    - name: community_walktrap
+      title: Walktrap
+      type: Bool
+      default: True
+
+    - name: community_fast_greedy
+      title: Fast Greedy
+      type: Bool
+      default: True
+
+    - name: community_label_prop
+      title: Label Propagation
+      type: Bool
+      default: False
+
+    - name: community_infomap
+      title: Infomap
+      type: Bool
+      default: False
+
+    - name: community_edge_betweenness
+      title: Edge Betweenness
+      type: Bool
+      default: False
+
+    - name: community_leading_eigen
+      title: Leading Eigenvector
+      type: Bool
+      default: False
+
+    - name: community_spinglass
+      title: Spinglass
+      type: Bool
+      default: False
+
+    # Edge Betweenness Options
+    - name: edge_betweenness_show_table
+      title: Show Edge Betweenness Table
+      type: Bool
+      default: False
+
+    - name: edge_betweenness_directed
+      title: Directed Network
+      type: Bool
+      default: True
 
 ...

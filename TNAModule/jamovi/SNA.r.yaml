@@ -17,26 +17,6 @@ items:
       type: Preformatted
       visible: False
 
-    - name: snaTitle
-      title: SNA
-      type: Preformatted
-      visible: True
-
-    ### SNA MODEL
-    - name: snaModelTitle
-      title: Model
-      type: Preformatted
-      visible: True
-
-    - name: snaModelContent
-      type: Preformatted
-      visible: False
-      clearWith:
-        - sna_from
-        - sna_to
-        - sna_weight
-        - sna_aggregate
-
     - name: sna_plot
       type: Image
       width: 600
@@ -47,7 +27,12 @@ items:
         - sna_from
         - sna_to
         - sna_weight
+        - sna_group
         - sna_aggregate
+        - sna_plot_node_size_slider
+        - sna_plot_edge_size_slider
+        - sna_plot_show_node_labels
+        - sna_plot_show_edge_labels
         - sna_plot_cut
         - sna_plot_min_value
         - sna_plot_edge_label_size
@@ -58,16 +43,68 @@ items:
         - sna_plot_vsize
         - sna_plot_borders
         - sna_plot_border_width
-        - sna_plot_esize
         - sna_plot_asize
         - sna_plot_curve
         - sna_plot_curveAll
         - sna_plot_theme
-        - sna_plot_posCol
-        - sna_plot_negCol
+        - sna_plot_edge_color
         - sna_plot_details
         - sna_plot_width
         - sna_plot_height
+
+    ### GRAPH LEVEL METRICS
+    - name: graphMetricsTitle
+      title: Graph Level Metrics
+      type: Preformatted
+      visible: False
+
+    - name: summaryTable
+      type: Table
+      title: Network Summary
+      visible: False
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+      clearWith:
+        - sna_from
+        - sna_to
+        - sna_weight
+        - sna_group
+        - sna_aggregate
+
+    - name: degree_plot
+      type: Image
+      title: Degree Distribution
+      width: 500
+      height: 400
+      visible: False
+      renderFun: .showDegreePlot
+      clearWith:
+        - sna_from
+        - sna_to
+        - sna_weight
+        - sna_group
+        - sna_aggregate
+
+    ### SNA MODEL (hidden, for caching)
+    - name: snaModelTitle
+      title: Model
+      type: Preformatted
+      visible: False
+
+    - name: snaModelContent
+      type: Preformatted
+      visible: False
+      clearWith:
+        - sna_from
+        - sna_to
+        - sna_weight
+        - sna_group
+        - sna_aggregate
 
     ### CENTRALITY
     - name: centralityTitle
@@ -86,28 +123,77 @@ items:
         - sna_from
         - sna_to
         - sna_weight
+        - sna_group
         - sna_aggregate
+        - centrality_show_table
         - centrality_loops
         - centrality_normalize
         - centrality_OutStrength
         - centrality_InStrength
         - centrality_Betweenness
+        - centrality_BetweennessRSP
+        - centrality_Closeness
+        - centrality_ClosenessIn
+        - centrality_ClosenessOut
+        - centrality_Diffusion
+        - centrality_Clustering
 
-    - name: centrality_plot
-      type: Image
-      width: 600
-      height: 600
+    ### COMMUNITY DETECTION
+    - name: communityTitle
+      title: Community Detection
+      type: Preformatted
       visible: False
-      renderFun: .showCentralityPlot
+
+    - name: communityTable
+      type: Table
+      title: Community Assignments
+      visible: False
+      columns:
+        - name: state
+          title: State
+          type: text
       clearWith:
         - sna_from
         - sna_to
         - sna_weight
+        - sna_group
         - sna_aggregate
-        - centrality_loops
-        - centrality_normalize
-        - centrality_OutStrength
-        - centrality_InStrength
-        - centrality_Betweenness
+        - community_show_table
+        - community_walktrap
+        - community_fast_greedy
+        - community_label_prop
+        - community_infomap
+        - community_edge_betweenness
+        - community_leading_eigen
+        - community_spinglass
+
+    ### EDGE BETWEENNESS
+    - name: edgeBetweennessTitle
+      title: Edge Betweenness
+      type: Preformatted
+      visible: False
+
+    - name: edgeBetweennessTable
+      type: Table
+      title: Edge Betweenness
+      visible: False
+      columns:
+        - name: from
+          title: From
+          type: text
+        - name: to
+          title: To
+          type: text
+        - name: betweenness
+          title: Betweenness
+          type: number
+      clearWith:
+        - sna_from
+        - sna_to
+        - sna_weight
+        - sna_group
+        - sna_aggregate
+        - edge_betweenness_show_table
+        - edge_betweenness_directed
 
 ...

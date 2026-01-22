@@ -1,7 +1,7 @@
 Package: JTNA
 Type: Package
 Title: Transition Network Analysis
-Version: 1.10.0
+Version: 1.9.2
 Author:
   -  Dylan Girault [cre]
   -  Mohammed Saqr [aut]
