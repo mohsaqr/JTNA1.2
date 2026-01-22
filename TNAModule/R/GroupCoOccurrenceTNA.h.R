@@ -1140,7 +1140,7 @@ GroupCoOccurrenceTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             super$initialize(
                 package = "JTNA",
                 name = "GroupCoOccurrenceTNA",
-                version = c(1,9,0),
+                version = c(1,10,0),
                 options = options,
                 results = GroupCoOccurrenceTNAResults$new(options=options),
                 data = data,

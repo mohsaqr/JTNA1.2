@@ -1,0 +1,99 @@
+---
+name:  SNA
+title: Social Network Analysis
+jrs:   '1.1'
+refs:
+  - JTNA
+  - SNA
+items:
+
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: True
+
+    - name: errorText
+      title: Error
+      type: Preformatted
+      visible: False
+
+    - name: snaTitle
+      title: SNA
+      type: Preformatted
+      visible: True
+
+    ### SNA MODEL
+    - name: snaModelTitle
+      title: Model
+      type: Preformatted
+      visible: True
+
+    - name: snaModelContent
+      type: Preformatted
+      visible: False
+      clearWith:
+        - sna_from
+        - sna_to
+        - sna_weight
+        - sna_aggregate
+
+    - name: sna_plot
+      type: Image
+      width: 600
+      height: 600
+      visible: False
+      renderFun: .showSNAPlot
+      clearWith:
+        - sna_from
+        - sna_to
+        - sna_weight
+        - sna_aggregate
+        - sna_plot_cut
+        - sna_plot_min_value
+        - sna_plot_edge_label_size
+        - sna_plot_node_size
+        - sna_plot_node_label_size
+        - sna_plot_layout
+
+    ### CENTRALITY
+    - name: centralityTitle
+      title: Centrality
+      type: Preformatted
+      visible: False
+
+    - name: centralityTable
+      type: Table
+      title: Centrality Measures
+      visible: False
+      columns:
+        - name: state
+          type: text
+      clearWith:
+        - sna_from
+        - sna_to
+        - sna_weight
+        - sna_aggregate
+        - centrality_loops
+        - centrality_normalize
+        - centrality_OutStrength
+        - centrality_InStrength
+        - centrality_Betweenness
+
+    - name: centrality_plot
+      type: Image
+      width: 600
+      height: 600
+      visible: False
+      renderFun: .showCentralityPlot
+      clearWith:
+        - sna_from
+        - sna_to
+        - sna_weight
+        - sna_aggregate
+        - centrality_loops
+        - centrality_normalize
+        - centrality_OutStrength
+        - centrality_InStrength
+        - centrality_Betweenness
+
+...

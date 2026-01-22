@@ -1,0 +1,158 @@
+---
+name:  SNA
+title: Social Network Analysis
+menuGroup: JTNA
+version: '1.10.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    # Input Variables
+    - name: sna_from
+      title: From (Source)
+      type: Variable
+      description: The column containing the source node of each edge (required).
+
+    - name: sna_to
+      title: To (Target)
+      type: Variable
+      description: The column containing the target node of each edge (required).
+
+    - name: sna_weight
+      title: Weight (Optional)
+      type: Variable
+      description: The column containing edge weights. If not provided, defaults to 1 for unweighted networks.
+
+    - name: sna_aggregate
+      title: Aggregation Function
+      type: List
+      options:
+        - title: Sum
+          name: sum
+        - title: Mean
+          name: mean
+        - title: Max
+          name: max
+        - title: Min
+          name: min
+      default: sum
+
+    # Display Options
+    - name: sna_show_matrix
+      title: Matrix
+      type: Bool
+      default: False
+
+    - name: sna_show_plot
+      title: Plot
+      type: Bool
+      default: True
+
+    # Plot Parameters
+    - name: sna_plot_cut
+      title: Cut value
+      type: Number
+      default: 0.1
+      min: 0
+      max: 1
+
+    - name: sna_plot_min_value
+      title: Minimum value
+      type: Number
+      default: 0.05
+      min: 0
+      max: 1
+
+    - name: sna_plot_edge_label_size
+      title: Edge label size
+      type: Number
+      default: 1
+      min: 0
+      max: 10
+
+    - name: sna_plot_node_size
+      title: Node size
+      type: Number
+      default: 1
+      min: 0
+      max: 2
+
+    - name: sna_plot_node_label_size
+      title: Node label size
+      type: Number
+      default: 1
+      min: 0
+      max: 10
+
+    - name: sna_plot_layout
+      title: Layout
+      type: List
+      options:
+        - title: Circle
+          name: circle
+        - title: Spring
+          name: spring
+        - title: Kamada-Kawai
+          name: layout_with_kk
+        - title: Graphopt
+          name: layout_with_graphopt
+        - title: GEM
+          name: layout_with_gem
+        - title: DRL
+          name: layout_with_drl
+        - title: Star
+          name: layout_as_star
+        - title: Grid
+          name: layout_on_grid
+        - title: Nicely
+          name: layout_nicely
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
+        - title: Davidson-Harel
+          name: layout_with_dh
+        - title: LGL
+          name: layout_with_lgl
+        - title: Sugiyama
+          name: layout_with_sugiyama
+        - title: Random
+          name: layout_randomly
+
+    # Centrality Options
+    - name: centrality_show_table
+      title: Table
+      type: Bool
+      default: False
+
+    - name: centrality_show_plot
+      title: Plot
+      type: Bool
+      default: False
+
+    - name: centrality_OutStrength
+      title: OutStrength
+      type: Bool
+      default: True
+
+    - name: centrality_InStrength
+      title: InStrength
+      type: Bool
+      default: True
+
+    - name: centrality_Betweenness
+      title: Betweenness
+      type: Bool
+      default: True
+
+    - name: centrality_loops
+      title: loops
+      type: Bool
+      default: False
+
+    - name: centrality_normalize
+      title: normalize
+      type: Bool
+      default: False
+
+...

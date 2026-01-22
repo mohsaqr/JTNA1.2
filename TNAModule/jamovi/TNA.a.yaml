@@ -2,7 +2,7 @@
 name:  TNA
 title: Transition Network Analysis
 menuGroup: JTNA
-version: '1.9.0'
+version: '1.10.0'
 jas: '1.2'
 
 options:

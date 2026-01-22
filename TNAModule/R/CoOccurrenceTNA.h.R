@@ -1040,7 +1040,7 @@ CoOccurrenceTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 package = "JTNA",
                 name = "CoOccurrenceTNA",
-                version = c(1,9,0),
+                version = c(1,10,0),
                 options = options,
                 results = CoOccurrenceTNAResults$new(options=options),
                 data = data,

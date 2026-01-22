@@ -1139,7 +1139,7 @@ OneHotTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "JTNA",
                 name = "OneHotTNA",
-                version = c(1,9,0),
+                version = c(1,10,0),
                 options = options,
                 results = OneHotTNAResults$new(options=options),
                 data = data,
