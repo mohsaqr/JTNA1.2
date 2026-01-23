@@ -1361,6 +1361,265 @@ ui <- page_navbar(
     )
   ),
 
+  # ---- Group Co-occurrence TNA Tab ----
+  nav_panel(
+    title = "Group Co-occurrence",
+    icon = icon("layer-group"),
+    layout_sidebar(
+      sidebar = sidebar(
+        title = "Group Co-occurrence Network Analysis",
+        width = 350,
+
+        # Data status indicator
+        uiOutput("gcotna_data_indicator"),
+        hr(),
+
+        # Run button
+        actionButton("gcotna_run", "Run Group Analysis", class = "btn-primary w-100 mb-3"),
+
+        # Scaling
+        radioButtons("gcotna_scaling", "Scaling:",
+                     choices = c("No scaling" = "noScaling",
+                                "MinMax" = "minmax",
+                                "Max" = "max",
+                                "Rank" = "rank"),
+                     selected = "noScaling"),
+
+        numericInput("gcotna_threshold", "Time Threshold:", value = 900, min = 1),
+
+        checkboxInput("gcotna_show_plot", "Show Plot", value = TRUE),
+        checkboxInput("gcotna_show_matrix", "Show Matrix", value = FALSE),
+
+        accordion(
+          id = "gcotna_accordion",
+          open = FALSE,
+
+          accordion_panel(
+            title = "Visualization Settings",
+            numericInput("gcotna_plot_cut", "Cut value:", value = 0.1, min = 0, max = 1, step = 0.05),
+            numericInput("gcotna_plot_min", "Minimum value:", value = 0.05, min = 0, max = 1, step = 0.01),
+            numericInput("gcotna_edge_label_size", "Edge label size:", value = 1, min = 0, max = 10),
+            numericInput("gcotna_node_size", "Node size:", value = 1, min = 0, max = 2, step = 0.1),
+            numericInput("gcotna_node_label_size", "Node label size:", value = 1, min = 0, max = 10),
+            selectInput("gcotna_layout", "Layout:", choices = layout_choices),
+            checkboxInput("gcotna_show_histogram", "Show Histogram", value = FALSE),
+            checkboxInput("gcotna_show_frequencies", "Show Frequencies Plot", value = FALSE)
+          ),
+
+          accordion_panel(
+            title = "Centrality Analysis",
+            checkboxInput("gcotna_centrality_show_table", "Show Table", value = TRUE),
+            checkboxInput("gcotna_centrality_show_plot", "Show Plot", value = TRUE),
+            checkboxGroupInput("gcotna_centrality_measures", "Measures:",
+                              choices = centrality_measures,
+                              selected = c("OutStrength", "InStrength", "Betweenness")),
+            checkboxInput("gcotna_centrality_loops", "Include loops", value = FALSE),
+            checkboxInput("gcotna_centrality_normalize", "Normalize values", value = FALSE)
+          ),
+
+          accordion_panel(
+            title = "Community Detection",
+            checkboxInput("gcotna_community_show_table", "Show Table", value = TRUE),
+            checkboxInput("gcotna_community_show_plot", "Show Plot", value = TRUE),
+            selectInput("gcotna_community_method", "Method:", choices = community_methods),
+            numericInput("gcotna_community_gamma", "Gamma:", value = 1, min = 0, max = 100)
+          ),
+
+          accordion_panel(
+            title = "Clique Analysis",
+            checkboxInput("gcotna_cliques_show_table", "Show Table", value = TRUE),
+            checkboxInput("gcotna_cliques_show_plot", "Show Plot", value = TRUE),
+            numericInput("gcotna_cliques_size", "Clique size:", value = 2, min = 2, max = 10),
+            numericInput("gcotna_cliques_threshold", "Threshold:", value = 0, min = 0, max = 1, step = 0.1)
+          ),
+
+          accordion_panel(
+            title = "Bootstrap Analysis",
+            checkboxInput("gcotna_bootstrap_show_table", "Show Table", value = TRUE),
+            checkboxInput("gcotna_bootstrap_show_plot", "Show Plot", value = TRUE),
+            numericInput("gcotna_bootstrap_iterations", "Iterations:", value = 1000, min = 100, max = 10000),
+            numericInput("gcotna_bootstrap_level", "Level:", value = 0.05, min = 0, max = 1, step = 0.01),
+            radioButtons("gcotna_bootstrap_method", "Method:",
+                        choices = c("Stability" = "stability", "Threshold" = "threshold"),
+                        selected = "stability"),
+            conditionalPanel(
+              condition = "input.gcotna_bootstrap_method == 'stability'",
+              numericInput("gcotna_bootstrap_range_low", "Lower range:", value = 0.75, min = 0, max = 10),
+              numericInput("gcotna_bootstrap_range_up", "Upper range:", value = 1.25, min = 0, max = 10)
+            ),
+            conditionalPanel(
+              condition = "input.gcotna_bootstrap_method == 'threshold'",
+              numericInput("gcotna_bootstrap_threshold", "Threshold:", value = 0.1, min = 0, max = 1)
+            ),
+            checkboxInput("gcotna_bootstrap_significant_only", "Significant only", value = FALSE),
+            numericInput("gcotna_bootstrap_max_rows", "Max rows:", value = 20, min = 1, max = 1000)
+          ),
+
+          accordion_panel(
+            title = "Permutation Test",
+            checkboxInput("gcotna_permutation_show_table", "Show Table", value = TRUE),
+            checkboxInput("gcotna_permutation_show_plot", "Show Plot", value = TRUE),
+            numericInput("gcotna_permutation_iter", "Iterations:", value = 1000, min = 1),
+            checkboxInput("gcotna_permutation_paired", "Paired", value = FALSE),
+            numericInput("gcotna_permutation_level", "Level:", value = 0.05, min = 0, max = 1)
+          )
+        )
+      ),
+
+      # Main panel with subtabs
+      navset_pill(
+        id = "gcotna_output_tabs",
+
+        nav_panel(
+          title = "Network",
+          icon = icon("layer-group"),
+          card(
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              span("Group Co-occurrence Network Plot"),
+              span(
+                downloadButton("gcotna_plot_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                downloadButton("gcotna_plot_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+              )
+            ),
+            plotOutput("gcotna_network_plot", height = "600px")
+          ),
+          card(
+            card_header("Matrix"),
+            verbatimTextOutput("gcotna_matrix_output")
+          )
+        ),
+
+        nav_panel(
+          title = "Metrics",
+          icon = icon("chart-bar"),
+          card(
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              span("Histogram"),
+              span(
+                downloadButton("gcotna_histogram_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                downloadButton("gcotna_histogram_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+              )
+            ),
+            plotOutput("gcotna_histogram_plot", height = "400px")
+          ),
+          card(
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              span("Frequencies"),
+              span(
+                downloadButton("gcotna_frequencies_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                downloadButton("gcotna_frequencies_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+              )
+            ),
+            plotOutput("gcotna_frequencies_plot", height = "400px")
+          )
+        ),
+
+        nav_panel(
+          title = "Centrality",
+          icon = icon("bullseye"),
+          card(
+            card_header("Centrality Table"),
+            DT::dataTableOutput("gcotna_centrality_table")
+          ),
+          card(
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              span("Centrality Plot"),
+              span(
+                downloadButton("gcotna_centrality_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                downloadButton("gcotna_centrality_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+              )
+            ),
+            plotOutput("gcotna_centrality_plot", height = "400px")
+          )
+        ),
+
+        nav_panel(
+          title = "Community",
+          icon = icon("users"),
+          card(
+            card_header("Community Assignments"),
+            DT::dataTableOutput("gcotna_community_table")
+          ),
+          card(
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              span("Community Plot"),
+              span(
+                downloadButton("gcotna_community_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                downloadButton("gcotna_community_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+              )
+            ),
+            plotOutput("gcotna_community_plot", height = "600px")
+          )
+        ),
+
+        nav_panel(
+          title = "Cliques",
+          icon = icon("circle-nodes"),
+          card(
+            card_header("Cliques"),
+            verbatimTextOutput("gcotna_cliques_text")
+          ),
+          card(
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              span("Clique Plot"),
+              span(
+                downloadButton("gcotna_cliques_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                downloadButton("gcotna_cliques_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+              )
+            ),
+            plotOutput("gcotna_cliques_plot", height = "600px")
+          )
+        ),
+
+        nav_panel(
+          title = "Bootstrap",
+          icon = icon("random"),
+          card(
+            card_header("Bootstrap Results"),
+            DT::dataTableOutput("gcotna_bootstrap_table")
+          ),
+          card(
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              span("Bootstrap Plot"),
+              span(
+                downloadButton("gcotna_bootstrap_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                downloadButton("gcotna_bootstrap_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+              )
+            ),
+            plotOutput("gcotna_bootstrap_plot", height = "600px")
+          )
+        ),
+
+        nav_panel(
+          title = "Permutation",
+          icon = icon("shuffle"),
+          card(
+            card_header("Permutation Test Results"),
+            DT::dataTableOutput("gcotna_permutation_table")
+          ),
+          card(
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              span("Permutation Plot"),
+              span(
+                downloadButton("gcotna_permutation_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                downloadButton("gcotna_permutation_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+              )
+            ),
+            plotOutput("gcotna_permutation_plot", height = "400px")
+          )
+        )
+      )
+    )
+  ),
+
   # ---- One-Hot TNA Tab ----
   nav_panel(
     title = "One-Hot",
@@ -4392,6 +4651,449 @@ server <- function(input, output, session) {
         text(0.5, 0.5, paste("Error:", e$message), col = "red", cex = 0.7)
       }
     })
+  })
+
+  # ==========================================================================
+  # Group Co-occurrence TNA Module
+  # ==========================================================================
+
+  # Group Co-occurrence data indicator
+  output$gcotna_data_indicator <- renderUI({
+    if (is.null(shared_data$activity_data)) {
+      div(class = "alert alert-warning alert-sm py-2", icon("exclamation-triangle"), " Load data in Data tab")
+    } else if (is.null(shared_data$actor_col)) {
+      div(class = "alert alert-warning alert-sm py-2", icon("user"), " Select an Actor column in Data tab")
+    } else if (!shared_data$has_group) {
+      div(class = "alert alert-warning alert-sm py-2", icon("users"), " Select a Group column in Data tab")
+    } else {
+      div(class = "alert alert-success alert-sm py-2",
+          icon("check-circle"), sprintf(" Ready: %d rows (Group: %s)", nrow(shared_data$activity_data), shared_data$group_col))
+    }
+  })
+
+  # Store computed Group Co-occurrence model
+  gcotna_model <- reactiveVal(NULL)
+
+  # Run Group Co-occurrence when button is clicked
+  observeEvent(input$gcotna_run, {
+    req(shared_data$action_col, shared_data$actor_col)
+    req(shared_data$action_col != "", shared_data$actor_col != "")
+
+    # Check if group column is available
+    if (!shared_data$has_group) {
+      showNotification("Please select a Group column in the Data tab", type = "warning")
+      gcotna_model(NULL)
+      return()
+    }
+
+    copyData <- shared_data$activity_data
+    copyData[[shared_data$action_col]] <- as.character(copyData[[shared_data$action_col]])
+    copyData[[shared_data$actor_col]] <- as.character(copyData[[shared_data$actor_col]])
+
+    args_prepare_data <- list(
+      data = copyData,
+      action = shared_data$action_col,
+      actor = shared_data$actor_col,
+      time_threshold = input$gcotna_threshold
+    )
+
+    if(!is.null(shared_data$time_col) && shared_data$time_col != "") {
+      copyData[[shared_data$time_col]] <- as.POSIXct(copyData[[shared_data$time_col]])
+      args_prepare_data$time <- shared_data$time_col
+    }
+
+    if(!is.null(shared_data$order_col) && shared_data$order_col != "") {
+      args_prepare_data$order <- shared_data$order_col
+    }
+
+    args_prepare_data$data <- copyData
+
+    dataForTNA <- tryCatch({
+      do.call(prepare_data, args_prepare_data)
+    }, error = function(e) {
+      showNotification(paste("Error preparing data:", e$message), type = "error")
+      NULL
+    })
+
+    if(is.null(dataForTNA)) {
+      gcotna_model(NULL)
+      return()
+    }
+
+    scaling <- if(input$gcotna_scaling == "noScaling") character(0L) else input$gcotna_scaling
+
+    # Get group from long data
+    group <- dataForTNA$long_data[!duplicated(dataForTNA$long_data$.session_id),]
+    group_vec <- group[[shared_data$group_col]]
+
+    result <- tryCatch({
+      tna::group_model(x = dataForTNA, group = group_vec, type = "co-occurrence", scaling = scaling)
+    }, error = function(e) {
+      showNotification(paste("Error building model:", e$message), type = "error")
+      NULL
+    })
+
+    if (!is.null(result)) {
+      gcotna_model(result)
+      showNotification(paste("Group co-occurrence analysis complete:", length(result), "groups"), type = "message")
+    } else {
+      gcotna_model(NULL)
+    }
+  })
+
+  # Group Co-occurrence Network Plot
+  output$gcotna_network_plot <- renderPlot({
+    if (is.null(shared_data$activity_data)) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, "Load data in the Data tab to begin", cex = 1.2, col = "gray50")
+      return()
+    }
+
+    if (!shared_data$has_group) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, "Select a Group column in the Data tab,\nthen click 'Run Group Analysis'", cex = 1.2, col = "gray50")
+      return()
+    }
+
+    if (is.null(gcotna_model())) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, "Click 'Run Group Analysis' to begin", cex = 1.2, col = "gray50")
+      return()
+    }
+
+    if (!input$gcotna_show_plot) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, "Enable 'Show Plot' to view", cex = 1, col = "gray50")
+      return()
+    }
+
+    groupModels <- gcotna_model()
+
+    tryCatch({
+      nGroups <- length(groupModels)
+      nCols <- ceiling(sqrt(nGroups))
+      nRows <- ceiling(nGroups / nCols)
+
+      par(mfrow = c(nRows, nCols), mar = c(0.5, 0.5, 1.5, 0.5), oma = c(0, 0, 0, 0))
+
+      for(g in names(groupModels)) {
+        plot(groupModels[[g]],
+             title = g,
+             cut = input$gcotna_plot_cut,
+             minimum = input$gcotna_plot_min,
+             edge.label.cex = input$gcotna_edge_label_size,
+             node.width = input$gcotna_node_size,
+             label.cex = input$gcotna_node_label_size,
+             layout = input$gcotna_layout,
+             bg = "white")
+      }
+
+      par(mfrow = c(1, 1))
+    }, error = function(e) {
+      par(mfrow = c(1, 1), mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, paste("Error:", e$message), col = "red", cex = 0.7)
+    })
+  })
+
+  # Group Co-occurrence Matrix Output
+  output$gcotna_matrix_output <- renderPrint({
+    req(gcotna_model(), input$gcotna_show_matrix)
+
+    groupModels <- gcotna_model()
+
+    for(g in names(groupModels)) {
+      cat("=== Group:", g, "===\n")
+      print(round(groupModels[[g]]$weights, 4))
+      cat("\n")
+    }
+  })
+
+  # Group Co-occurrence Histogram
+  output$gcotna_histogram_plot <- renderPlot({
+    req(gcotna_model(), input$gcotna_show_histogram)
+
+    groupModels <- gcotna_model()
+
+    tryCatch({
+      nGroups <- length(groupModels)
+      nCols <- ceiling(sqrt(nGroups))
+      nRows <- ceiling(nGroups / nCols)
+
+      par(mfrow = c(nRows, nCols), mar = c(3, 3, 2, 1))
+
+      for(g in names(groupModels)) {
+        hist(x = groupModels[[g]], main = paste("Histogram -", g),
+             xlab = "Edge Weights", ylab = "Frequency")
+      }
+
+      par(mfrow = c(1, 1))
+    }, error = function(e) {
+      par(mfrow = c(1, 1), mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, paste("Error:", e$message), col = "red", cex = 0.7)
+    })
+  })
+
+  # Group Co-occurrence Frequencies Plot
+  output$gcotna_frequencies_plot <- renderPlot({
+    req(gcotna_model(), input$gcotna_show_frequencies)
+
+    groupModels <- gcotna_model()
+
+    tryCatch({
+      p <- tna::plot_frequencies(x = groupModels)
+      if(!is.null(p)) print(p)
+    }, error = function(e) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, paste("Error:", e$message), col = "red", cex = 0.7)
+    })
+  })
+
+  # Group Co-occurrence Centrality Table
+  output$gcotna_centrality_table <- DT::renderDataTable({
+    req(gcotna_model(), input$gcotna_centrality_show_table)
+    req(length(input$gcotna_centrality_measures) > 0)
+
+    groupModels <- gcotna_model()
+
+    cent <- tryCatch({
+      centralities(x = groupModels,
+                  loops = input$gcotna_centrality_loops,
+                  normalize = input$gcotna_centrality_normalize,
+                  measures = input$gcotna_centrality_measures)
+    }, error = function(e) NULL)
+
+    if(is.null(cent)) return(NULL)
+
+    styled_datatable(cent, caption = "Group Centrality Measures")
+  })
+
+  # Group Co-occurrence Centrality Plot
+  output$gcotna_centrality_plot <- renderPlot({
+    req(gcotna_model(), input$gcotna_centrality_show_plot)
+    req(length(input$gcotna_centrality_measures) > 0)
+
+    groupModels <- gcotna_model()
+
+    cent <- tryCatch({
+      centralities(x = groupModels,
+                  loops = input$gcotna_centrality_loops,
+                  normalize = input$gcotna_centrality_normalize,
+                  measures = input$gcotna_centrality_measures)
+    }, error = function(e) NULL)
+
+    if(!is.null(cent)) {
+      p <- plot(cent)
+      print(p)
+    }
+  })
+
+  # Group Co-occurrence Community Table
+  output$gcotna_community_table <- DT::renderDataTable({
+    req(gcotna_model(), input$gcotna_community_show_table)
+
+    groupModels <- gcotna_model()
+
+    coms <- tryCatch({
+      tna::communities(x = groupModels,
+                      methods = input$gcotna_community_method,
+                      gamma = input$gcotna_community_gamma)
+    }, error = function(e) NULL)
+
+    if(is.null(coms) || is.null(coms$assignments)) return(NULL)
+
+    styled_datatable(coms$assignments, caption = "Community Assignments by Group")
+  })
+
+  # Group Co-occurrence Community Plot
+  output$gcotna_community_plot <- renderPlot({
+    req(gcotna_model(), input$gcotna_community_show_plot)
+
+    groupModels <- gcotna_model()
+
+    tryCatch({
+      coms <- tna::communities(x = groupModels,
+                              methods = input$gcotna_community_method,
+                              gamma = input$gcotna_community_gamma)
+
+      if(!is.null(coms)) {
+        nGroups <- length(groupModels)
+        nCols <- ceiling(sqrt(nGroups))
+        nRows <- ceiling(nGroups / nCols)
+
+        par(mfrow = c(nRows, nCols), mar = c(0.5, 0.5, 1.5, 0.5), oma = c(0, 0, 0, 0))
+        plot(x = coms, method = input$gcotna_community_method)
+        par(mfrow = c(1, 1))
+      }
+    }, error = function(e) {
+      par(mfrow = c(1, 1), mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, paste("Error:", e$message), col = "red", cex = 0.7)
+    })
+  })
+
+  # Group Co-occurrence Cliques Text
+  output$gcotna_cliques_text <- renderPrint({
+    req(gcotna_model(), input$gcotna_cliques_show_table)
+
+    groupModels <- gcotna_model()
+
+    cliques <- tryCatch({
+      tna::cliques(x = groupModels,
+                  size = input$gcotna_cliques_size,
+                  threshold = input$gcotna_cliques_threshold)
+    }, error = function(e) NULL)
+
+    if(!is.null(cliques)) {
+      print(cliques)
+    } else {
+      cat("No cliques found\n")
+    }
+  })
+
+  # Group Co-occurrence Cliques Plot
+  output$gcotna_cliques_plot <- renderPlot({
+    req(gcotna_model(), input$gcotna_cliques_show_plot)
+
+    groupModels <- gcotna_model()
+
+    tryCatch({
+      cliques <- tna::cliques(x = groupModels,
+                             size = input$gcotna_cliques_size,
+                             threshold = input$gcotna_cliques_threshold)
+
+      if(!is.null(cliques) && length(cliques) > 0) {
+        nGroups <- length(groupModels)
+        nCols <- ceiling(sqrt(nGroups))
+        nRows <- ceiling(nGroups / nCols)
+
+        par(mfrow = c(nRows, nCols), mar = c(0.5, 0.5, 1.5, 0.5), oma = c(0, 0, 0, 0))
+        plot(x = cliques, ask = FALSE, first = 1, n = 1, bg = "white")
+        par(mfrow = c(1, 1))
+      }
+    }, error = function(e) {
+      par(mfrow = c(1, 1), mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, paste("Error:", e$message), col = "red", cex = 0.7)
+    })
+  })
+
+  # Group Co-occurrence Bootstrap Table
+  output$gcotna_bootstrap_table <- DT::renderDataTable({
+    req(gcotna_model(), input$gcotna_bootstrap_show_table)
+
+    groupModels <- gcotna_model()
+
+    bs <- tryCatch({
+      tna::bootstrap(
+        x = groupModels,
+        iter = input$gcotna_bootstrap_iterations,
+        level = input$gcotna_bootstrap_level,
+        method = input$gcotna_bootstrap_method,
+        threshold = if(input$gcotna_bootstrap_method == "threshold") input$gcotna_bootstrap_threshold else 0.1,
+        consistency_range = c(input$gcotna_bootstrap_range_low, input$gcotna_bootstrap_range_up)
+      )
+    }, error = function(e) NULL)
+
+    if(is.null(bs)) return(NULL)
+
+    # Combine results from all groups
+    all_bs <- NULL
+    for(g in names(bs)) {
+      if(!is.null(bs[[g]]$summary)) {
+        df <- bs[[g]]$summary
+        df$group <- g
+
+        if(input$gcotna_bootstrap_significant_only) {
+          df <- df[df$sig == TRUE, ]
+        }
+
+        all_bs <- rbind(all_bs, df)
+      }
+    }
+
+    if(is.null(all_bs) || nrow(all_bs) == 0) return(NULL)
+
+    if(nrow(all_bs) > input$gcotna_bootstrap_max_rows) {
+      all_bs <- all_bs[1:input$gcotna_bootstrap_max_rows, ]
+    }
+
+    styled_datatable(all_bs, caption = "Bootstrap Analysis Results")
+  })
+
+  # Group Co-occurrence Bootstrap Plot
+  output$gcotna_bootstrap_plot <- renderPlot({
+    req(gcotna_model(), input$gcotna_bootstrap_show_plot)
+
+    groupModels <- gcotna_model()
+
+    tryCatch({
+      bs <- tna::bootstrap(
+        x = groupModels,
+        iter = input$gcotna_bootstrap_iterations,
+        level = input$gcotna_bootstrap_level,
+        method = input$gcotna_bootstrap_method,
+        threshold = if(input$gcotna_bootstrap_method == "threshold") input$gcotna_bootstrap_threshold else 0.1,
+        consistency_range = c(input$gcotna_bootstrap_range_low, input$gcotna_bootstrap_range_up)
+      )
+
+      if(!is.null(bs)) {
+        nGroups <- length(groupModels)
+        nCols <- ceiling(sqrt(nGroups))
+        nRows <- ceiling(nGroups / nCols)
+
+        par(mfrow = c(nRows, nCols), mar = c(0.5, 0.5, 1.5, 0.5), oma = c(0, 0, 0, 0))
+        plot(x = bs, cut = 0.01)
+        par(mfrow = c(1, 1))
+      }
+    }, error = function(e) {
+      par(mfrow = c(1, 1), mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, paste("Error:", e$message), col = "red", cex = 0.7)
+    })
+  })
+
+  # Group Co-occurrence Permutation Table
+  output$gcotna_permutation_table <- DT::renderDataTable({
+    req(gcotna_model(), input$gcotna_permutation_show_table)
+
+    groupModels <- gcotna_model()
+
+    permResult <- tryCatch({
+      tna::permutation_test(x = groupModels,
+                           iter = input$gcotna_permutation_iter,
+                           paired = input$gcotna_permutation_paired,
+                           level = input$gcotna_permutation_level)
+    }, error = function(e) NULL)
+
+    if(is.null(permResult)) return(NULL)
+
+    styled_datatable(permResult$summary, caption = "Permutation Test Results")
+  })
+
+  # Group Co-occurrence Permutation Plot
+  output$gcotna_permutation_plot <- renderPlot({
+    req(gcotna_model(), input$gcotna_permutation_show_plot)
+
+    groupModels <- gcotna_model()
+
+    permResult <- tryCatch({
+      tna::permutation_test(x = groupModels,
+                           iter = input$gcotna_permutation_iter,
+                           paired = input$gcotna_permutation_paired,
+                           level = input$gcotna_permutation_level)
+    }, error = function(e) NULL)
+
+    if(!is.null(permResult)) {
+      p <- plot(permResult)
+      print(p)
+    }
   })
 
   # ==========================================================================
