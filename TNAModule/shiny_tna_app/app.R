@@ -4,6 +4,7 @@
 
 library(shiny)
 library(bslib)
+library(bsicons)
 library(DT)
 library(tna)
 library(codyna)
@@ -96,6 +97,9 @@ ui <- page_navbar(
   # ---- Settings in navbar ----
   nav_spacer(),
   nav_item(
+    input_dark_mode(id = "dark_mode", mode = "light")
+  ),
+  nav_item(
     selectInput(
       "app_theme",
       label = NULL,
@@ -114,54 +118,115 @@ ui <- page_navbar(
         title = "Data Management",
         width = 350,
 
-        # Data Format Selection
-        radioButtons("data_format", "Data Format:",
-                     choices = c("Activity Sequence (TNA)" = "activity_sequence",
-                                "Edge List (SNA)" = "edge_list"),
-                     selected = "activity_sequence"),
+        # Data Management Accordion
+        accordion(
+          id = "data_management_accordion",
+          open = c("load_data", "column_mapping"),
 
-        hr(),
+          accordion_panel(
+            title = "Data Format",
+            icon = bsicons::bs_icon("file-earmark-spreadsheet"),
+            value = "data_format",
+            radioButtons("data_format", label = NULL,
+                         choices = c("Activity Sequence (TNA)" = "activity_sequence",
+                                    "Edge List (SNA)" = "edge_list"),
+                         selected = "activity_sequence")
+          ),
 
-        # File Upload
-        fileInput("data_file", "Upload CSV:", accept = ".csv"),
-        actionButton("load_sample", "Load Sample Data",
-                    class = "btn-outline-primary btn-sm mb-2",
-                    icon = icon("database")),
+          accordion_panel(
+            title = "Load Data",
+            icon = bsicons::bs_icon("cloud-arrow-up"),
+            value = "load_data",
+            fileInput("data_file", label = NULL, accept = ".csv",
+                      placeholder = "Choose CSV file...", buttonLabel = "Browse"),
+            actionButton("load_sample", "Load Sample Data",
+                        class = "btn-outline-secondary w-100",
+                        icon = icon("database"))
+          ),
 
-        hr(),
+          accordion_panel(
+            title = "Column Mapping",
+            icon = bsicons::bs_icon("columns-gap"),
+            value = "column_mapping",
 
-        # Activity Sequence Column Mapping
-        conditionalPanel(
-          condition = "input.data_format == 'activity_sequence'",
-          h5("Column Mapping"),
-          selectInput("col_action", "Action Column:", choices = NULL),
-          selectInput("col_actor", "Actor Column (Optional):", choices = NULL),
-          selectInput("col_group", "Group Column (Optional):", choices = NULL),
-          selectInput("col_time", "Time Column (Optional):", choices = NULL),
-          selectInput("col_order", "Order Column (Optional):", choices = NULL)
+            conditionalPanel(
+              condition = "input.data_format == 'activity_sequence'",
+              # Required field
+              tags$label(
+                class = "form-label",
+                bsicons::bs_icon("asterisk", class = "text-danger"), " Action Column"
+              ),
+              selectInput("col_action", label = NULL, choices = NULL),
+
+              # Optional fields
+              tags$label(
+                class = "form-label",
+                bsicons::bs_icon("dash-circle", class = "text-secondary"), " Actor Column ",
+                tags$small(class = "text-muted", "(Optional)")
+              ),
+              selectInput("col_actor", label = NULL, choices = NULL),
+
+              tags$label(
+                class = "form-label",
+                bsicons::bs_icon("dash-circle", class = "text-secondary"), " Group Column ",
+                tags$small(class = "text-muted", "(Optional)")
+              ),
+              selectInput("col_group", label = NULL, choices = NULL),
+
+              tags$label(
+                class = "form-label",
+                bsicons::bs_icon("dash-circle", class = "text-secondary"), " Time Column ",
+                tags$small(class = "text-muted", "(Optional)")
+              ),
+              selectInput("col_time", label = NULL, choices = NULL),
+
+              tags$label(
+                class = "form-label",
+                bsicons::bs_icon("dash-circle", class = "text-secondary"), " Order Column ",
+                tags$small(class = "text-muted", "(Optional)")
+              ),
+              selectInput("col_order", label = NULL, choices = NULL)
+            ),
+
+            conditionalPanel(
+              condition = "input.data_format == 'edge_list'",
+              # Required fields
+              tags$label(
+                class = "form-label",
+                bsicons::bs_icon("asterisk", class = "text-danger"), " From (Source)"
+              ),
+              selectInput("col_from", label = NULL, choices = NULL),
+
+              tags$label(
+                class = "form-label",
+                bsicons::bs_icon("asterisk", class = "text-danger"), " To (Target)"
+              ),
+              selectInput("col_to", label = NULL, choices = NULL),
+
+              # Optional fields
+              tags$label(
+                class = "form-label",
+                bsicons::bs_icon("dash-circle", class = "text-secondary"), " Weight ",
+                tags$small(class = "text-muted", "(Optional)")
+              ),
+              selectInput("col_weight", label = NULL, choices = NULL),
+
+              tags$label(
+                class = "form-label",
+                bsicons::bs_icon("dash-circle", class = "text-secondary"), " Group ",
+                tags$small(class = "text-muted", "(Optional)")
+              ),
+              selectInput("col_sna_group", label = NULL, choices = NULL)
+            )
+          )
         ),
-
-        # Edge List Column Mapping
-        conditionalPanel(
-          condition = "input.data_format == 'edge_list'",
-          h5("Edge List Mapping"),
-          selectInput("col_from", "From (Source):", choices = NULL),
-          selectInput("col_to", "To (Target):", choices = NULL),
-          selectInput("col_weight", "Weight (Optional):", choices = NULL),
-          selectInput("col_sna_group", "Group (Optional):", choices = NULL)
-        ),
-
-        hr(),
 
         # Status indicator
-        uiOutput("data_status")
+        tags$div(class = "mt-3", uiOutput("data_status"))
       ),
 
-      # Main panel - Data Viewer
-      card(
-        card_header("Data Preview"),
-        DT::dataTableOutput("data_preview")
-      )
+      # Main panel - Conditional rendering
+      uiOutput("data_main_panel")
     )
   ),
 
@@ -178,27 +243,12 @@ ui <- page_navbar(
         uiOutput("tna_data_indicator"),
         hr(),
 
-        # Model Type
-        radioButtons("tna_type", "Type:",
-                     choices = c("Relative" = "relative",
-                                "Frequency" = "frequency",
-                                "Attention" = "attention"),
-                     selected = "relative", inline = TRUE),
-
-        conditionalPanel(
-          condition = "input.tna_type == 'attention'",
-          numericInput("tna_lambda", "Lambda (decay rate):", value = 1, min = 0.01, max = 10)
+        # Run/Clear buttons
+        div(
+          class = "d-flex gap-2 mb-3",
+          actionButton("tna_run", "Run Analysis", class = "btn-primary flex-grow-1", icon = icon("play")),
+          actionButton("tna_clear", "Clear", class = "btn-outline-secondary", icon = icon("trash"))
         ),
-
-        # Scaling
-        radioButtons("tna_scaling", "Scaling:",
-                     choices = c("No scaling" = "noScaling",
-                                "MinMax" = "minmax",
-                                "Max" = "max",
-                                "Rank" = "rank"),
-                     selected = "noScaling"),
-
-        numericInput("tna_threshold", "Time Threshold:", value = 900, min = 1),
 
         checkboxInput("tna_show_plot", "Show TNA Plot", value = TRUE),
         checkboxInput("tna_show_matrix", "Show Matrix", value = TRUE),
@@ -209,7 +259,27 @@ ui <- page_navbar(
           open = FALSE,
 
           accordion_panel(
-            title = "Visualization Settings",
+            title = "Estimation Settings", icon = bsicons::bs_icon("sliders"),
+            radioButtons("tna_type", "Type:",
+                         choices = c("Relative" = "relative",
+                                    "Frequency" = "frequency",
+                                    "Attention" = "attention"),
+                         selected = "relative", inline = TRUE),
+            conditionalPanel(
+              condition = "input.tna_type == 'attention'",
+              numericInput("tna_lambda", "Lambda (decay rate):", value = 1, min = 0.01, max = 10)
+            ),
+            radioButtons("tna_scaling", "Scaling:",
+                         choices = c("No scaling" = "noScaling",
+                                    "MinMax" = "minmax",
+                                    "Max" = "max",
+                                    "Rank" = "rank"),
+                         selected = "noScaling"),
+            numericInput("tna_threshold", "Time Threshold:", value = 900, min = 1)
+          ),
+
+          accordion_panel(
+            title = "Visualization Settings", icon = bsicons::bs_icon("palette"),
             numericInput("tna_plot_cut", "Cut value:", value = 0.1, min = 0, max = 1, step = 0.05),
             numericInput("tna_plot_min", "Minimum value:", value = 0.05, min = 0, max = 1, step = 0.01),
             numericInput("tna_edge_label_size", "Edge label size:", value = 1, min = 0, max = 10),
@@ -225,7 +295,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Centrality Analysis",
+            title = "Centrality Analysis", icon = bsicons::bs_icon("bullseye"),
             checkboxInput("tna_centrality_show_table", "Show Table", value = TRUE),
             checkboxInput("tna_centrality_show_plot", "Show Plot", value = TRUE),
             checkboxGroupInput("tna_centrality_measures", "Measures:",
@@ -236,7 +306,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Centrality Stability",
+            title = "Centrality Stability", icon = bsicons::bs_icon("bar-chart"),
             checkboxInput("tna_stability_show_table", "Stability Table", value = TRUE),
             checkboxInput("tna_stability_show_plot", "Stability Plot", value = TRUE),
             checkboxGroupInput("tna_stability_measures", "Measures:",
@@ -248,14 +318,14 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Edge Betweenness",
+            title = "Edge Betweenness", icon = bsicons::bs_icon("arrow-right"),
             checkboxInput("tna_edge_betweenness_show_table", "Show Table", value = TRUE),
             checkboxInput("tna_edge_betweenness_show_plot", "Show Plot", value = TRUE),
             selectInput("tna_edge_betweenness_layout", "Layout:", choices = layout_choices)
           ),
 
           accordion_panel(
-            title = "Community Detection",
+            title = "Community Detection", icon = bsicons::bs_icon("people"),
             checkboxInput("tna_community_show_table", "Show Table", value = TRUE),
             checkboxInput("tna_community_show_plot", "Show Plot", value = TRUE),
             selectInput("tna_community_method", "Method:", choices = community_methods),
@@ -263,7 +333,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Bootstrap Analysis",
+            title = "Bootstrap Analysis", icon = bsicons::bs_icon("shuffle"),
             checkboxInput("tna_bootstrap_show_table", "Show Table", value = TRUE),
             checkboxInput("tna_bootstrap_show_plot", "Show Plot", value = TRUE),
             numericInput("tna_bootstrap_iterations", "Iterations:", value = 1000, min = 0, max = 10000),
@@ -285,7 +355,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Sequence Analysis",
+            title = "Sequence Analysis", icon = bsicons::bs_icon("list-ol"),
             checkboxInput("tna_sequences_show_plot", "Show Sequence Plot", value = TRUE),
             radioButtons("tna_sequences_type", "Type:",
                         choices = c("Index" = "index", "Distribution" = "distribution"),
@@ -301,7 +371,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Pattern Discovery",
+            title = "Pattern Discovery", icon = bsicons::bs_icon("search"),
             checkboxInput("tna_pattern_show_table", "Show Patterns Table", value = TRUE),
             radioButtons("tna_pattern_type", "Pattern Type:",
                         choices = c("N-gram" = "ngram", "Gapped" = "gapped",
@@ -319,7 +389,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Sequence Indices",
+            title = "Sequence Indices", icon = bsicons::bs_icon("hash"),
             checkboxInput("tna_indices_show_table", "Show Indices Table", value = TRUE),
             numericInput("tna_indices_omega", "Omega:", value = 1, min = 0.01, max = 10),
             numericInput("tna_indices_max_rows", "Max rows:", value = 50, min = 1, max = 10000)
@@ -335,57 +405,94 @@ ui <- page_navbar(
           title = "Network",
           icon = icon("sitemap"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("TNA Network Plot"),
-              span(
+              tags$strong("TNA Network"),
+              tags$span(
                 downloadButton("tna_plot_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("tna_plot_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("tna_network_plot", height = "600px")
-          ),
-          card(
-            card_header("Matrix"),
-            verbatimTextOutput("tna_matrix_output")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("tna_network_plot", width = "600px", height = "600px")
+            ),
+            card_footer(
+              class = "p-0",
+              accordion(
+                id = "tna_network_accordion",
+                open = FALSE,
+                accordion_panel(
+                  title = "Network Summary",
+                  icon = bsicons::bs_icon("table"),
+                  DT::dataTableOutput("tna_summary_table")
+                ),
+                accordion_panel(
+                  title = "Transition Matrix",
+                  icon = bsicons::bs_icon("grid-3x3"),
+                  verbatimTextOutput("tna_matrix_output")
+                )
+              )
+            )
           )
         ),
 
         nav_panel(
           title = "Metrics",
           icon = icon("chart-bar"),
-          card(
-            card_header(
-              class = "d-flex justify-content-between align-items-center",
-              span("Histogram"),
-              span(
-                downloadButton("tna_histogram_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
-                downloadButton("tna_histogram_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+          layout_column_wrap(
+            width = 1/2,
+            heights_equal = "row",
+            card(
+              full_screen = TRUE,
+              card_header(
+                class = "d-flex justify-content-between align-items-center",
+                tags$strong("Histogram"),
+                tags$span(
+                  downloadButton("tna_histogram_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                  downloadButton("tna_histogram_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+                )
+              ),
+              card_body(
+                class = "p-2",
+                style = "display: flex; justify-content: center; align-items: center;",
+                plotOutput("tna_histogram_plot", width = "600px", height = "400px")
               )
             ),
-            plotOutput("tna_histogram_plot", height = "400px")
-          ),
-          card(
-            card_header(
-              class = "d-flex justify-content-between align-items-center",
-              span("Frequencies"),
-              span(
-                downloadButton("tna_frequencies_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
-                downloadButton("tna_frequencies_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+            card(
+              full_screen = TRUE,
+              card_header(
+                class = "d-flex justify-content-between align-items-center",
+                tags$strong("Frequencies"),
+                tags$span(
+                  downloadButton("tna_frequencies_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                  downloadButton("tna_frequencies_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+                )
+              ),
+              card_body(
+                class = "p-2",
+                style = "display: flex; justify-content: center; align-items: center;",
+                plotOutput("tna_frequencies_plot", width = "600px", height = "400px")
               )
-            ),
-            plotOutput("tna_frequencies_plot", height = "400px")
+            )
           ),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Mosaic"),
-              span(
+              tags$strong("Mosaic"),
+              tags$span(
                 downloadButton("tna_mosaic_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("tna_mosaic_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("tna_mosaic_plot", height = "400px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("tna_mosaic_plot", width = "600px", height = "400px")
+            )
           )
         ),
 
@@ -396,15 +503,20 @@ ui <- page_navbar(
           nav_panel(
             title = "Measures",
             card(
+              full_screen = TRUE,
               card_header(
                 class = "d-flex justify-content-between align-items-center",
-                span("Centrality Plot"),
-                span(
+                tags$strong("Centrality Plot"),
+                tags$span(
                   downloadButton("tna_centrality_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                   downloadButton("tna_centrality_pdf", "PDF", class = "btn-sm btn-outline-secondary")
                 )
               ),
-              plotOutput("tna_centrality_plot", height = "400px")
+              card_body(
+                class = "p-2",
+                style = "display: flex; justify-content: center; align-items: center;",
+                plotOutput("tna_centrality_plot", width = "600px", height = "400px")
+              )
             ),
             card(
               card_header("Centrality Table"),
@@ -415,15 +527,20 @@ ui <- page_navbar(
           nav_panel(
             title = "Stability",
             card(
+              full_screen = TRUE,
               card_header(
                 class = "d-flex justify-content-between align-items-center",
-                span("Centrality Stability Plot"),
-                span(
+                tags$strong("Centrality Stability Plot"),
+                tags$span(
                   downloadButton("tna_stability_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                   downloadButton("tna_stability_pdf", "PDF", class = "btn-sm btn-outline-secondary")
                 )
               ),
-              plotOutput("tna_stability_plot", height = "400px")
+              card_body(
+                class = "p-2",
+                style = "display: flex; justify-content: center; align-items: center;",
+                plotOutput("tna_stability_plot", width = "600px", height = "400px")
+              )
             ),
             card(
               card_header("Centrality Stability Table"),
@@ -436,15 +553,20 @@ ui <- page_navbar(
           title = "Community",
           icon = icon("users"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Community Plot"),
-              span(
+              tags$strong("Community Plot"),
+              tags$span(
                 downloadButton("tna_community_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("tna_community_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("tna_community_plot", height = "600px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("tna_community_plot", width = "600px", height = "600px")
+            )
           ),
           card(
             card_header("Community Table"),
@@ -456,15 +578,20 @@ ui <- page_navbar(
           title = "Bootstrap",
           icon = icon("random"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Bootstrap Plot"),
-              span(
+              tags$strong("Bootstrap Plot"),
+              tags$span(
                 downloadButton("tna_bootstrap_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("tna_bootstrap_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("tna_bootstrap_plot", height = "600px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("tna_bootstrap_plot", width = "600px", height = "600px")
+            )
           ),
           card(
             card_header("Bootstrap Table"),
@@ -479,15 +606,20 @@ ui <- page_navbar(
           nav_panel(
             title = "Sequence Plot",
             card(
+              full_screen = TRUE,
               card_header(
                 class = "d-flex justify-content-between align-items-center",
-                span("Sequence Plot"),
-                span(
+                tags$strong("Sequence Plot"),
+                tags$span(
                   downloadButton("tna_sequences_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                   downloadButton("tna_sequences_pdf", "PDF", class = "btn-sm btn-outline-secondary")
                 )
               ),
-              plotOutput("tna_sequences_plot", height = "400px")
+              card_body(
+                class = "p-2",
+                style = "display: flex; justify-content: center; align-items: center;",
+                plotOutput("tna_sequences_plot", width = "600px", height = "400px")
+              )
             )
           ),
 
@@ -512,15 +644,20 @@ ui <- page_navbar(
           title = "Edge Betweenness",
           icon = icon("route"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Edge Betweenness Plot"),
-              span(
+              tags$strong("Edge Betweenness Plot"),
+              tags$span(
                 downloadButton("tna_edgebetweenness_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("tna_edgebetweenness_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("tna_edge_betweenness_plot", height = "600px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("tna_edge_betweenness_plot", width = "600px", height = "600px")
+            )
           ),
           card(
             card_header("Edge Betweenness Table"),
@@ -544,32 +681,12 @@ ui <- page_navbar(
         uiOutput("gtna_data_indicator"),
         hr(),
 
-        # Run button
-        actionButton("gtna_run", "Run Group Analysis", class = "btn-primary mb-3", icon = icon("play")),
-
-        hr(),
-
-        # Model Type
-        radioButtons("gtna_type", "Type:",
-                     choices = c("Relative" = "relative",
-                                "Frequency" = "frequency",
-                                "Attention" = "attention"),
-                     selected = "relative", inline = TRUE),
-
-        conditionalPanel(
-          condition = "input.gtna_type == 'attention'",
-          numericInput("gtna_lambda", "Lambda:", value = 1, min = 0.01, max = 10)
+        # Run/Clear buttons
+        div(
+          class = "d-flex gap-2 mb-3",
+          actionButton("gtna_run", "Run Analysis", class = "btn-primary flex-grow-1", icon = icon("play")),
+          actionButton("gtna_clear", "Clear", class = "btn-outline-secondary", icon = icon("trash"))
         ),
-
-        # Scaling
-        radioButtons("gtna_scaling", "Scaling:",
-                     choices = c("No scaling" = "noScaling",
-                                "MinMax" = "minmax",
-                                "Max" = "max",
-                                "Rank" = "rank"),
-                     selected = "noScaling"),
-
-        numericInput("gtna_threshold", "Time Threshold:", value = 900, min = 1),
 
         checkboxInput("gtna_show_plot", "Show Plot", value = TRUE),
         checkboxInput("gtna_show_matrix", "Show Matrix", value = TRUE),
@@ -579,7 +696,27 @@ ui <- page_navbar(
           open = FALSE,
 
           accordion_panel(
-            title = "Visualization Settings",
+            title = "Estimation Settings", icon = bsicons::bs_icon("sliders"),
+            radioButtons("gtna_type", "Type:",
+                         choices = c("Relative" = "relative",
+                                    "Frequency" = "frequency",
+                                    "Attention" = "attention"),
+                         selected = "relative", inline = TRUE),
+            conditionalPanel(
+              condition = "input.gtna_type == 'attention'",
+              numericInput("gtna_lambda", "Lambda:", value = 1, min = 0.01, max = 10)
+            ),
+            radioButtons("gtna_scaling", "Scaling:",
+                         choices = c("No scaling" = "noScaling",
+                                    "MinMax" = "minmax",
+                                    "Max" = "max",
+                                    "Rank" = "rank"),
+                         selected = "noScaling"),
+            numericInput("gtna_threshold", "Time Threshold:", value = 900, min = 1)
+          ),
+
+          accordion_panel(
+            title = "Visualization Settings", icon = bsicons::bs_icon("palette"),
             numericInput("gtna_plot_cut", "Cut value:", value = 0.1, min = 0, max = 1, step = 0.05),
             numericInput("gtna_plot_min", "Minimum value:", value = 0.05, min = 0, max = 1, step = 0.01),
             numericInput("gtna_edge_label_size", "Edge label size:", value = 1, min = 0, max = 10),
@@ -589,7 +726,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Centrality Analysis",
+            title = "Centrality Analysis", icon = bsicons::bs_icon("bullseye"),
             checkboxInput("gtna_centrality_show_table", "Show Table", value = TRUE),
             checkboxInput("gtna_centrality_show_plot", "Show Plot", value = TRUE),
             checkboxGroupInput("gtna_centrality_measures", "Measures:",
@@ -600,7 +737,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Permutation Test",
+            title = "Permutation Test", icon = bsicons::bs_icon("arrow-left-right"),
             checkboxInput("gtna_permutation_show_table", "Show Table", value = TRUE),
             checkboxInput("gtna_permutation_show_plot", "Show Plot", value = TRUE),
             numericInput("gtna_permutation_iter", "Iterations:", value = 1000, min = 1),
@@ -609,7 +746,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Sequence Analysis",
+            title = "Sequence Analysis", icon = bsicons::bs_icon("list-ol"),
             checkboxInput("gtna_sequences_show_plot", "Show Sequence Plot", value = TRUE),
             radioButtons("gtna_sequences_type", "Type:",
                         choices = c("Index" = "index", "Distribution" = "distribution"),
@@ -625,7 +762,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Community Detection",
+            title = "Community Detection", icon = bsicons::bs_icon("people"),
             checkboxInput("gtna_community_show_table", "Show Table", value = TRUE),
             checkboxInput("gtna_community_show_plot", "Show Plot", value = TRUE),
             selectInput("gtna_community_method", "Method:", choices = community_methods),
@@ -633,7 +770,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Clique Analysis",
+            title = "Clique Analysis", icon = bsicons::bs_icon("diagram-2"),
             checkboxInput("gtna_cliques_show_table", "Show Table", value = TRUE),
             checkboxInput("gtna_cliques_show_plot", "Show Plot", value = TRUE),
             numericInput("gtna_cliques_size", "Clique size:", value = 2, min = 2, max = 10),
@@ -641,7 +778,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Bootstrap Analysis",
+            title = "Bootstrap Analysis", icon = bsicons::bs_icon("shuffle"),
             checkboxInput("gtna_bootstrap_show_table", "Show Table", value = TRUE),
             checkboxInput("gtna_bootstrap_show_plot", "Show Plot", value = TRUE),
             numericInput("gtna_bootstrap_iterations", "Iterations:", value = 1000, min = 100, max = 10000),
@@ -663,7 +800,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Compare Sequences",
+            title = "Compare Sequences", icon = bsicons::bs_icon("file-diff"),
             checkboxInput("gtna_compare_show_table", "Show Table", value = TRUE),
             checkboxInput("gtna_compare_show_plot", "Show Plot", value = TRUE),
             numericInput("gtna_compare_min_len", "Min Length:", value = 2, min = 2, max = 10),
@@ -676,7 +813,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Sequence Indices",
+            title = "Sequence Indices", icon = bsicons::bs_icon("hash"),
             checkboxInput("gtna_indices_show_table", "Show Indices Table", value = TRUE),
             numericInput("gtna_indices_omega", "Omega:", value = 1, min = 0.01, max = 10),
             numericInput("gtna_indices_max_rows", "Max rows:", value = 50, min = 1, max = 10000)
@@ -692,19 +829,37 @@ ui <- page_navbar(
           title = "Network",
           icon = icon("project-diagram"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Group TNA Network Plots"),
-              span(
+              tags$strong("Group TNA Networks"),
+              tags$span(
                 downloadButton("gtna_plot_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("gtna_plot_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("gtna_network_plot", height = "600px")
-          ),
-          card(
-            card_header("Group Models Matrix"),
-            verbatimTextOutput("gtna_matrix_output")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("gtna_network_plot", width = "100%", height = "600px")
+            ),
+            card_footer(
+              class = "p-0",
+              accordion(
+                id = "gtna_network_accordion",
+                open = FALSE,
+                accordion_panel(
+                  title = "Network Summary",
+                  icon = bsicons::bs_icon("table"),
+                  DT::dataTableOutput("gtna_summary_table")
+                ),
+                accordion_panel(
+                  title = "Transition Matrices",
+                  icon = bsicons::bs_icon("grid-3x3"),
+                  verbatimTextOutput("gtna_matrix_output")
+                )
+              )
+            )
           )
         ),
 
@@ -716,15 +871,20 @@ ui <- page_navbar(
             DT::dataTableOutput("gtna_centrality_table")
           ),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Centrality Plot"),
-              span(
+              tags$strong("Centrality Plot"),
+              tags$span(
                 downloadButton("gtna_centrality_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("gtna_centrality_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("gtna_centrality_plot", height = "400px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("gtna_centrality_plot", width = "600px", height = "400px")
+            )
           )
         ),
 
@@ -736,15 +896,20 @@ ui <- page_navbar(
             DT::dataTableOutput("gtna_permutation_table")
           ),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Permutation Plot"),
-              span(
+              tags$strong("Permutation Plot"),
+              tags$span(
                 downloadButton("gtna_permutation_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("gtna_permutation_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("gtna_permutation_plot", height = "400px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("gtna_permutation_plot", width = "600px", height = "400px")
+            )
           )
         ),
 
@@ -752,15 +917,20 @@ ui <- page_navbar(
           title = "Sequences",
           icon = icon("stream"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Sequence Plot"),
-              span(
+              tags$strong("Sequence Plot"),
+              tags$span(
                 downloadButton("gtna_sequences_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("gtna_sequences_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("gtna_sequences_plot", height = "400px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("gtna_sequences_plot", width = "600px", height = "400px")
+            )
           )
         ),
 
@@ -768,15 +938,20 @@ ui <- page_navbar(
           title = "Community",
           icon = icon("users"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Community Detection Plot"),
-              span(
+              tags$strong("Community Detection Plot"),
+              tags$span(
                 downloadButton("gtna_community_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("gtna_community_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("gtna_community_plot", height = "600px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("gtna_community_plot", width = "600px", height = "600px")
+            )
           ),
           card(
             card_header("Community Assignments"),
@@ -788,15 +963,20 @@ ui <- page_navbar(
           title = "Cliques",
           icon = icon("circle-nodes"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Clique Analysis Plot"),
-              span(
+              tags$strong("Clique Analysis Plot"),
+              tags$span(
                 downloadButton("gtna_cliques_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("gtna_cliques_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("gtna_cliques_plot", height = "600px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("gtna_cliques_plot", width = "600px", height = "600px")
+            )
           ),
           card(
             card_header("Cliques"),
@@ -808,15 +988,20 @@ ui <- page_navbar(
           title = "Bootstrap",
           icon = icon("random"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Bootstrap Analysis Plot"),
-              span(
+              tags$strong("Bootstrap Analysis Plot"),
+              tags$span(
                 downloadButton("gtna_bootstrap_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("gtna_bootstrap_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("gtna_bootstrap_plot", height = "600px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("gtna_bootstrap_plot", width = "600px", height = "600px")
+            )
           ),
           card(
             card_header("Bootstrap Results"),
@@ -828,15 +1013,20 @@ ui <- page_navbar(
           title = "Compare",
           icon = icon("code-compare"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Compare Sequences Plot"),
-              span(
+              tags$strong("Compare Sequences Plot"),
+              tags$span(
                 downloadButton("gtna_compare_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("gtna_compare_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("gtna_compare_plot", height = "400px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("gtna_compare_plot", width = "600px", height = "400px")
+            )
           ),
           card(
             card_header("Sequence Comparison"),
@@ -869,9 +1059,15 @@ ui <- page_navbar(
         uiOutput("ctna_data_indicator"),
         hr(),
 
+        # Run/Clear buttons
+        div(
+          class = "d-flex gap-2 mb-3",
+          actionButton("ctna_run_clustering", "Run Clustering", class = "btn-primary flex-grow-1", icon = icon("play")),
+          actionButton("ctna_clear", "Clear", class = "btn-outline-secondary", icon = icon("trash"))
+        ),
+
         # Clustering Parameters
         numericInput("ctna_k", "Number of Clusters (k):", value = 2, min = 2, max = 20),
-        actionButton("ctna_run_clustering", "Run Clustering", class = "btn-primary"),
 
         selectInput("ctna_dissimilarity", "Distance Measure:",
                    choices = c("Hamming" = "hamming",
@@ -888,20 +1084,6 @@ ui <- page_navbar(
                               "Average" = "average",
                               "Single" = "single")),
 
-        # Model Type
-        radioButtons("ctna_type", "Type:",
-                     choices = c("Relative" = "relative",
-                                "Frequency" = "frequency",
-                                "Attention" = "attention"),
-                     selected = "relative", inline = TRUE),
-
-        radioButtons("ctna_scaling", "Scaling:",
-                     choices = c("No scaling" = "noScaling",
-                                "MinMax" = "minmax",
-                                "Max" = "max",
-                                "Rank" = "rank"),
-                     selected = "noScaling"),
-
         checkboxInput("ctna_show_plot", "Show Cluster Plots", value = TRUE),
 
         accordion(
@@ -909,7 +1091,22 @@ ui <- page_navbar(
           open = FALSE,
 
           accordion_panel(
-            title = "Visualization Settings",
+            title = "Estimation Settings", icon = bsicons::bs_icon("sliders"),
+            radioButtons("ctna_type", "Type:",
+                         choices = c("Relative" = "relative",
+                                    "Frequency" = "frequency",
+                                    "Attention" = "attention"),
+                         selected = "relative", inline = TRUE),
+            radioButtons("ctna_scaling", "Scaling:",
+                         choices = c("No scaling" = "noScaling",
+                                    "MinMax" = "minmax",
+                                    "Max" = "max",
+                                    "Rank" = "rank"),
+                         selected = "noScaling")
+          ),
+
+          accordion_panel(
+            title = "Visualization Settings", icon = bsicons::bs_icon("palette"),
             numericInput("ctna_plot_cut", "Cut value:", value = 0.1, min = 0, max = 1, step = 0.05),
             numericInput("ctna_plot_min", "Minimum value:", value = 0.05, min = 0, max = 1, step = 0.01),
             numericInput("ctna_edge_label_size", "Edge label size:", value = 1, min = 0, max = 10),
@@ -919,7 +1116,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Centrality Analysis",
+            title = "Centrality Analysis", icon = bsicons::bs_icon("bullseye"),
             checkboxInput("ctna_centrality_show_table", "Show Table", value = FALSE),
             checkboxGroupInput("ctna_centrality_measures", "Measures:",
                               choices = centrality_measures,
@@ -927,7 +1124,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Permutation Test",
+            title = "Permutation Test", icon = bsicons::bs_icon("arrow-left-right"),
             checkboxInput("ctna_permutation_show_table", "Show Table", value = FALSE),
             checkboxInput("ctna_permutation_show_plot", "Show Plot", value = FALSE),
             numericInput("ctna_permutation_iter", "Iterations:", value = 1000, min = 1),
@@ -935,7 +1132,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Sequence Analysis",
+            title = "Sequence Analysis", icon = bsicons::bs_icon("list-ol"),
             checkboxInput("ctna_sequences_show_plot", "Show Sequence Plot", value = TRUE),
             radioButtons("ctna_sequences_type", "Type:",
                         choices = c("Index" = "index", "Distribution" = "distribution"),
@@ -951,7 +1148,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Community Detection",
+            title = "Community Detection", icon = bsicons::bs_icon("people"),
             checkboxInput("ctna_community_show_table", "Show Table", value = TRUE),
             checkboxInput("ctna_community_show_plot", "Show Plot", value = TRUE),
             selectInput("ctna_community_method", "Method:", choices = community_methods),
@@ -959,7 +1156,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Clique Analysis",
+            title = "Clique Analysis", icon = bsicons::bs_icon("diagram-2"),
             checkboxInput("ctna_cliques_show_table", "Show Table", value = TRUE),
             checkboxInput("ctna_cliques_show_plot", "Show Plot", value = TRUE),
             numericInput("ctna_cliques_size", "Clique size:", value = 2, min = 2, max = 10),
@@ -967,7 +1164,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Bootstrap Analysis",
+            title = "Bootstrap Analysis", icon = bsicons::bs_icon("shuffle"),
             checkboxInput("ctna_bootstrap_show_table", "Show Table", value = TRUE),
             checkboxInput("ctna_bootstrap_show_plot", "Show Plot", value = TRUE),
             numericInput("ctna_bootstrap_iterations", "Iterations:", value = 1000, min = 100, max = 10000),
@@ -989,7 +1186,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Compare Sequences",
+            title = "Compare Sequences", icon = bsicons::bs_icon("file-diff"),
             checkboxInput("ctna_compare_show_table", "Show Table", value = TRUE),
             checkboxInput("ctna_compare_show_plot", "Show Plot", value = TRUE),
             numericInput("ctna_compare_min_len", "Min Length:", value = 2, min = 2, max = 10),
@@ -1002,7 +1199,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Sequence Indices",
+            title = "Sequence Indices", icon = bsicons::bs_icon("hash"),
             checkboxInput("ctna_indices_show_table", "Show Indices Table", value = TRUE),
             numericInput("ctna_indices_omega", "Omega:", value = 1, min = 0.01, max = 10),
             numericInput("ctna_indices_max_rows", "Max rows:", value = 50, min = 1, max = 10000)
@@ -1018,15 +1215,37 @@ ui <- page_navbar(
           title = "Network",
           icon = icon("project-diagram"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Cluster TNA Network Plots"),
-              span(
+              tags$strong("Cluster TNA Networks"),
+              tags$span(
                 downloadButton("ctna_plot_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("ctna_plot_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("ctna_network_plot", height = "600px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("ctna_network_plot", width = "100%", height = "600px")
+            ),
+            card_footer(
+              class = "p-0",
+              accordion(
+                id = "ctna_network_accordion",
+                open = FALSE,
+                accordion_panel(
+                  title = "Network Summary",
+                  icon = bsicons::bs_icon("table"),
+                  DT::dataTableOutput("ctna_summary_table")
+                ),
+                accordion_panel(
+                  title = "Cluster Matrices",
+                  icon = bsicons::bs_icon("grid-3x3"),
+                  verbatimTextOutput("ctna_matrix_output")
+                )
+              )
+            )
           )
         ),
 
@@ -1056,15 +1275,20 @@ ui <- page_navbar(
             DT::dataTableOutput("ctna_permutation_table")
           ),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Permutation Plot"),
-              span(
+              tags$strong("Permutation Plot"),
+              tags$span(
                 downloadButton("ctna_permutation_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("ctna_permutation_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("ctna_permutation_plot", height = "400px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("ctna_permutation_plot", width = "600px", height = "400px")
+            )
           )
         ),
 
@@ -1072,15 +1296,20 @@ ui <- page_navbar(
           title = "Sequences",
           icon = icon("stream"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Sequence Plot"),
-              span(
+              tags$strong("Sequence Plot"),
+              tags$span(
                 downloadButton("ctna_sequences_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("ctna_sequences_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("ctna_sequences_plot", height = "400px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("ctna_sequences_plot", width = "600px", height = "400px")
+            )
           )
         ),
 
@@ -1088,15 +1317,20 @@ ui <- page_navbar(
           title = "Community",
           icon = icon("users"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Community Detection Plot"),
-              span(
+              tags$strong("Community Detection Plot"),
+              tags$span(
                 downloadButton("ctna_community_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("ctna_community_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("ctna_community_plot", height = "600px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("ctna_community_plot", width = "600px", height = "600px")
+            )
           ),
           card(
             card_header("Community Assignments"),
@@ -1108,15 +1342,20 @@ ui <- page_navbar(
           title = "Cliques",
           icon = icon("circle-nodes"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Clique Analysis Plot"),
-              span(
+              tags$strong("Clique Analysis Plot"),
+              tags$span(
                 downloadButton("ctna_cliques_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("ctna_cliques_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("ctna_cliques_plot", height = "600px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("ctna_cliques_plot", width = "600px", height = "600px")
+            )
           ),
           card(
             card_header("Cliques"),
@@ -1128,15 +1367,20 @@ ui <- page_navbar(
           title = "Bootstrap",
           icon = icon("random"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Bootstrap Analysis Plot"),
-              span(
+              tags$strong("Bootstrap Analysis Plot"),
+              tags$span(
                 downloadButton("ctna_bootstrap_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("ctna_bootstrap_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("ctna_bootstrap_plot", height = "600px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("ctna_bootstrap_plot", width = "600px", height = "600px")
+            )
           ),
           card(
             card_header("Bootstrap Results"),
@@ -1148,15 +1392,20 @@ ui <- page_navbar(
           title = "Compare",
           icon = icon("code-compare"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Compare Sequences Plot"),
-              span(
+              tags$strong("Compare Sequences Plot"),
+              tags$span(
                 downloadButton("ctna_compare_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("ctna_compare_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("ctna_compare_plot", height = "400px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("ctna_compare_plot", width = "600px", height = "400px")
+            )
           ),
           card(
             card_header("Sequence Comparison"),
@@ -1189,15 +1438,12 @@ ui <- page_navbar(
         uiOutput("cotna_data_indicator"),
         hr(),
 
-        # Scaling
-        radioButtons("cotna_scaling", "Scaling:",
-                     choices = c("No scaling" = "noScaling",
-                                "MinMax" = "minmax",
-                                "Max" = "max",
-                                "Rank" = "rank"),
-                     selected = "noScaling"),
-
-        numericInput("cotna_threshold", "Time Threshold:", value = 900, min = 1),
+        # Run/Clear buttons
+        div(
+          class = "d-flex gap-2 mb-3",
+          actionButton("cotna_run", "Run Analysis", class = "btn-primary flex-grow-1", icon = icon("play")),
+          actionButton("cotna_clear", "Clear", class = "btn-outline-secondary", icon = icon("trash"))
+        ),
 
         checkboxInput("cotna_show_plot", "Show Plot", value = TRUE),
         checkboxInput("cotna_show_matrix", "Show Matrix", value = TRUE),
@@ -1207,7 +1453,18 @@ ui <- page_navbar(
           open = FALSE,
 
           accordion_panel(
-            title = "Visualization Settings",
+            title = "Estimation Settings", icon = bsicons::bs_icon("sliders"),
+            radioButtons("cotna_scaling", "Scaling:",
+                         choices = c("No scaling" = "noScaling",
+                                    "MinMax" = "minmax",
+                                    "Max" = "max",
+                                    "Rank" = "rank"),
+                         selected = "noScaling"),
+            numericInput("cotna_threshold", "Time Threshold:", value = 900, min = 1)
+          ),
+
+          accordion_panel(
+            title = "Visualization Settings", icon = bsicons::bs_icon("palette"),
             numericInput("cotna_plot_cut", "Cut value:", value = 0.1, min = 0, max = 1, step = 0.05),
             numericInput("cotna_plot_min", "Minimum value:", value = 0.05, min = 0, max = 1, step = 0.01),
             numericInput("cotna_edge_label_size", "Edge label size:", value = 1, min = 0, max = 10),
@@ -1219,7 +1476,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Centrality Analysis",
+            title = "Centrality Analysis", icon = bsicons::bs_icon("bullseye"),
             checkboxInput("cotna_centrality_show_table", "Show Table", value = TRUE),
             checkboxInput("cotna_centrality_show_plot", "Show Plot", value = TRUE),
             checkboxGroupInput("cotna_centrality_measures", "Measures:",
@@ -1230,7 +1487,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Community Detection",
+            title = "Community Detection", icon = bsicons::bs_icon("people"),
             checkboxInput("cotna_community_show_table", "Show Table", value = TRUE),
             checkboxInput("cotna_community_show_plot", "Show Plot", value = TRUE),
             selectInput("cotna_community_method", "Method:", choices = community_methods),
@@ -1238,7 +1495,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Bootstrap Analysis",
+            title = "Bootstrap Analysis", icon = bsicons::bs_icon("shuffle"),
             checkboxInput("cotna_bootstrap_show_table", "Show Table", value = TRUE),
             checkboxInput("cotna_bootstrap_show_plot", "Show Plot", value = TRUE),
             numericInput("cotna_bootstrap_iterations", "Iterations:", value = 1000, min = 0, max = 10000),
@@ -1255,46 +1512,78 @@ ui <- page_navbar(
           title = "Network",
           icon = icon("link"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Co-occurrence Network Plot"),
-              span(
+              tags$strong("Co-occurrence Network"),
+              tags$span(
                 downloadButton("cotna_plot_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("cotna_plot_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("cotna_network_plot", height = "600px")
-          ),
-          card(
-            card_header("Matrix"),
-            verbatimTextOutput("cotna_matrix_output")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("cotna_network_plot", width = "600px", height = "600px")
+            ),
+            card_footer(
+              class = "p-0",
+              accordion(
+                id = "cotna_network_accordion",
+                open = FALSE,
+                accordion_panel(
+                  title = "Network Summary",
+                  icon = bsicons::bs_icon("table"),
+                  DT::dataTableOutput("cotna_summary_table")
+                ),
+                accordion_panel(
+                  title = "Co-occurrence Matrix",
+                  icon = bsicons::bs_icon("grid-3x3"),
+                  verbatimTextOutput("cotna_matrix_output")
+                )
+              )
+            )
           )
         ),
 
         nav_panel(
           title = "Metrics",
           icon = icon("chart-bar"),
-          card(
-            card_header(
-              class = "d-flex justify-content-between align-items-center",
-              span("Histogram"),
-              span(
-                downloadButton("cotna_histogram_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
-                downloadButton("cotna_histogram_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+          layout_column_wrap(
+            width = 1/2,
+            heights_equal = "row",
+            card(
+              full_screen = TRUE,
+              card_header(
+                class = "d-flex justify-content-between align-items-center",
+                tags$strong("Histogram"),
+                tags$span(
+                  downloadButton("cotna_histogram_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                  downloadButton("cotna_histogram_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+                )
+              ),
+              card_body(
+                class = "p-2",
+                style = "display: flex; justify-content: center; align-items: center;",
+                plotOutput("cotna_histogram_plot", width = "600px", height = "400px")
               )
             ),
-            plotOutput("cotna_histogram_plot", height = "400px")
-          ),
-          card(
-            card_header(
-              class = "d-flex justify-content-between align-items-center",
-              span("Frequencies"),
-              span(
-                downloadButton("cotna_frequencies_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
-                downloadButton("cotna_frequencies_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+            card(
+              full_screen = TRUE,
+              card_header(
+                class = "d-flex justify-content-between align-items-center",
+                tags$strong("Frequencies"),
+                tags$span(
+                  downloadButton("cotna_frequencies_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                  downloadButton("cotna_frequencies_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+                )
+              ),
+              card_body(
+                class = "p-2",
+                style = "display: flex; justify-content: center; align-items: center;",
+                plotOutput("cotna_frequencies_plot", width = "600px", height = "400px")
               )
-            ),
-            plotOutput("cotna_frequencies_plot", height = "400px")
+            )
           )
         ),
 
@@ -1306,15 +1595,20 @@ ui <- page_navbar(
             DT::dataTableOutput("cotna_centrality_table")
           ),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Centrality Plot"),
-              span(
+              tags$strong("Centrality Plot"),
+              tags$span(
                 downloadButton("cotna_centrality_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("cotna_centrality_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("cotna_centrality_plot", height = "400px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("cotna_centrality_plot", width = "600px", height = "400px")
+            )
           )
         ),
 
@@ -1326,15 +1620,20 @@ ui <- page_navbar(
             DT::dataTableOutput("cotna_community_table")
           ),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Community Plot"),
-              span(
+              tags$strong("Community Plot"),
+              tags$span(
                 downloadButton("cotna_community_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("cotna_community_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("cotna_community_plot", height = "600px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("cotna_community_plot", width = "600px", height = "600px")
+            )
           )
         ),
 
@@ -1346,15 +1645,20 @@ ui <- page_navbar(
             DT::dataTableOutput("cotna_bootstrap_table")
           ),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Bootstrap Plot"),
-              span(
+              tags$strong("Bootstrap Plot"),
+              tags$span(
                 downloadButton("cotna_bootstrap_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("cotna_bootstrap_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("cotna_bootstrap_plot", height = "600px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("cotna_bootstrap_plot", width = "600px", height = "600px")
+            )
           )
         )
       )
@@ -1374,18 +1678,12 @@ ui <- page_navbar(
         uiOutput("gcotna_data_indicator"),
         hr(),
 
-        # Run button
-        actionButton("gcotna_run", "Run Group Analysis", class = "btn-primary w-100 mb-3"),
-
-        # Scaling
-        radioButtons("gcotna_scaling", "Scaling:",
-                     choices = c("No scaling" = "noScaling",
-                                "MinMax" = "minmax",
-                                "Max" = "max",
-                                "Rank" = "rank"),
-                     selected = "noScaling"),
-
-        numericInput("gcotna_threshold", "Time Threshold:", value = 900, min = 1),
+        # Run/Clear buttons
+        div(
+          class = "d-flex gap-2 mb-3",
+          actionButton("gcotna_run", "Run Analysis", class = "btn-primary flex-grow-1", icon = icon("play")),
+          actionButton("gcotna_clear", "Clear", class = "btn-outline-secondary", icon = icon("trash"))
+        ),
 
         checkboxInput("gcotna_show_plot", "Show Plot", value = TRUE),
         checkboxInput("gcotna_show_matrix", "Show Matrix", value = FALSE),
@@ -1395,7 +1693,18 @@ ui <- page_navbar(
           open = FALSE,
 
           accordion_panel(
-            title = "Visualization Settings",
+            title = "Estimation Settings", icon = bsicons::bs_icon("sliders"),
+            radioButtons("gcotna_scaling", "Scaling:",
+                         choices = c("No scaling" = "noScaling",
+                                    "MinMax" = "minmax",
+                                    "Max" = "max",
+                                    "Rank" = "rank"),
+                         selected = "noScaling"),
+            numericInput("gcotna_threshold", "Time Threshold:", value = 900, min = 1)
+          ),
+
+          accordion_panel(
+            title = "Visualization Settings", icon = bsicons::bs_icon("palette"),
             numericInput("gcotna_plot_cut", "Cut value:", value = 0.1, min = 0, max = 1, step = 0.05),
             numericInput("gcotna_plot_min", "Minimum value:", value = 0.05, min = 0, max = 1, step = 0.01),
             numericInput("gcotna_edge_label_size", "Edge label size:", value = 1, min = 0, max = 10),
@@ -1407,7 +1716,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Centrality Analysis",
+            title = "Centrality Analysis", icon = bsicons::bs_icon("bullseye"),
             checkboxInput("gcotna_centrality_show_table", "Show Table", value = TRUE),
             checkboxInput("gcotna_centrality_show_plot", "Show Plot", value = TRUE),
             checkboxGroupInput("gcotna_centrality_measures", "Measures:",
@@ -1418,7 +1727,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Community Detection",
+            title = "Community Detection", icon = bsicons::bs_icon("people"),
             checkboxInput("gcotna_community_show_table", "Show Table", value = TRUE),
             checkboxInput("gcotna_community_show_plot", "Show Plot", value = TRUE),
             selectInput("gcotna_community_method", "Method:", choices = community_methods),
@@ -1426,7 +1735,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Clique Analysis",
+            title = "Clique Analysis", icon = bsicons::bs_icon("diagram-2"),
             checkboxInput("gcotna_cliques_show_table", "Show Table", value = TRUE),
             checkboxInput("gcotna_cliques_show_plot", "Show Plot", value = TRUE),
             numericInput("gcotna_cliques_size", "Clique size:", value = 2, min = 2, max = 10),
@@ -1434,7 +1743,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Bootstrap Analysis",
+            title = "Bootstrap Analysis", icon = bsicons::bs_icon("shuffle"),
             checkboxInput("gcotna_bootstrap_show_table", "Show Table", value = TRUE),
             checkboxInput("gcotna_bootstrap_show_plot", "Show Plot", value = TRUE),
             numericInput("gcotna_bootstrap_iterations", "Iterations:", value = 1000, min = 100, max = 10000),
@@ -1456,7 +1765,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Permutation Test",
+            title = "Permutation Test", icon = bsicons::bs_icon("arrow-left-right"),
             checkboxInput("gcotna_permutation_show_table", "Show Table", value = TRUE),
             checkboxInput("gcotna_permutation_show_plot", "Show Plot", value = TRUE),
             numericInput("gcotna_permutation_iter", "Iterations:", value = 1000, min = 1),
@@ -1474,46 +1783,78 @@ ui <- page_navbar(
           title = "Network",
           icon = icon("layer-group"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Group Co-occurrence Network Plot"),
-              span(
+              tags$strong("Group Co-occurrence Networks"),
+              tags$span(
                 downloadButton("gcotna_plot_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("gcotna_plot_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("gcotna_network_plot", height = "600px")
-          ),
-          card(
-            card_header("Matrix"),
-            verbatimTextOutput("gcotna_matrix_output")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("gcotna_network_plot", width = "100%", height = "600px")
+            ),
+            card_footer(
+              class = "p-0",
+              accordion(
+                id = "gcotna_network_accordion",
+                open = FALSE,
+                accordion_panel(
+                  title = "Network Summary",
+                  icon = bsicons::bs_icon("table"),
+                  DT::dataTableOutput("gcotna_summary_table")
+                ),
+                accordion_panel(
+                  title = "Co-occurrence Matrices",
+                  icon = bsicons::bs_icon("grid-3x3"),
+                  verbatimTextOutput("gcotna_matrix_output")
+                )
+              )
+            )
           )
         ),
 
         nav_panel(
           title = "Metrics",
           icon = icon("chart-bar"),
-          card(
-            card_header(
-              class = "d-flex justify-content-between align-items-center",
-              span("Histogram"),
-              span(
-                downloadButton("gcotna_histogram_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
-                downloadButton("gcotna_histogram_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+          layout_column_wrap(
+            width = 1/2,
+            heights_equal = "row",
+            card(
+              full_screen = TRUE,
+              card_header(
+                class = "d-flex justify-content-between align-items-center",
+                tags$strong("Histogram"),
+                tags$span(
+                  downloadButton("gcotna_histogram_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                  downloadButton("gcotna_histogram_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+                )
+              ),
+              card_body(
+                class = "p-2",
+                style = "display: flex; justify-content: center; align-items: center;",
+                plotOutput("gcotna_histogram_plot", width = "600px", height = "400px")
               )
             ),
-            plotOutput("gcotna_histogram_plot", height = "400px")
-          ),
-          card(
-            card_header(
-              class = "d-flex justify-content-between align-items-center",
-              span("Frequencies"),
-              span(
-                downloadButton("gcotna_frequencies_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
-                downloadButton("gcotna_frequencies_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+            card(
+              full_screen = TRUE,
+              card_header(
+                class = "d-flex justify-content-between align-items-center",
+                tags$strong("Frequencies"),
+                tags$span(
+                  downloadButton("gcotna_frequencies_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                  downloadButton("gcotna_frequencies_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+                )
+              ),
+              card_body(
+                class = "p-2",
+                style = "display: flex; justify-content: center; align-items: center;",
+                plotOutput("gcotna_frequencies_plot", width = "600px", height = "400px")
               )
-            ),
-            plotOutput("gcotna_frequencies_plot", height = "400px")
+            )
           )
         ),
 
@@ -1525,15 +1866,20 @@ ui <- page_navbar(
             DT::dataTableOutput("gcotna_centrality_table")
           ),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Centrality Plot"),
-              span(
+              tags$strong("Centrality Plot"),
+              tags$span(
                 downloadButton("gcotna_centrality_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("gcotna_centrality_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("gcotna_centrality_plot", height = "400px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("gcotna_centrality_plot", width = "600px", height = "400px")
+            )
           )
         ),
 
@@ -1545,15 +1891,20 @@ ui <- page_navbar(
             DT::dataTableOutput("gcotna_community_table")
           ),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Community Plot"),
-              span(
+              tags$strong("Community Plot"),
+              tags$span(
                 downloadButton("gcotna_community_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("gcotna_community_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("gcotna_community_plot", height = "600px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("gcotna_community_plot", width = "600px", height = "600px")
+            )
           )
         ),
 
@@ -1565,15 +1916,20 @@ ui <- page_navbar(
             verbatimTextOutput("gcotna_cliques_text")
           ),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Clique Plot"),
-              span(
+              tags$strong("Clique Plot"),
+              tags$span(
                 downloadButton("gcotna_cliques_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("gcotna_cliques_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("gcotna_cliques_plot", height = "600px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("gcotna_cliques_plot", width = "600px", height = "600px")
+            )
           )
         ),
 
@@ -1585,15 +1941,20 @@ ui <- page_navbar(
             DT::dataTableOutput("gcotna_bootstrap_table")
           ),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Bootstrap Plot"),
-              span(
+              tags$strong("Bootstrap Plot"),
+              tags$span(
                 downloadButton("gcotna_bootstrap_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("gcotna_bootstrap_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("gcotna_bootstrap_plot", height = "600px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("gcotna_bootstrap_plot", width = "600px", height = "600px")
+            )
           )
         ),
 
@@ -1605,15 +1966,20 @@ ui <- page_navbar(
             DT::dataTableOutput("gcotna_permutation_table")
           ),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Permutation Plot"),
-              span(
+              tags$strong("Permutation Plot"),
+              tags$span(
                 downloadButton("gcotna_permutation_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("gcotna_permutation_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("gcotna_permutation_plot", height = "400px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("gcotna_permutation_plot", width = "600px", height = "400px")
+            )
           )
         )
       )
@@ -1633,6 +1999,13 @@ ui <- page_navbar(
         uiOutput("ohtna_data_indicator"),
         hr(),
 
+        # Run/Clear buttons
+        div(
+          class = "d-flex gap-2 mb-3",
+          actionButton("ohtna_run", "Run Analysis", class = "btn-primary flex-grow-1", icon = icon("play")),
+          actionButton("ohtna_clear", "Clear", class = "btn-outline-secondary", icon = icon("trash"))
+        ),
+
         # Variable Selection (multiple for one-hot columns)
         selectizeInput("ohtna_onehot_cols", "One-Hot Columns (Actions):",
                       choices = NULL, multiple = TRUE,
@@ -1640,16 +2013,6 @@ ui <- page_navbar(
         selectInput("ohtna_actor", "Actor (Optional):", choices = NULL),
         selectInput("ohtna_session", "Session (Optional):", choices = NULL),
         selectInput("ohtna_group", "Group (Optional):", choices = NULL),
-
-        numericInput("ohtna_window", "Window Size:", value = 1, min = 1, max = 100),
-
-        # Scaling
-        radioButtons("ohtna_scaling", "Scaling:",
-                     choices = c("No scaling" = "noScaling",
-                                "MinMax" = "minmax",
-                                "Max" = "max",
-                                "Rank" = "rank"),
-                     selected = "noScaling"),
 
         checkboxInput("ohtna_show_plot", "Show Plot", value = TRUE),
         checkboxInput("ohtna_show_matrix", "Show Matrix", value = TRUE),
@@ -1659,7 +2022,18 @@ ui <- page_navbar(
           open = FALSE,
 
           accordion_panel(
-            title = "Visualization Settings",
+            title = "Estimation Settings", icon = bsicons::bs_icon("sliders"),
+            numericInput("ohtna_window", "Window Size:", value = 1, min = 1, max = 100),
+            radioButtons("ohtna_scaling", "Scaling:",
+                         choices = c("No scaling" = "noScaling",
+                                    "MinMax" = "minmax",
+                                    "Max" = "max",
+                                    "Rank" = "rank"),
+                         selected = "noScaling")
+          ),
+
+          accordion_panel(
+            title = "Visualization Settings", icon = bsicons::bs_icon("palette"),
             numericInput("ohtna_plot_cut", "Cut value:", value = 0.1, min = 0, max = 1, step = 0.05),
             numericInput("ohtna_plot_min", "Minimum value:", value = 0.05, min = 0, max = 1, step = 0.01),
             numericInput("ohtna_edge_label_size", "Edge label size:", value = 1, min = 0, max = 10),
@@ -1672,7 +2046,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Centrality Analysis",
+            title = "Centrality Analysis", icon = bsicons::bs_icon("bullseye"),
             checkboxInput("ohtna_centrality_show_table", "Show Table", value = TRUE),
             checkboxInput("ohtna_centrality_show_plot", "Show Plot", value = TRUE),
             checkboxGroupInput("ohtna_centrality_measures", "Measures:",
@@ -1683,7 +2057,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Community Detection",
+            title = "Community Detection", icon = bsicons::bs_icon("people"),
             checkboxInput("ohtna_community_show_table", "Show Table", value = TRUE),
             checkboxInput("ohtna_community_show_plot", "Show Plot", value = TRUE),
             selectInput("ohtna_community_method", "Method:", choices = community_methods),
@@ -1691,7 +2065,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Bootstrap Analysis",
+            title = "Bootstrap Analysis", icon = bsicons::bs_icon("shuffle"),
             checkboxInput("ohtna_bootstrap_show_table", "Show Table", value = TRUE),
             checkboxInput("ohtna_bootstrap_show_plot", "Show Plot", value = TRUE),
             numericInput("ohtna_bootstrap_iterations", "Iterations:", value = 1000, min = 0, max = 10000),
@@ -1699,7 +2073,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Permutation Test",
+            title = "Permutation Test", icon = bsicons::bs_icon("arrow-left-right"),
             checkboxInput("ohtna_permutation_show_table", "Show Table", value = TRUE),
             checkboxInput("ohtna_permutation_show_plot", "Show Plot", value = TRUE),
             numericInput("ohtna_permutation_iter", "Iterations:", value = 1000, min = 1),
@@ -1716,57 +2090,94 @@ ui <- page_navbar(
           title = "Network",
           icon = icon("th"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("One-Hot Co-occurrence Network Plot"),
-              span(
+              tags$strong("One-Hot Co-occurrence Network"),
+              tags$span(
                 downloadButton("ohtna_plot_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("ohtna_plot_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("ohtna_network_plot", height = "600px")
-          ),
-          card(
-            card_header("Matrix"),
-            verbatimTextOutput("ohtna_matrix_output")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("ohtna_network_plot", width = "600px", height = "600px")
+            ),
+            card_footer(
+              class = "p-0",
+              accordion(
+                id = "ohtna_network_accordion",
+                open = FALSE,
+                accordion_panel(
+                  title = "Network Summary",
+                  icon = bsicons::bs_icon("table"),
+                  DT::dataTableOutput("ohtna_summary_table")
+                ),
+                accordion_panel(
+                  title = "Co-occurrence Matrix",
+                  icon = bsicons::bs_icon("grid-3x3"),
+                  verbatimTextOutput("ohtna_matrix_output")
+                )
+              )
+            )
           )
         ),
 
         nav_panel(
           title = "Metrics",
           icon = icon("chart-bar"),
-          card(
-            card_header(
-              class = "d-flex justify-content-between align-items-center",
-              span("Histogram"),
-              span(
-                downloadButton("ohtna_histogram_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
-                downloadButton("ohtna_histogram_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+          layout_column_wrap(
+            width = 1/2,
+            heights_equal = "row",
+            card(
+              full_screen = TRUE,
+              card_header(
+                class = "d-flex justify-content-between align-items-center",
+                tags$strong("Histogram"),
+                tags$span(
+                  downloadButton("ohtna_histogram_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                  downloadButton("ohtna_histogram_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+                )
+              ),
+              card_body(
+                class = "p-2",
+                style = "display: flex; justify-content: center; align-items: center;",
+                plotOutput("ohtna_histogram_plot", width = "600px", height = "400px")
               )
             ),
-            plotOutput("ohtna_histogram_plot", height = "400px")
-          ),
-          card(
-            card_header(
-              class = "d-flex justify-content-between align-items-center",
-              span("Frequencies"),
-              span(
-                downloadButton("ohtna_frequencies_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
-                downloadButton("ohtna_frequencies_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+            card(
+              full_screen = TRUE,
+              card_header(
+                class = "d-flex justify-content-between align-items-center",
+                tags$strong("Frequencies"),
+                tags$span(
+                  downloadButton("ohtna_frequencies_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                  downloadButton("ohtna_frequencies_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+                )
+              ),
+              card_body(
+                class = "p-2",
+                style = "display: flex; justify-content: center; align-items: center;",
+                plotOutput("ohtna_frequencies_plot", width = "600px", height = "400px")
               )
-            ),
-            plotOutput("ohtna_frequencies_plot", height = "400px")
+            )
           ),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Mosaic"),
-              span(
+              tags$strong("Mosaic"),
+              tags$span(
                 downloadButton("ohtna_mosaic_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("ohtna_mosaic_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("ohtna_mosaic_plot", height = "400px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("ohtna_mosaic_plot", width = "600px", height = "400px")
+            )
           )
         ),
 
@@ -1778,15 +2189,20 @@ ui <- page_navbar(
             DT::dataTableOutput("ohtna_centrality_table")
           ),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Centrality Plot"),
-              span(
+              tags$strong("Centrality Plot"),
+              tags$span(
                 downloadButton("ohtna_centrality_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("ohtna_centrality_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("ohtna_centrality_plot", height = "400px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("ohtna_centrality_plot", width = "600px", height = "400px")
+            )
           )
         ),
 
@@ -1798,15 +2214,20 @@ ui <- page_navbar(
             DT::dataTableOutput("ohtna_community_table")
           ),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Community Plot"),
-              span(
+              tags$strong("Community Plot"),
+              tags$span(
                 downloadButton("ohtna_community_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("ohtna_community_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("ohtna_community_plot", height = "600px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("ohtna_community_plot", width = "600px", height = "600px")
+            )
           )
         ),
 
@@ -1818,15 +2239,20 @@ ui <- page_navbar(
             DT::dataTableOutput("ohtna_bootstrap_table")
           ),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Bootstrap Plot"),
-              span(
+              tags$strong("Bootstrap Plot"),
+              tags$span(
                 downloadButton("ohtna_bootstrap_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("ohtna_bootstrap_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("ohtna_bootstrap_plot", height = "600px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("ohtna_bootstrap_plot", width = "600px", height = "600px")
+            )
           )
         ),
 
@@ -1838,15 +2264,20 @@ ui <- page_navbar(
             DT::dataTableOutput("ohtna_permutation_table")
           ),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Permutation Plot"),
-              span(
+              tags$strong("Permutation Plot"),
+              tags$span(
                 downloadButton("ohtna_permutation_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("ohtna_permutation_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("ohtna_permutation_plot", height = "400px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("ohtna_permutation_plot", width = "600px", height = "400px")
+            )
           )
         )
       )
@@ -1880,7 +2311,7 @@ ui <- page_navbar(
           open = FALSE,
 
           accordion_panel(
-            title = "Visualization Settings",
+            title = "Visualization Settings", icon = bsicons::bs_icon("palette"),
             numericInput("sna_node_size", "Node Size:", value = 8, min = 1, max = 30),
             numericInput("sna_edge_size", "Edge Size:", value = 6, min = 1, max = 30),
             checkboxInput("sna_show_node_labels", "Show node labels", value = FALSE),
@@ -1894,13 +2325,13 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Graph Level Metrics",
+            title = "Graph Level Metrics", icon = bsicons::bs_icon("graph-up"),
             checkboxInput("sna_show_summary", "Summary Table", value = TRUE),
             checkboxInput("sna_show_degree_plot", "Degree Distribution", value = TRUE)
           ),
 
           accordion_panel(
-            title = "Centrality Analysis",
+            title = "Centrality Analysis", icon = bsicons::bs_icon("bullseye"),
             checkboxInput("sna_centrality_show", "Show Centrality Table", value = TRUE),
             checkboxGroupInput("sna_centrality_measures", "Measures:",
                               choices = centrality_measures,
@@ -1910,7 +2341,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Community Detection",
+            title = "Community Detection", icon = bsicons::bs_icon("people"),
             checkboxInput("sna_community_show", "Show Community Table", value = TRUE),
             checkboxGroupInput("sna_community_methods", "Methods:",
                               choices = community_methods,
@@ -1918,7 +2349,7 @@ ui <- page_navbar(
           ),
 
           accordion_panel(
-            title = "Edge Betweenness",
+            title = "Edge Betweenness", icon = bsicons::bs_icon("arrow-right"),
             checkboxInput("sna_edge_betweenness_show", "Show Edge Betweenness Table", value = TRUE),
             checkboxInput("sna_edge_betweenness_directed", "Directed Network", value = TRUE)
           )
@@ -1933,15 +2364,20 @@ ui <- page_navbar(
           title = "Network",
           icon = icon("project-diagram"),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Network Plot"),
-              span(
+              tags$strong("SNA Network"),
+              tags$span(
                 downloadButton("sna_plot_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("sna_plot_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("sna_network_plot", height = "600px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("sna_network_plot", width = "600px", height = "600px")
+            )
           )
         ),
 
@@ -1953,15 +2389,20 @@ ui <- page_navbar(
             DT::dataTableOutput("sna_summary_table")
           ),
           card(
+            full_screen = TRUE,
             card_header(
               class = "d-flex justify-content-between align-items-center",
-              span("Degree Distribution"),
-              span(
+              tags$strong("Degree Distribution"),
+              tags$span(
                 downloadButton("sna_degree_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
                 downloadButton("sna_degree_pdf", "PDF", class = "btn-sm btn-outline-secondary")
               )
             ),
-            plotOutput("sna_degree_plot", height = "400px")
+            card_body(
+              class = "p-2",
+              style = "display: flex; justify-content: center; align-items: center;",
+              plotOutput("sna_degree_plot", width = "600px", height = "400px")
+            )
           )
         ),
 
@@ -2279,20 +2720,158 @@ server <- function(input, output, session) {
     DT::datatable(df, options = list(pageLength = 25, scrollX = TRUE), rownames = FALSE)
   })
 
-  # Data status
+  # Data status (minimal)
   output$data_status <- renderUI({
     df <- if (input$data_format == "activity_sequence") shared_data$activity_data else shared_data$edge_data
     if (is.null(df)) {
-      div(class = "alert alert-warning", icon("exclamation-triangle"), " No data loaded")
+      tags$small(class = "text-warning", bsicons::bs_icon("exclamation-triangle"), " No data loaded")
     } else {
       tagList(
-        div(class = "alert alert-success", icon("check-circle"), sprintf(" %d rows, %d columns", nrow(df), ncol(df))),
+        tags$small(class = "text-success", bsicons::bs_icon("check-circle-fill"), sprintf(" %d rows, %d cols", nrow(df), ncol(df))),
         if (shared_data$has_group && input$data_format == "activity_sequence") {
-          div(class = "alert alert-info", icon("users"), " Group analysis enabled")
+          tags$small(class = "text-info d-block mt-1", bsicons::bs_icon("people-fill"), " Groups enabled")
         }
       )
     }
   })
+
+  # Empty state button handler
+  observeEvent(input$empty_load_sample, {
+    if (input$data_format == "activity_sequence") {
+      shared_data$activity_data <- tna::group_regulation_long
+      showNotification("Sample activity sequence data loaded", type = "message")
+    } else {
+      sample_edges <- data.frame(
+        from = c("A", "A", "B", "B", "C", "C", "D"),
+        to = c("B", "C", "C", "D", "D", "A", "A"),
+        weight = c(5, 3, 4, 2, 3, 2, 1),
+        group = c("G1", "G1", "G1", "G2", "G2", "G2", "G2"),
+        stringsAsFactors = FALSE
+      )
+      shared_data$edge_data <- sample_edges
+      showNotification("Sample edge list data loaded", type = "message")
+    }
+    shared_data$data_format <- input$data_format
+  })
+
+  # Data main panel - conditional rendering
+  output$data_main_panel <- renderUI({
+    df <- if (input$data_format == "activity_sequence") shared_data$activity_data else shared_data$edge_data
+
+    if (is.null(df)) {
+      # Empty state
+      card(
+        class = "h-100",
+        card_body(
+          class = "d-flex flex-column align-items-center justify-content-center text-center py-5",
+          tags$div(
+            class = "mb-4",
+            bsicons::bs_icon("database", size = "5em", class = "text-muted")
+          ),
+          tags$h3(class = "mb-2", "Welcome to TNA"),
+          tags$p(
+            class = "text-muted mb-4",
+            "Upload a CSV file or load sample data to get started with Transition Network Analysis"
+          ),
+          tags$div(
+            class = "d-flex gap-2 flex-wrap justify-content-center",
+            actionButton("empty_load_sample", "Load Sample Data",
+                        class = "btn-primary", icon = icon("database")),
+            tags$label(
+              class = "btn btn-outline-secondary mb-0",
+              `for` = "data_file",
+              icon("upload"), " Upload CSV"
+            )
+          ),
+          tags$div(
+            class = "mt-4 text-muted",
+            tags$small(
+              "Current format: ",
+              tags$strong(if (input$data_format == "activity_sequence") "Activity Sequence (TNA)" else "Edge List (SNA)")
+            )
+          )
+        )
+      )
+    } else {
+      # Data loaded state - just the preview card with stats in header
+      card(
+        full_screen = TRUE,
+        card_header(
+          class = "py-2",
+          tags$div(
+            class = "d-flex justify-content-between align-items-center flex-wrap gap-2",
+            tags$div(
+              class = "d-flex align-items-center gap-2 flex-wrap",
+              bsicons::bs_icon("table", class = "me-1"),
+              tags$strong("Data Preview"),
+              uiOutput("data_stats_badges", inline = TRUE)
+            ),
+            downloadButton("data_download_csv", "CSV",
+                          class = "btn-sm btn-outline-secondary")
+          )
+        ),
+        DT::dataTableOutput("data_preview")
+      )
+    }
+  })
+
+  # Data stats badges (inline in header)
+  output$data_stats_badges <- renderUI({
+    df <- if (input$data_format == "activity_sequence") shared_data$activity_data else shared_data$edge_data
+    req(df)
+
+    if (input$data_format == "activity_sequence") {
+      n_actions <- if (!is.null(shared_data$action_col) && shared_data$action_col %in% names(df)) {
+        length(unique(df[[shared_data$action_col]]))
+      } else NULL
+
+      n_actors <- if (!is.null(shared_data$actor_col) && shared_data$actor_col %in% names(df)) {
+        length(unique(df[[shared_data$actor_col]]))
+      } else NULL
+
+      n_groups <- if (!is.null(shared_data$group_col) && shared_data$group_col %in% names(df)) {
+        length(unique(df[[shared_data$group_col]]))
+      } else NULL
+
+      tags$span(
+        class = "d-inline-flex gap-1 flex-wrap",
+        tags$span(class = "badge bg-secondary", paste(format(nrow(df), big.mark = ","), "rows")),
+        tags$span(class = "badge bg-secondary", paste(ncol(df), "cols")),
+        if (!is.null(n_actions)) tags$span(class = "badge bg-info", paste(n_actions, "actions")),
+        if (!is.null(n_actors)) tags$span(class = "badge bg-success", paste(n_actors, "actors")),
+        if (!is.null(n_groups)) tags$span(class = "badge bg-warning text-dark", paste(n_groups, "groups"))
+      )
+    } else {
+      n_nodes <- if (!is.null(shared_data$from_col) && !is.null(shared_data$to_col) &&
+                     shared_data$from_col %in% names(df) && shared_data$to_col %in% names(df)) {
+        length(unique(c(df[[shared_data$from_col]], df[[shared_data$to_col]])))
+      } else NULL
+
+      n_groups <- if (!is.null(shared_data$sna_group_col) && shared_data$sna_group_col %in% names(df)) {
+        length(unique(df[[shared_data$sna_group_col]]))
+      } else NULL
+
+      tags$span(
+        class = "d-inline-flex gap-1 flex-wrap",
+        tags$span(class = "badge bg-secondary", paste(format(nrow(df), big.mark = ","), "edges")),
+        tags$span(class = "badge bg-secondary", paste(ncol(df), "cols")),
+        if (!is.null(n_nodes)) tags$span(class = "badge bg-info", paste(n_nodes, "nodes")),
+        if (!is.null(n_groups)) tags$span(class = "badge bg-warning text-dark", paste(n_groups, "groups"))
+      )
+    }
+  })
+
+  # Download CSV handler
+  output$data_download_csv <- downloadHandler(
+    filename = function() {
+      format_name <- if (input$data_format == "activity_sequence") "activity_data" else "edge_data"
+      paste0(format_name, "_", Sys.Date(), ".csv")
+    },
+    content = function(file) {
+      df <- if (input$data_format == "activity_sequence") shared_data$activity_data else shared_data$edge_data
+      write.csv(df, file, row.names = FALSE)
+    }
+  )
 
   # ==========================================================================
   # Module Data Status Indicators
@@ -2631,21 +3210,99 @@ server <- function(input, output, session) {
     })
   })
 
-  # Build TNA model
-  tna_model <- reactive({
+  # Store computed TNA model
+  tna_model <- reactiveVal(NULL)
+
+  # Auto-run TNA analysis when data first becomes available
+  observe({
+    req(tna_prepared_data())
+    # Only auto-run if model is NULL (first time)
+    if (is.null(isolate(tna_model()))) {
+      dataForTNA <- tna_prepared_data()
+      scaling <- if(isolate(input$tna_scaling) == "noScaling") character(0L) else isolate(input$tna_scaling)
+
+      result <- tryCatch({
+        if(isolate(input$tna_type) == "attention") {
+          build_model(x = dataForTNA, type = isolate(input$tna_type), scaling = scaling, lambda = isolate(input$tna_lambda))
+        } else {
+          build_model(x = dataForTNA, type = isolate(input$tna_type), scaling = scaling)
+        }
+      }, error = function(e) NULL)
+
+      if (!is.null(result)) {
+        tna_model(result)
+      }
+    }
+  })
+
+  # Run TNA analysis when button is clicked
+  observeEvent(input$tna_run, {
+    removeNotification(id = "tna_settings_warning")
     req(tna_prepared_data())
 
     dataForTNA <- tna_prepared_data()
     scaling <- if(input$tna_scaling == "noScaling") character(0L) else input$tna_scaling
 
-    tryCatch({
+    result <- tryCatch({
       if(input$tna_type == "attention") {
         build_model(x = dataForTNA, type = input$tna_type, scaling = scaling, lambda = input$tna_lambda)
       } else {
         build_model(x = dataForTNA, type = input$tna_type, scaling = scaling)
       }
     }, error = function(e) {
+      showNotification(paste("Error building model:", e$message), type = "error")
       NULL
+    })
+
+    if (!is.null(result)) {
+      tna_model(result)
+      showNotification("TNA analysis complete", type = "message")
+    }
+  })
+
+  # Clear TNA analysis
+  observeEvent(input$tna_clear, {
+    tna_model(NULL)
+    showNotification("Analysis cleared. Change settings and click 'Run Analysis'.", type = "message")
+  })
+
+  # Notify user when settings change and analysis needs to be re-run
+  observeEvent(input$tna_type, {
+    if (!is.null(tna_model())) {
+      showNotification("Settings changed. Click 'Run Analysis' to apply.",
+                       type = "warning", duration = NULL, id = "tna_settings_warning")
+    }
+  }, ignoreInit = TRUE)
+
+  observeEvent(input$tna_scaling, {
+    if (!is.null(tna_model())) {
+      showNotification("Settings changed. Click 'Run Analysis' to apply.",
+                       type = "warning", duration = NULL, id = "tna_settings_warning")
+    }
+  }, ignoreInit = TRUE)
+
+  # TNA Summary Table
+  output$tna_summary_table <- DT::renderDataTable({
+    model <- tna_model()
+    req(model)
+
+    tryCatch({
+      summary_df <- summary(model)
+      DT::datatable(
+        summary_df,
+        options = list(
+          dom = 't',
+          paging = FALSE,
+          searching = FALSE,
+          ordering = FALSE,
+          info = FALSE
+        ),
+        rownames = FALSE,
+        colnames = c("Metric", "Value"),
+        class = 'compact stripe'
+      ) %>% DT::formatRound('value', digits = 4)
+    }, error = function(e) {
+      DT::datatable(data.frame(Metric = "Error", Value = as.character(e$message)))
     })
   })
 
@@ -2676,7 +3333,7 @@ server <- function(input, output, session) {
     if (is.null(tna_model())) {
       par(mar = c(0, 0, 0, 0))
       plot.new()
-      text(0.5, 0.5, "Error building model.\nCheck your data format.", cex = 1, col = "#e74c3c")
+      text(0.5, 0.5, "Click 'Run Analysis' to build the network", cex = 1.2, col = "gray50")
       return()
     }
 
@@ -3101,6 +3758,7 @@ server <- function(input, output, session) {
 
   # Run Group TNA when button is clicked
   observeEvent(input$gtna_run, {
+    removeNotification(id = "gtna_settings_warning")
     req(shared_data$action_col, shared_data$actor_col)
     req(shared_data$action_col != "", shared_data$actor_col != "")
 
@@ -3176,6 +3834,62 @@ server <- function(input, output, session) {
     } else {
       gtna_model(NULL)
     }
+  })
+
+  # Clear Group TNA analysis
+  observeEvent(input$gtna_clear, {
+    gtna_model(NULL)
+    showNotification("Analysis cleared. Change settings and click 'Run Analysis'.", type = "message")
+  })
+
+  # Notify user when settings change and analysis needs to be re-run
+  observeEvent(input$gtna_type, {
+    if (!is.null(gtna_model())) {
+      showNotification("Settings changed. Click 'Run Analysis' to apply.",
+                       type = "warning", duration = NULL, id = "gtna_settings_warning")
+    }
+  }, ignoreInit = TRUE)
+
+  observeEvent(input$gtna_scaling, {
+    if (!is.null(gtna_model())) {
+      showNotification("Settings changed. Click 'Run Analysis' to apply.",
+                       type = "warning", duration = NULL, id = "gtna_settings_warning")
+    }
+  }, ignoreInit = TRUE)
+
+  # Group TNA Summary Table
+  output$gtna_summary_table <- DT::renderDataTable({
+    model <- gtna_model()
+    req(model)
+
+    tryCatch({
+      # Combine summaries from all groups
+      summaries <- lapply(names(model), function(grp) {
+        s <- summary(model[[grp]])
+        s$group <- grp
+        s
+      })
+      combined <- do.call(rbind, summaries)
+      combined <- combined[, c("group", "metric", "value")]
+
+      DT::datatable(
+        combined,
+        options = list(
+          dom = 't',
+          paging = FALSE,
+          searching = FALSE,
+          ordering = FALSE,
+          info = FALSE,
+          scrollY = "400px",
+          scrollCollapse = TRUE
+        ),
+        rownames = FALSE,
+        colnames = c("Group", "Metric", "Value"),
+        class = 'compact stripe'
+      ) %>% DT::formatRound('value', digits = 4)
+    }, error = function(e) {
+      DT::datatable(data.frame(Message = "Run Group TNA analysis first"))
+    })
   })
 
   # Group TNA Network Plot
@@ -3706,6 +4420,7 @@ server <- function(input, output, session) {
 
   # Run clustering when button is clicked
   observeEvent(input$ctna_run_clustering, {
+    removeNotification(id = "ctna_settings_warning")
     req(shared_data$action_col, shared_data$actor_col)
     req(shared_data$action_col != "", shared_data$actor_col != "")
 
@@ -3830,6 +4545,27 @@ server <- function(input, output, session) {
     )
   })
 
+  # Clear Cluster TNA analysis
+  observeEvent(input$ctna_clear, {
+    ctna_clusters(NULL)
+    showNotification("Analysis cleared. Change settings and click 'Run Clustering'.", type = "message")
+  })
+
+  # Notify user when settings change and analysis needs to be re-run
+  observeEvent(input$ctna_type, {
+    if (!is.null(ctna_clusters())) {
+      showNotification("Settings changed. Click 'Run Clustering' to apply.",
+                       type = "warning", duration = NULL, id = "ctna_settings_warning")
+    }
+  }, ignoreInit = TRUE)
+
+  observeEvent(input$ctna_scaling, {
+    if (!is.null(ctna_clusters())) {
+      showNotification("Settings changed. Click 'Run Clustering' to apply.",
+                       type = "warning", duration = NULL, id = "ctna_settings_warning")
+    }
+  }, ignoreInit = TRUE)
+
   # Cluster Assignment Table
   output$ctna_cluster_assignment <- DT::renderDataTable({
     if (is.null(ctna_clusters())) {
@@ -3843,6 +4579,53 @@ server <- function(input, output, session) {
     }
 
     styled_datatable(clusters$assignments, caption = "Cluster Assignments")
+  })
+
+  # Cluster TNA Summary Table
+  output$ctna_summary_table <- DT::renderDataTable({
+    clusters <- ctna_clusters()
+    req(clusters)
+    req(clusters$models)
+
+    tryCatch({
+      # Combine summaries from all clusters
+      summaries <- lapply(names(clusters$models), function(clust) {
+        s <- summary(clusters$models[[clust]])
+        s$cluster <- clust
+        s
+      })
+      combined <- do.call(rbind, summaries)
+      combined <- combined[, c("cluster", "metric", "value")]
+
+      DT::datatable(
+        combined,
+        options = list(
+          dom = 't',
+          paging = FALSE,
+          searching = FALSE,
+          ordering = FALSE,
+          info = FALSE,
+          scrollY = "400px",
+          scrollCollapse = TRUE
+        ),
+        rownames = FALSE,
+        colnames = c("Cluster", "Metric", "Value"),
+        class = 'compact stripe'
+      ) %>% DT::formatRound('value', digits = 4)
+    }, error = function(e) {
+      DT::datatable(data.frame(Message = "Run Cluster TNA analysis first"))
+    })
+  })
+
+  # Cluster TNA Matrix Output
+  output$ctna_matrix_output <- renderPrint({
+    clusters <- ctna_clusters()
+    req(clusters, clusters$models)
+    for(clust in names(clusters$models)) {
+      cat("=== Cluster:", clust, "===\n")
+      print(round(clusters$models[[clust]]$weights, 4))
+      cat("\n")
+    }
   })
 
   # Cluster TNA Network Plot
@@ -4459,21 +5242,78 @@ server <- function(input, output, session) {
     }, error = function(e) NULL)
   })
 
-  # Build Co-occurrence TNA model
-  cotna_model <- reactive({
+  # Store computed Co-occurrence TNA model
+  cotna_model <- reactiveVal(NULL)
+
+  # Auto-run Co-occurrence TNA analysis when data first becomes available
+  observe({
+    req(cotna_prepared_data())
+    # Only auto-run if model is NULL (first time)
+    if (is.null(isolate(cotna_model()))) {
+      dataForTNA <- cotna_prepared_data()
+      scaling <- if(isolate(input$cotna_scaling) == "noScaling") character(0L) else isolate(input$cotna_scaling)
+
+      result <- tryCatch({
+        build_model(x = dataForTNA, type = "co-occurrence", scaling = scaling)
+      }, error = function(e) NULL)
+
+      if (!is.null(result)) {
+        cotna_model(result)
+      }
+    }
+  })
+
+  # Run Co-occurrence TNA analysis when button is clicked
+  observeEvent(input$cotna_run, {
+    removeNotification(id = "cotna_settings_warning")
     req(cotna_prepared_data())
 
     dataForTNA <- cotna_prepared_data()
     scaling <- if(input$cotna_scaling == "noScaling") character(0L) else input$cotna_scaling
 
-    tryCatch({
+    result <- tryCatch({
       build_model(x = dataForTNA, type = "co-occurrence", scaling = scaling)
-    }, error = function(e) NULL)
+    }, error = function(e) {
+      showNotification(paste("Error building model:", e$message), type = "error")
+      NULL
+    })
+
+    if (!is.null(result)) {
+      cotna_model(result)
+      showNotification("Co-occurrence analysis complete", type = "message")
+    }
   })
+
+  # Clear Co-occurrence TNA analysis
+  observeEvent(input$cotna_clear, {
+    cotna_model(NULL)
+    showNotification("Analysis cleared. Change settings and click 'Run Analysis'.", type = "message")
+  })
+
+  # Notify user when settings change and analysis needs to be re-run
+  observeEvent(input$cotna_scaling, {
+    if (!is.null(cotna_model())) {
+      showNotification("Settings changed. Click 'Run Analysis' to apply.",
+                       type = "warning", duration = NULL, id = "cotna_settings_warning")
+    }
+  }, ignoreInit = TRUE)
 
   # Co-occurrence TNA Network Plot
   output$cotna_network_plot <- renderPlot({
-    req(cotna_model(), input$cotna_show_plot)
+    # Show message if no analysis run yet
+    if (is.null(cotna_model())) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, "Click 'Run Analysis' to build the network", cex = 1.2, col = "gray50")
+      return()
+    }
+
+    if (!input$cotna_show_plot) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, "Enable 'Show Plot' to view", cex = 1, col = "gray50")
+      return()
+    }
 
     par(mar = c(0.5, 0.5, 1, 0.5), oma = c(0, 0, 0, 0))
 
@@ -4504,6 +5344,21 @@ server <- function(input, output, session) {
     req(cotna_model(), input$cotna_show_matrix)
     model <- cotna_model()
     round(model$weights, 4)
+  })
+
+  # Co-occurrence TNA Summary Table
+  output$cotna_summary_table <- DT::renderDataTable({
+    model <- cotna_model()
+    req(model)
+
+    tryCatch({
+      summary_df <- summary(model)
+      DT::datatable(
+        summary_df,
+        options = list(dom = 't', paging = FALSE, searching = FALSE, ordering = FALSE, info = FALSE),
+        rownames = FALSE, colnames = c("Metric", "Value"), class = 'compact stripe'
+      ) %>% DT::formatRound('value', digits = 4)
+    }, error = function(e) DT::datatable(data.frame(Metric = "Error", Value = as.character(e$message))))
   })
 
   # Co-occurrence TNA Histogram
@@ -4676,6 +5531,7 @@ server <- function(input, output, session) {
 
   # Run Group Co-occurrence when button is clicked
   observeEvent(input$gcotna_run, {
+    removeNotification(id = "gcotna_settings_warning")
     req(shared_data$action_col, shared_data$actor_col)
     req(shared_data$action_col != "", shared_data$actor_col != "")
 
@@ -4740,6 +5596,20 @@ server <- function(input, output, session) {
       gcotna_model(NULL)
     }
   })
+
+  # Clear Group Co-occurrence TNA analysis
+  observeEvent(input$gcotna_clear, {
+    gcotna_model(NULL)
+    showNotification("Analysis cleared. Change settings and click 'Run Analysis'.", type = "message")
+  })
+
+  # Notify user when settings change and analysis needs to be re-run
+  observeEvent(input$gcotna_scaling, {
+    if (!is.null(gcotna_model())) {
+      showNotification("Settings changed. Click 'Run Analysis' to apply.",
+                       type = "warning", duration = NULL, id = "gcotna_settings_warning")
+    }
+  }, ignoreInit = TRUE)
 
   # Group Co-occurrence Network Plot
   output$gcotna_network_plot <- renderPlot({
@@ -4811,6 +5681,29 @@ server <- function(input, output, session) {
       print(round(groupModels[[g]]$weights, 4))
       cat("\n")
     }
+  })
+
+  # Group Co-occurrence Summary Table
+  output$gcotna_summary_table <- DT::renderDataTable({
+    model <- gcotna_model()
+    req(model)
+
+    tryCatch({
+      summaries <- lapply(names(model), function(grp) {
+        s <- summary(model[[grp]])
+        s$group <- grp
+        s
+      })
+      combined <- do.call(rbind, summaries)
+      combined <- combined[, c("group", "metric", "value")]
+
+      DT::datatable(
+        combined,
+        options = list(dom = 't', paging = FALSE, searching = FALSE, ordering = FALSE, info = FALSE,
+                       scrollY = "300px", scrollCollapse = TRUE),
+        rownames = FALSE, colnames = c("Group", "Metric", "Value"), class = 'compact stripe'
+      ) %>% DT::formatRound('value', digits = 4)
+    }, error = function(e) DT::datatable(data.frame(Message = "Run analysis first")))
   })
 
   # Group Co-occurrence Histogram
@@ -5123,8 +6016,12 @@ server <- function(input, output, session) {
     updateSelectInput(session, "ohtna_group", choices = cols, selected = group_match)
   })
 
-  # Build One-Hot TNA model
-  ohtna_model <- reactive({
+  # Store computed One-Hot TNA model
+  ohtna_model <- reactiveVal(NULL)
+
+  # Run One-Hot TNA analysis when button is clicked
+  observeEvent(input$ohtna_run, {
+    removeNotification(id = "ohtna_settings_warning")
     req(input$ohtna_onehot_cols)
     req(length(input$ohtna_onehot_cols) >= 2)
 
@@ -5138,7 +6035,7 @@ server <- function(input, output, session) {
     # Check for group column
     hasGroup <- !is.null(input$ohtna_group) && input$ohtna_group != ""
 
-    tryCatch({
+    result <- tryCatch({
       if(hasGroup) {
         # Build group models
         group_col <- copyData[[input$ohtna_group]]
@@ -5156,7 +6053,7 @@ server <- function(input, output, session) {
           groupModels[[as.character(g)]] <- model
         }
 
-        return(list(type = "group", models = groupModels))
+        list(type = "group", models = groupModels)
       } else {
         # Build single model
         model <- tna::build_model_from_onehot(
@@ -5164,7 +6061,7 @@ server <- function(input, output, session) {
           window = input$ohtna_window,
           scaling = scaling
         )
-        return(list(type = "single", model = model))
+        list(type = "single", model = model)
       }
     }, error = function(e) {
       # Fallback: manual co-occurrence calculation
@@ -5203,14 +6100,46 @@ server <- function(input, output, session) {
         )
         class(model) <- c("tna", "list")
 
-        return(list(type = "single", model = model))
+        list(type = "single", model = model)
       }, error = function(e2) NULL)
     })
+
+    if (!is.null(result)) {
+      ohtna_model(result)
+      showNotification("One-Hot analysis complete", type = "message")
+    }
   })
+
+  # Clear One-Hot TNA analysis
+  observeEvent(input$ohtna_clear, {
+    ohtna_model(NULL)
+    showNotification("Analysis cleared. Change settings and click 'Run Analysis'.", type = "message")
+  })
+
+  # Notify user when settings change and analysis needs to be re-run
+  observeEvent(input$ohtna_scaling, {
+    if (!is.null(ohtna_model())) {
+      showNotification("Settings changed. Click 'Run Analysis' to apply.",
+                       type = "warning", duration = NULL, id = "ohtna_settings_warning")
+    }
+  }, ignoreInit = TRUE)
 
   # One-Hot TNA Network Plot
   output$ohtna_network_plot <- renderPlot({
-    req(ohtna_model(), input$ohtna_show_plot)
+    # Show message if no analysis run yet
+    if (is.null(ohtna_model())) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, "Click 'Run Analysis' to build the network", cex = 1.2, col = "gray50")
+      return()
+    }
+
+    if (!input$ohtna_show_plot) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, "Enable 'Show Plot' to view", cex = 1, col = "gray50")
+      return()
+    }
 
     result <- ohtna_model()
 
@@ -5268,6 +6197,22 @@ server <- function(input, output, session) {
     result <- ohtna_model()
     model <- if(result$type == "group") result$models[[1]] else result$model
     round(model$weights, 4)
+  })
+
+  # One-Hot TNA Summary Table
+  output$ohtna_summary_table <- DT::renderDataTable({
+    result <- ohtna_model()
+    req(result)
+
+    tryCatch({
+      model <- if(result$type == "group") result$models[[1]] else result$model
+      summary_df <- summary(model)
+      DT::datatable(
+        summary_df,
+        options = list(dom = 't', paging = FALSE, searching = FALSE, ordering = FALSE, info = FALSE),
+        rownames = FALSE, colnames = c("Metric", "Value"), class = 'compact stripe'
+      ) %>% DT::formatRound('value', digits = 4)
+    }, error = function(e) DT::datatable(data.frame(Metric = "Error", Value = as.character(e$message))))
   })
 
   # One-Hot TNA Histogram
