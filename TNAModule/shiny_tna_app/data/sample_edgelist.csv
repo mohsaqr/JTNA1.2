@@ -1,0 +1,17 @@
+from,to,weight,group
+A,B,3,Group1
+A,C,2,Group1
+B,C,4,Group1
+B,D,1,Group1
+C,D,3,Group1
+D,A,2,Group1
+A,B,2,Group2
+A,D,3,Group2
+B,C,2,Group2
+C,D,4,Group2
+D,A,1,Group2
+B,A,2,Group2
+A,B,1,Group1
+C,B,2,Group1
+D,C,1,Group2
+A,C,3,Group2
