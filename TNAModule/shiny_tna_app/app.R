@@ -613,7 +613,73 @@ ui <- page_navbar(
             checkboxInput("gtna_sequences_show_plot", "Show Sequence Plot", value = TRUE),
             radioButtons("gtna_sequences_type", "Type:",
                         choices = c("Index" = "index", "Distribution" = "distribution"),
-                        selected = "index", inline = TRUE)
+                        selected = "index", inline = TRUE),
+            radioButtons("gtna_sequences_scale", "Scale:",
+                        choices = c("Proportion" = "proportion", "Count" = "count"),
+                        selected = "proportion", inline = TRUE),
+            radioButtons("gtna_sequences_geom", "Geometry:",
+                        choices = c("Bar" = "bar", "Area" = "area"),
+                        selected = "bar", inline = TRUE),
+            checkboxInput("gtna_sequences_include_na", "Include missing values", value = FALSE),
+            numericInput("gtna_sequences_tick", "Tick interval:", value = 5, min = 1, max = 20)
+          ),
+
+          accordion_panel(
+            title = "Community Detection",
+            checkboxInput("gtna_community_show_table", "Show Table", value = TRUE),
+            checkboxInput("gtna_community_show_plot", "Show Plot", value = TRUE),
+            selectInput("gtna_community_method", "Method:", choices = community_methods),
+            numericInput("gtna_community_gamma", "Gamma:", value = 1, min = 0, max = 100)
+          ),
+
+          accordion_panel(
+            title = "Clique Analysis",
+            checkboxInput("gtna_cliques_show_table", "Show Table", value = TRUE),
+            checkboxInput("gtna_cliques_show_plot", "Show Plot", value = TRUE),
+            numericInput("gtna_cliques_size", "Clique size:", value = 2, min = 2, max = 10),
+            numericInput("gtna_cliques_threshold", "Threshold:", value = 0, min = 0, max = 1, step = 0.1)
+          ),
+
+          accordion_panel(
+            title = "Bootstrap Analysis",
+            checkboxInput("gtna_bootstrap_show_table", "Show Table", value = TRUE),
+            checkboxInput("gtna_bootstrap_show_plot", "Show Plot", value = TRUE),
+            numericInput("gtna_bootstrap_iterations", "Iterations:", value = 1000, min = 100, max = 10000),
+            numericInput("gtna_bootstrap_level", "Level:", value = 0.05, min = 0, max = 1, step = 0.01),
+            radioButtons("gtna_bootstrap_method", "Method:",
+                        choices = c("Stability" = "stability", "Threshold" = "threshold"),
+                        selected = "stability"),
+            conditionalPanel(
+              condition = "input.gtna_bootstrap_method == 'stability'",
+              numericInput("gtna_bootstrap_range_low", "Lower range:", value = 0.75, min = 0, max = 10),
+              numericInput("gtna_bootstrap_range_up", "Upper range:", value = 1.25, min = 0, max = 10)
+            ),
+            conditionalPanel(
+              condition = "input.gtna_bootstrap_method == 'threshold'",
+              numericInput("gtna_bootstrap_threshold", "Threshold:", value = 0.1, min = 0, max = 1)
+            ),
+            checkboxInput("gtna_bootstrap_significant_only", "Significant only", value = FALSE),
+            numericInput("gtna_bootstrap_max_rows", "Max rows:", value = 20, min = 1, max = 1000)
+          ),
+
+          accordion_panel(
+            title = "Compare Sequences",
+            checkboxInput("gtna_compare_show_table", "Show Table", value = TRUE),
+            checkboxInput("gtna_compare_show_plot", "Show Plot", value = TRUE),
+            numericInput("gtna_compare_min_len", "Min Length:", value = 2, min = 2, max = 10),
+            numericInput("gtna_compare_max_len", "Max Length:", value = 4, min = 2, max = 10),
+            numericInput("gtna_compare_min_freq", "Min Frequency:", value = 20, min = 1, max = 100),
+            selectInput("gtna_compare_correction", "Correction Method:",
+                       choices = c("Bonferroni" = "bonferroni", "Holm" = "holm",
+                                  "Hochberg" = "hochberg", "BH (FDR)" = "BH",
+                                  "BY" = "BY", "None" = "none"))
+          ),
+
+          accordion_panel(
+            title = "Sequence Indices",
+            checkboxInput("gtna_indices_show_table", "Show Indices Table", value = TRUE),
+            numericInput("gtna_indices_omega", "Omega:", value = 1, min = 0.01, max = 10),
+            numericInput("gtna_indices_max_rows", "Max rows:", value = 50, min = 1, max = 10000)
           )
         )
       ),
@@ -696,6 +762,95 @@ ui <- page_navbar(
             ),
             plotOutput("gtna_sequences_plot", height = "400px")
           )
+        ),
+
+        nav_panel(
+          title = "Community",
+          icon = icon("users"),
+          card(
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              span("Community Detection Plot"),
+              span(
+                downloadButton("gtna_community_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                downloadButton("gtna_community_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+              )
+            ),
+            plotOutput("gtna_community_plot", height = "600px")
+          ),
+          card(
+            card_header("Community Assignments"),
+            DT::dataTableOutput("gtna_community_table")
+          )
+        ),
+
+        nav_panel(
+          title = "Cliques",
+          icon = icon("circle-nodes"),
+          card(
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              span("Clique Analysis Plot"),
+              span(
+                downloadButton("gtna_cliques_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                downloadButton("gtna_cliques_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+              )
+            ),
+            plotOutput("gtna_cliques_plot", height = "600px")
+          ),
+          card(
+            card_header("Cliques"),
+            verbatimTextOutput("gtna_cliques_text")
+          )
+        ),
+
+        nav_panel(
+          title = "Bootstrap",
+          icon = icon("random"),
+          card(
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              span("Bootstrap Analysis Plot"),
+              span(
+                downloadButton("gtna_bootstrap_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                downloadButton("gtna_bootstrap_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+              )
+            ),
+            plotOutput("gtna_bootstrap_plot", height = "600px")
+          ),
+          card(
+            card_header("Bootstrap Results"),
+            DT::dataTableOutput("gtna_bootstrap_table")
+          )
+        ),
+
+        nav_panel(
+          title = "Compare",
+          icon = icon("code-compare"),
+          card(
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              span("Compare Sequences Plot"),
+              span(
+                downloadButton("gtna_compare_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                downloadButton("gtna_compare_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+              )
+            ),
+            plotOutput("gtna_compare_plot", height = "400px")
+          ),
+          card(
+            card_header("Sequence Comparison"),
+            DT::dataTableOutput("gtna_compare_table")
+          )
+        ),
+
+        nav_panel(
+          title = "Indices",
+          icon = icon("table"),
+          card(
+            card_header("Sequence Indices"),
+            DT::dataTableOutput("gtna_indices_table")
+          )
         )
       )
     )
@@ -774,8 +929,83 @@ ui <- page_navbar(
           accordion_panel(
             title = "Permutation Test",
             checkboxInput("ctna_permutation_show_table", "Show Table", value = FALSE),
+            checkboxInput("ctna_permutation_show_plot", "Show Plot", value = FALSE),
             numericInput("ctna_permutation_iter", "Iterations:", value = 1000, min = 1),
             numericInput("ctna_permutation_level", "Level:", value = 0.05, min = 0, max = 1)
+          ),
+
+          accordion_panel(
+            title = "Sequence Analysis",
+            checkboxInput("ctna_sequences_show_plot", "Show Sequence Plot", value = TRUE),
+            radioButtons("ctna_sequences_type", "Type:",
+                        choices = c("Index" = "index", "Distribution" = "distribution"),
+                        selected = "index", inline = TRUE),
+            radioButtons("ctna_sequences_scale", "Scale:",
+                        choices = c("Proportion" = "proportion", "Count" = "count"),
+                        selected = "proportion", inline = TRUE),
+            radioButtons("ctna_sequences_geom", "Geometry:",
+                        choices = c("Bar" = "bar", "Area" = "area"),
+                        selected = "bar", inline = TRUE),
+            checkboxInput("ctna_sequences_include_na", "Include missing values", value = FALSE),
+            numericInput("ctna_sequences_tick", "Tick interval:", value = 5, min = 1, max = 20)
+          ),
+
+          accordion_panel(
+            title = "Community Detection",
+            checkboxInput("ctna_community_show_table", "Show Table", value = TRUE),
+            checkboxInput("ctna_community_show_plot", "Show Plot", value = TRUE),
+            selectInput("ctna_community_method", "Method:", choices = community_methods),
+            numericInput("ctna_community_gamma", "Gamma:", value = 1, min = 0, max = 100)
+          ),
+
+          accordion_panel(
+            title = "Clique Analysis",
+            checkboxInput("ctna_cliques_show_table", "Show Table", value = TRUE),
+            checkboxInput("ctna_cliques_show_plot", "Show Plot", value = TRUE),
+            numericInput("ctna_cliques_size", "Clique size:", value = 2, min = 2, max = 10),
+            numericInput("ctna_cliques_threshold", "Threshold:", value = 0, min = 0, max = 1, step = 0.1)
+          ),
+
+          accordion_panel(
+            title = "Bootstrap Analysis",
+            checkboxInput("ctna_bootstrap_show_table", "Show Table", value = TRUE),
+            checkboxInput("ctna_bootstrap_show_plot", "Show Plot", value = TRUE),
+            numericInput("ctna_bootstrap_iterations", "Iterations:", value = 1000, min = 100, max = 10000),
+            numericInput("ctna_bootstrap_level", "Level:", value = 0.05, min = 0, max = 1, step = 0.01),
+            radioButtons("ctna_bootstrap_method", "Method:",
+                        choices = c("Stability" = "stability", "Threshold" = "threshold"),
+                        selected = "stability"),
+            conditionalPanel(
+              condition = "input.ctna_bootstrap_method == 'stability'",
+              numericInput("ctna_bootstrap_range_low", "Lower range:", value = 0.75, min = 0, max = 10),
+              numericInput("ctna_bootstrap_range_up", "Upper range:", value = 1.25, min = 0, max = 10)
+            ),
+            conditionalPanel(
+              condition = "input.ctna_bootstrap_method == 'threshold'",
+              numericInput("ctna_bootstrap_threshold", "Threshold:", value = 0.1, min = 0, max = 1)
+            ),
+            checkboxInput("ctna_bootstrap_significant_only", "Significant only", value = FALSE),
+            numericInput("ctna_bootstrap_max_rows", "Max rows:", value = 20, min = 1, max = 1000)
+          ),
+
+          accordion_panel(
+            title = "Compare Sequences",
+            checkboxInput("ctna_compare_show_table", "Show Table", value = TRUE),
+            checkboxInput("ctna_compare_show_plot", "Show Plot", value = TRUE),
+            numericInput("ctna_compare_min_len", "Min Length:", value = 2, min = 2, max = 10),
+            numericInput("ctna_compare_max_len", "Max Length:", value = 4, min = 2, max = 10),
+            numericInput("ctna_compare_min_freq", "Min Frequency:", value = 20, min = 1, max = 100),
+            selectInput("ctna_compare_correction", "Correction Method:",
+                       choices = c("Bonferroni" = "bonferroni", "Holm" = "holm",
+                                  "Hochberg" = "hochberg", "BH (FDR)" = "BH",
+                                  "BY" = "BY", "None" = "none"))
+          ),
+
+          accordion_panel(
+            title = "Sequence Indices",
+            checkboxInput("ctna_indices_show_table", "Show Indices Table", value = TRUE),
+            numericInput("ctna_indices_omega", "Omega:", value = 1, min = 0.01, max = 10),
+            numericInput("ctna_indices_max_rows", "Max rows:", value = 50, min = 1, max = 10000)
           )
         )
       ),
@@ -824,6 +1054,122 @@ ui <- page_navbar(
           card(
             card_header("Permutation Test Results"),
             DT::dataTableOutput("ctna_permutation_table")
+          ),
+          card(
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              span("Permutation Plot"),
+              span(
+                downloadButton("ctna_permutation_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                downloadButton("ctna_permutation_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+              )
+            ),
+            plotOutput("ctna_permutation_plot", height = "400px")
+          )
+        ),
+
+        nav_panel(
+          title = "Sequences",
+          icon = icon("stream"),
+          card(
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              span("Sequence Plot"),
+              span(
+                downloadButton("ctna_sequences_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                downloadButton("ctna_sequences_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+              )
+            ),
+            plotOutput("ctna_sequences_plot", height = "400px")
+          )
+        ),
+
+        nav_panel(
+          title = "Community",
+          icon = icon("users"),
+          card(
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              span("Community Detection Plot"),
+              span(
+                downloadButton("ctna_community_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                downloadButton("ctna_community_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+              )
+            ),
+            plotOutput("ctna_community_plot", height = "600px")
+          ),
+          card(
+            card_header("Community Assignments"),
+            DT::dataTableOutput("ctna_community_table")
+          )
+        ),
+
+        nav_panel(
+          title = "Cliques",
+          icon = icon("circle-nodes"),
+          card(
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              span("Clique Analysis Plot"),
+              span(
+                downloadButton("ctna_cliques_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                downloadButton("ctna_cliques_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+              )
+            ),
+            plotOutput("ctna_cliques_plot", height = "600px")
+          ),
+          card(
+            card_header("Cliques"),
+            verbatimTextOutput("ctna_cliques_text")
+          )
+        ),
+
+        nav_panel(
+          title = "Bootstrap",
+          icon = icon("random"),
+          card(
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              span("Bootstrap Analysis Plot"),
+              span(
+                downloadButton("ctna_bootstrap_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                downloadButton("ctna_bootstrap_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+              )
+            ),
+            plotOutput("ctna_bootstrap_plot", height = "600px")
+          ),
+          card(
+            card_header("Bootstrap Results"),
+            DT::dataTableOutput("ctna_bootstrap_table")
+          )
+        ),
+
+        nav_panel(
+          title = "Compare",
+          icon = icon("code-compare"),
+          card(
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              span("Compare Sequences Plot"),
+              span(
+                downloadButton("ctna_compare_png", "PNG", class = "btn-sm btn-outline-secondary me-1"),
+                downloadButton("ctna_compare_pdf", "PDF", class = "btn-sm btn-outline-secondary")
+              )
+            ),
+            plotOutput("ctna_compare_plot", height = "400px")
+          ),
+          card(
+            card_header("Sequence Comparison"),
+            DT::dataTableOutput("ctna_compare_table")
+          )
+        ),
+
+        nav_panel(
+          title = "Indices",
+          icon = icon("table"),
+          card(
+            card_header("Sequence Indices"),
+            DT::dataTableOutput("ctna_indices_table")
           )
         )
       )
@@ -2741,16 +3087,347 @@ server <- function(input, output, session) {
     req(gtna_model(), input$gtna_sequences_show_plot)
 
     groupModels <- gtna_model()
-    model <- groupModels[[1]]
 
     p <- tryCatch({
       tna::plot_sequences(
-        x = model,
-        type = input$gtna_sequences_type
+        x = groupModels,
+        type = input$gtna_sequences_type,
+        scale = input$gtna_sequences_scale,
+        geom = input$gtna_sequences_geom,
+        include_na = input$gtna_sequences_include_na,
+        tick = input$gtna_sequences_tick
       )
     }, error = function(e) NULL)
 
     if(!is.null(p)) print(p)
+  })
+
+  # Group TNA Community Table
+  output$gtna_community_table <- DT::renderDataTable({
+    req(gtna_model(), input$gtna_community_show_table)
+
+    groupModels <- gtna_model()
+
+    all_coms <- NULL
+    for(g in names(groupModels)) {
+      coms <- tryCatch({
+        tna::communities(x = groupModels[[g]],
+                        methods = input$gtna_community_method,
+                        gamma = input$gtna_community_gamma)
+      }, error = function(e) NULL)
+
+      if(!is.null(coms) && !is.null(coms$assignments)) {
+        df <- coms$assignments
+        df$group <- g
+        all_coms <- rbind(all_coms, df)
+      }
+    }
+
+    if(is.null(all_coms)) return(NULL)
+    styled_datatable(all_coms, caption = "Community Assignments by Group")
+  })
+
+  # Group TNA Community Plot
+  output$gtna_community_plot <- renderPlot({
+    req(gtna_model(), input$gtna_community_show_plot)
+
+    groupModels <- gtna_model()
+
+    tryCatch({
+      nGroups <- length(groupModels)
+      nCols <- ceiling(sqrt(nGroups))
+      nRows <- ceiling(nGroups / nCols)
+
+      par(mfrow = c(nRows, nCols), mar = c(0.5, 0.5, 1.5, 0.5), oma = c(0, 0, 0, 0))
+
+      for(g in names(groupModels)) {
+        coms <- tna::communities(x = groupModels[[g]],
+                                methods = input$gtna_community_method,
+                                gamma = input$gtna_community_gamma)
+        if(!is.null(coms)) {
+          plot(x = coms, method = input$gtna_community_method, bg = "white")
+          title(main = g, line = 0.5)
+        }
+      }
+
+      par(mfrow = c(1, 1))
+    }, error = function(e) {
+      par(mfrow = c(1, 1), mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, paste("Error:", e$message), col = "red", cex = 0.7)
+    })
+  })
+
+  # Group TNA Cliques Text
+  output$gtna_cliques_text <- renderPrint({
+    req(gtna_model(), input$gtna_cliques_show_table)
+
+    groupModels <- gtna_model()
+
+    for(g in names(groupModels)) {
+      cat("=== Group:", g, "===\n")
+      cliques <- tryCatch({
+        tna::cliques(x = groupModels[[g]],
+                    size = input$gtna_cliques_size,
+                    threshold = input$gtna_cliques_threshold)
+      }, error = function(e) NULL)
+
+      if(!is.null(cliques)) {
+        print(cliques)
+      } else {
+        cat("No cliques found\n")
+      }
+      cat("\n")
+    }
+  })
+
+  # Group TNA Cliques Plot
+  output$gtna_cliques_plot <- renderPlot({
+    req(gtna_model(), input$gtna_cliques_show_plot)
+
+    groupModels <- gtna_model()
+
+    tryCatch({
+      nGroups <- length(groupModels)
+      nCols <- ceiling(sqrt(nGroups))
+      nRows <- ceiling(nGroups / nCols)
+
+      par(mfrow = c(nRows, nCols), mar = c(0.5, 0.5, 1.5, 0.5), oma = c(0, 0, 0, 0))
+
+      for(g in names(groupModels)) {
+        cliques <- tna::cliques(x = groupModels[[g]],
+                               size = input$gtna_cliques_size,
+                               threshold = input$gtna_cliques_threshold)
+        if(!is.null(cliques) && length(cliques) > 0) {
+          plot(x = cliques, ask = FALSE, first = 1, n = 1, bg = "white")
+          title(main = g, line = 0.5)
+        }
+      }
+
+      par(mfrow = c(1, 1))
+    }, error = function(e) {
+      par(mfrow = c(1, 1), mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, paste("Error:", e$message), col = "red", cex = 0.7)
+    })
+  })
+
+  # Group TNA Bootstrap Table
+  output$gtna_bootstrap_table <- DT::renderDataTable({
+    req(gtna_model(), input$gtna_bootstrap_show_table)
+
+    groupModels <- gtna_model()
+
+    all_bs <- NULL
+    for(g in names(groupModels)) {
+      bs <- tryCatch({
+        tna::bootstrap(
+          x = groupModels[[g]],
+          iter = input$gtna_bootstrap_iterations,
+          level = input$gtna_bootstrap_level,
+          method = input$gtna_bootstrap_method,
+          threshold = if(input$gtna_bootstrap_method == "threshold") input$gtna_bootstrap_threshold else 0.1,
+          consistency_range = c(input$gtna_bootstrap_range_low, input$gtna_bootstrap_range_up)
+        )
+      }, error = function(e) NULL)
+
+      if(!is.null(bs) && !is.null(bs$summary)) {
+        df <- bs$summary
+        df$group <- g
+
+        if(input$gtna_bootstrap_significant_only) {
+          df <- df[df$sig == TRUE, ]
+        }
+
+        all_bs <- rbind(all_bs, df)
+      }
+    }
+
+    if(is.null(all_bs) || nrow(all_bs) == 0) return(NULL)
+
+    if(nrow(all_bs) > input$gtna_bootstrap_max_rows) {
+      all_bs <- all_bs[1:input$gtna_bootstrap_max_rows, ]
+    }
+
+    styled_datatable(all_bs, caption = "Bootstrap Analysis Results")
+  })
+
+  # Group TNA Bootstrap Plot
+  output$gtna_bootstrap_plot <- renderPlot({
+    req(gtna_model(), input$gtna_bootstrap_show_plot)
+
+    groupModels <- gtna_model()
+
+    tryCatch({
+      nGroups <- length(groupModels)
+      nCols <- ceiling(sqrt(nGroups))
+      nRows <- ceiling(nGroups / nCols)
+
+      par(mfrow = c(nRows, nCols), mar = c(0.5, 0.5, 1.5, 0.5), oma = c(0, 0, 0, 0))
+
+      for(g in names(groupModels)) {
+        bs <- tna::bootstrap(
+          x = groupModels[[g]],
+          iter = input$gtna_bootstrap_iterations,
+          level = input$gtna_bootstrap_level,
+          method = input$gtna_bootstrap_method,
+          threshold = if(input$gtna_bootstrap_method == "threshold") input$gtna_bootstrap_threshold else 0.1,
+          consistency_range = c(input$gtna_bootstrap_range_low, input$gtna_bootstrap_range_up)
+        )
+        if(!is.null(bs)) {
+          plot(x = bs, cut = 0.01)
+          title(main = g, line = 0.5)
+        }
+      }
+
+      par(mfrow = c(1, 1))
+    }, error = function(e) {
+      par(mfrow = c(1, 1), mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, paste("Error:", e$message), col = "red", cex = 0.7)
+    })
+  })
+
+  # Group TNA Compare Sequences Table
+  output$gtna_compare_table <- DT::renderDataTable({
+    req(gtna_model(), input$gtna_compare_show_table)
+
+    groupModels <- gtna_model()
+
+    compSeq <- tryCatch({
+      sub_range <- input$gtna_compare_min_len:input$gtna_compare_max_len
+      tna::compare_sequences(
+        x = groupModels,
+        sub = sub_range,
+        min_freq = input$gtna_compare_min_freq,
+        correction = input$gtna_compare_correction
+      )
+    }, error = function(e) NULL)
+
+    if(is.null(compSeq) || nrow(compSeq) == 0) return(NULL)
+
+    # Remove patterns containing * (NAs)
+    compSeq <- compSeq[!grepl("\\*", compSeq$pattern), ]
+
+    # Sort by total frequency
+    freqCols <- colnames(compSeq)[grep("^freq_", colnames(compSeq))]
+    if(length(freqCols) > 0) {
+      compSeq$total_freq <- rowSums(compSeq[, freqCols, drop=FALSE])
+      compSeq <- compSeq[order(-compSeq$total_freq), ]
+      compSeq$total_freq <- NULL
+    }
+
+    # Keep only top 20
+    if(nrow(compSeq) > 20) {
+      compSeq <- compSeq[1:20, ]
+    }
+
+    styled_datatable(compSeq, caption = "Sequence Comparison Across Groups")
+  })
+
+  # Group TNA Compare Sequences Plot
+  output$gtna_compare_plot <- renderPlot({
+    req(gtna_model(), input$gtna_compare_show_plot)
+
+    groupModels <- gtna_model()
+
+    compSeq <- tryCatch({
+      sub_range <- input$gtna_compare_min_len:input$gtna_compare_max_len
+      tna::compare_sequences(
+        x = groupModels,
+        sub = sub_range,
+        min_freq = input$gtna_compare_min_freq,
+        correction = input$gtna_compare_correction
+      )
+    }, error = function(e) NULL)
+
+    if(is.null(compSeq)) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, "No comparison data available", cex = 1, col = "gray50")
+      return()
+    }
+
+    # Remove patterns containing *
+    compSeq <- compSeq[!grepl("\\*", compSeq$pattern), ]
+
+    if(nrow(compSeq) == 0) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, "No valid patterns found", cex = 1, col = "gray50")
+      return()
+    }
+
+    tryCatch({
+      p <- plot(compSeq)
+      p <- p + ggplot2::theme(
+        text = ggplot2::element_text(size = 14),
+        axis.text = ggplot2::element_text(size = 12),
+        axis.title = ggplot2::element_text(size = 14)
+      )
+      print(p)
+    }, error = function(e) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, paste("Error:", e$message), col = "red", cex = 0.7)
+    })
+  })
+
+  # Group TNA Sequence Indices Table
+  output$gtna_indices_table <- DT::renderDataTable({
+    req(gtna_model(), input$gtna_indices_show_table)
+    req(shared_data$action_col, shared_data$actor_col)
+
+    copyData <- gtna_data()
+
+    # Prepare data
+    args_prepare_data <- list(
+      data = copyData,
+      action = shared_data$action_col,
+      actor = shared_data$actor_col
+    )
+
+    if(!is.null(shared_data$time_col) && shared_data$time_col != "") {
+      args_prepare_data$time <- shared_data$time_col
+    }
+
+    if(!is.null(shared_data$order_col) && shared_data$order_col != "") {
+      args_prepare_data$order <- shared_data$order_col
+    }
+
+    dataForIndices <- tryCatch({
+      do.call(prepare_data, args_prepare_data)
+    }, error = function(e) NULL)
+
+    if(is.null(dataForIndices)) return(NULL)
+
+    seq_data <- dataForIndices$sequence_data
+    seq_data <- as.data.frame(lapply(seq_data, as.character), stringsAsFactors = FALSE)
+
+    indices <- tryCatch({
+      codyna::sequence_indices(data = seq_data, omega = input$gtna_indices_omega)
+    }, error = function(e) NULL)
+
+    if(is.null(indices)) return(NULL)
+
+    # Add actor and group info
+    indices$sequence_id <- 1:nrow(indices)
+    actor_names <- rownames(dataForIndices$sequence_data)
+    indices$actor <- actor_names
+
+    # Add group
+    if(shared_data$has_group) {
+      actor_group_map <- unique(copyData[, c(shared_data$actor_col, shared_data$group_col)])
+      names(actor_group_map) <- c("actor", "group")
+      indices$group <- actor_group_map$group[match(actor_names, actor_group_map$actor)]
+    }
+
+    # Limit rows
+    if(nrow(indices) > input$gtna_indices_max_rows) {
+      indices <- indices[1:input$gtna_indices_max_rows, ]
+    }
+
+    styled_datatable(indices, caption = "Sequence Indices")
   })
 
   # ==========================================================================
@@ -3026,6 +3703,456 @@ server <- function(input, output, session) {
     }
 
     styled_datatable(permResult$summary, caption = "Permutation Test Results")
+  })
+
+  # Cluster TNA Permutation Plot
+  output$ctna_permutation_plot <- renderPlot({
+    if (is.null(ctna_clusters())) return()
+    if (!isTRUE(input$ctna_permutation_show_plot)) return()
+
+    clusters <- ctna_clusters()
+
+    if (is.null(clusters$models) || length(clusters$models) < 2) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, "Need at least 2 clusters for permutation test", cex = 1, col = "gray50")
+      return()
+    }
+
+    groupModels <- clusters$models
+
+    permResult <- tryCatch({
+      tna::permutation_test(x = groupModels,
+                           iter = input$ctna_permutation_iter,
+                           level = input$ctna_permutation_level)
+    }, error = function(e) NULL)
+
+    if (is.null(permResult)) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, "Permutation test failed", cex = 1, col = "#e74c3c")
+      return()
+    }
+
+    tryCatch({
+      p <- plot(permResult)
+      print(p)
+    }, error = function(e) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, paste("Error:", e$message), col = "red", cex = 0.7)
+    })
+  })
+
+  # Cluster TNA Sequences Plot
+  output$ctna_sequences_plot <- renderPlot({
+    if (is.null(ctna_clusters())) return()
+    if (!isTRUE(input$ctna_sequences_show_plot)) return()
+
+    clusters <- ctna_clusters()
+
+    if (is.null(clusters$models) || length(clusters$models) == 0) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, "No models available", cex = 1, col = "gray50")
+      return()
+    }
+
+    groupModels <- clusters$models
+
+    p <- tryCatch({
+      tna::plot_sequences(
+        x = groupModels,
+        type = input$ctna_sequences_type,
+        scale = input$ctna_sequences_scale,
+        geom = input$ctna_sequences_geom,
+        include_na = input$ctna_sequences_include_na,
+        tick = input$ctna_sequences_tick
+      )
+    }, error = function(e) NULL)
+
+    if(!is.null(p)) print(p)
+  })
+
+  # Cluster TNA Community Table
+  output$ctna_community_table <- DT::renderDataTable({
+    if (is.null(ctna_clusters())) return(NULL)
+    if (!isTRUE(input$ctna_community_show_table)) return(NULL)
+
+    clusters <- ctna_clusters()
+
+    if (is.null(clusters$models) || length(clusters$models) == 0) {
+      return(styled_datatable(data.frame(Message = "No models available"), caption = "Community Assignments"))
+    }
+
+    groupModels <- clusters$models
+
+    all_coms <- NULL
+    for(g in names(groupModels)) {
+      coms <- tryCatch({
+        tna::communities(x = groupModels[[g]],
+                        methods = input$ctna_community_method,
+                        gamma = input$ctna_community_gamma)
+      }, error = function(e) NULL)
+
+      if(!is.null(coms) && !is.null(coms$assignments)) {
+        df <- coms$assignments
+        df$cluster <- g
+        all_coms <- rbind(all_coms, df)
+      }
+    }
+
+    if(is.null(all_coms)) return(NULL)
+    styled_datatable(all_coms, caption = "Community Assignments by Cluster")
+  })
+
+  # Cluster TNA Community Plot
+  output$ctna_community_plot <- renderPlot({
+    if (is.null(ctna_clusters())) return()
+    if (!isTRUE(input$ctna_community_show_plot)) return()
+
+    clusters <- ctna_clusters()
+
+    if (is.null(clusters$models) || length(clusters$models) == 0) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, "No models available", cex = 1, col = "gray50")
+      return()
+    }
+
+    groupModels <- clusters$models
+
+    tryCatch({
+      nGroups <- length(groupModels)
+      nCols <- ceiling(sqrt(nGroups))
+      nRows <- ceiling(nGroups / nCols)
+
+      par(mfrow = c(nRows, nCols), mar = c(0.5, 0.5, 1.5, 0.5), oma = c(0, 0, 0, 0))
+
+      for(g in names(groupModels)) {
+        coms <- tna::communities(x = groupModels[[g]],
+                                methods = input$ctna_community_method,
+                                gamma = input$ctna_community_gamma)
+        if(!is.null(coms)) {
+          plot(x = coms, method = input$ctna_community_method, bg = "white")
+          title(main = paste("Cluster", g), line = 0.5)
+        }
+      }
+
+      par(mfrow = c(1, 1))
+    }, error = function(e) {
+      par(mfrow = c(1, 1), mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, paste("Error:", e$message), col = "red", cex = 0.7)
+    })
+  })
+
+  # Cluster TNA Cliques Text
+  output$ctna_cliques_text <- renderPrint({
+    if (is.null(ctna_clusters())) {
+      cat("Run clustering to see cliques\n")
+      return()
+    }
+    if (!isTRUE(input$ctna_cliques_show_table)) return()
+
+    clusters <- ctna_clusters()
+
+    if (is.null(clusters$models) || length(clusters$models) == 0) {
+      cat("No models available\n")
+      return()
+    }
+
+    groupModels <- clusters$models
+
+    for(g in names(groupModels)) {
+      cat("=== Cluster:", g, "===\n")
+      cliques <- tryCatch({
+        tna::cliques(x = groupModels[[g]],
+                    size = input$ctna_cliques_size,
+                    threshold = input$ctna_cliques_threshold)
+      }, error = function(e) NULL)
+
+      if(!is.null(cliques)) {
+        print(cliques)
+      } else {
+        cat("No cliques found\n")
+      }
+      cat("\n")
+    }
+  })
+
+  # Cluster TNA Cliques Plot
+  output$ctna_cliques_plot <- renderPlot({
+    if (is.null(ctna_clusters())) return()
+    if (!isTRUE(input$ctna_cliques_show_plot)) return()
+
+    clusters <- ctna_clusters()
+
+    if (is.null(clusters$models) || length(clusters$models) == 0) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, "No models available", cex = 1, col = "gray50")
+      return()
+    }
+
+    groupModels <- clusters$models
+
+    tryCatch({
+      nGroups <- length(groupModels)
+      nCols <- ceiling(sqrt(nGroups))
+      nRows <- ceiling(nGroups / nCols)
+
+      par(mfrow = c(nRows, nCols), mar = c(0.5, 0.5, 1.5, 0.5), oma = c(0, 0, 0, 0))
+
+      for(g in names(groupModels)) {
+        cliques <- tna::cliques(x = groupModels[[g]],
+                               size = input$ctna_cliques_size,
+                               threshold = input$ctna_cliques_threshold)
+        if(!is.null(cliques) && length(cliques) > 0) {
+          plot(x = cliques, ask = FALSE, first = 1, n = 1, bg = "white")
+          title(main = paste("Cluster", g), line = 0.5)
+        }
+      }
+
+      par(mfrow = c(1, 1))
+    }, error = function(e) {
+      par(mfrow = c(1, 1), mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, paste("Error:", e$message), col = "red", cex = 0.7)
+    })
+  })
+
+  # Cluster TNA Bootstrap Table
+  output$ctna_bootstrap_table <- DT::renderDataTable({
+    if (is.null(ctna_clusters())) return(NULL)
+    if (!isTRUE(input$ctna_bootstrap_show_table)) return(NULL)
+
+    clusters <- ctna_clusters()
+
+    if (is.null(clusters$models) || length(clusters$models) == 0) {
+      return(styled_datatable(data.frame(Message = "No models available"), caption = "Bootstrap Analysis"))
+    }
+
+    groupModels <- clusters$models
+
+    all_bs <- NULL
+    for(g in names(groupModels)) {
+      bs <- tryCatch({
+        tna::bootstrap(
+          x = groupModels[[g]],
+          iter = input$ctna_bootstrap_iterations,
+          level = input$ctna_bootstrap_level,
+          method = input$ctna_bootstrap_method,
+          threshold = if(input$ctna_bootstrap_method == "threshold") input$ctna_bootstrap_threshold else 0.1,
+          consistency_range = c(input$ctna_bootstrap_range_low, input$ctna_bootstrap_range_up)
+        )
+      }, error = function(e) NULL)
+
+      if(!is.null(bs) && !is.null(bs$summary)) {
+        df <- bs$summary
+        df$cluster <- g
+
+        if(input$ctna_bootstrap_significant_only) {
+          df <- df[df$sig == TRUE, ]
+        }
+
+        all_bs <- rbind(all_bs, df)
+      }
+    }
+
+    if(is.null(all_bs) || nrow(all_bs) == 0) return(NULL)
+
+    if(nrow(all_bs) > input$ctna_bootstrap_max_rows) {
+      all_bs <- all_bs[1:input$ctna_bootstrap_max_rows, ]
+    }
+
+    styled_datatable(all_bs, caption = "Bootstrap Analysis Results")
+  })
+
+  # Cluster TNA Bootstrap Plot
+  output$ctna_bootstrap_plot <- renderPlot({
+    if (is.null(ctna_clusters())) return()
+    if (!isTRUE(input$ctna_bootstrap_show_plot)) return()
+
+    clusters <- ctna_clusters()
+
+    if (is.null(clusters$models) || length(clusters$models) == 0) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, "No models available", cex = 1, col = "gray50")
+      return()
+    }
+
+    groupModels <- clusters$models
+
+    tryCatch({
+      nGroups <- length(groupModels)
+      nCols <- ceiling(sqrt(nGroups))
+      nRows <- ceiling(nGroups / nCols)
+
+      par(mfrow = c(nRows, nCols), mar = c(0.5, 0.5, 1.5, 0.5), oma = c(0, 0, 0, 0))
+
+      for(g in names(groupModels)) {
+        bs <- tna::bootstrap(
+          x = groupModels[[g]],
+          iter = input$ctna_bootstrap_iterations,
+          level = input$ctna_bootstrap_level,
+          method = input$ctna_bootstrap_method,
+          threshold = if(input$ctna_bootstrap_method == "threshold") input$ctna_bootstrap_threshold else 0.1,
+          consistency_range = c(input$ctna_bootstrap_range_low, input$ctna_bootstrap_range_up)
+        )
+        if(!is.null(bs)) {
+          plot(x = bs, cut = 0.01)
+          title(main = paste("Cluster", g), line = 0.5)
+        }
+      }
+
+      par(mfrow = c(1, 1))
+    }, error = function(e) {
+      par(mfrow = c(1, 1), mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, paste("Error:", e$message), col = "red", cex = 0.7)
+    })
+  })
+
+  # Cluster TNA Compare Sequences Table
+  output$ctna_compare_table <- DT::renderDataTable({
+    if (is.null(ctna_clusters())) return(NULL)
+    if (!isTRUE(input$ctna_compare_show_table)) return(NULL)
+
+    clusters <- ctna_clusters()
+
+    if (is.null(clusters$models) || length(clusters$models) < 2) {
+      return(styled_datatable(data.frame(Message = "Need at least 2 clusters for comparison"), caption = "Sequence Comparison"))
+    }
+
+    groupModels <- clusters$models
+
+    compSeq <- tryCatch({
+      sub_range <- input$ctna_compare_min_len:input$ctna_compare_max_len
+      tna::compare_sequences(
+        x = groupModels,
+        sub = sub_range,
+        min_freq = input$ctna_compare_min_freq,
+        correction = input$ctna_compare_correction
+      )
+    }, error = function(e) NULL)
+
+    if(is.null(compSeq) || nrow(compSeq) == 0) return(NULL)
+
+    # Remove patterns containing * (NAs)
+    compSeq <- compSeq[!grepl("\\*", compSeq$pattern), ]
+
+    # Sort by total frequency
+    freqCols <- colnames(compSeq)[grep("^freq_", colnames(compSeq))]
+    if(length(freqCols) > 0) {
+      compSeq$total_freq <- rowSums(compSeq[, freqCols, drop=FALSE])
+      compSeq <- compSeq[order(-compSeq$total_freq), ]
+      compSeq$total_freq <- NULL
+    }
+
+    # Keep only top 20
+    if(nrow(compSeq) > 20) {
+      compSeq <- compSeq[1:20, ]
+    }
+
+    styled_datatable(compSeq, caption = "Sequence Comparison Across Clusters")
+  })
+
+  # Cluster TNA Compare Sequences Plot
+  output$ctna_compare_plot <- renderPlot({
+    if (is.null(ctna_clusters())) return()
+    if (!isTRUE(input$ctna_compare_show_plot)) return()
+
+    clusters <- ctna_clusters()
+
+    if (is.null(clusters$models) || length(clusters$models) < 2) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, "Need at least 2 clusters for comparison", cex = 1, col = "gray50")
+      return()
+    }
+
+    groupModels <- clusters$models
+
+    compSeq <- tryCatch({
+      sub_range <- input$ctna_compare_min_len:input$ctna_compare_max_len
+      tna::compare_sequences(
+        x = groupModels,
+        sub = sub_range,
+        min_freq = input$ctna_compare_min_freq,
+        correction = input$ctna_compare_correction
+      )
+    }, error = function(e) NULL)
+
+    if(is.null(compSeq)) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, "No comparison data available", cex = 1, col = "gray50")
+      return()
+    }
+
+    # Remove patterns containing *
+    compSeq <- compSeq[!grepl("\\*", compSeq$pattern), ]
+
+    if(nrow(compSeq) == 0) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, "No valid patterns found", cex = 1, col = "gray50")
+      return()
+    }
+
+    tryCatch({
+      p <- plot(compSeq)
+      p <- p + ggplot2::theme(
+        text = ggplot2::element_text(size = 14),
+        axis.text = ggplot2::element_text(size = 12),
+        axis.title = ggplot2::element_text(size = 14)
+      )
+      print(p)
+    }, error = function(e) {
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      text(0.5, 0.5, paste("Error:", e$message), col = "red", cex = 0.7)
+    })
+  })
+
+  # Cluster TNA Sequence Indices Table
+  output$ctna_indices_table <- DT::renderDataTable({
+    if (is.null(ctna_clusters())) return(NULL)
+    if (!isTRUE(input$ctna_indices_show_table)) return(NULL)
+    if (is.null(ctna_prepared_data())) return(NULL)
+
+    clusters <- ctna_clusters()
+    dataForIndices <- ctna_prepared_data()
+
+    if(is.null(dataForIndices)) return(NULL)
+
+    seq_data <- dataForIndices$sequence_data
+    seq_data <- as.data.frame(lapply(seq_data, as.character), stringsAsFactors = FALSE)
+
+    indices <- tryCatch({
+      codyna::sequence_indices(data = seq_data, omega = input$ctna_indices_omega)
+    }, error = function(e) NULL)
+
+    if(is.null(indices)) return(NULL)
+
+    # Add actor and cluster info
+    indices$sequence_id <- 1:nrow(indices)
+    actor_names <- rownames(dataForIndices$sequence_data)
+    indices$actor <- actor_names
+
+    # Add cluster assignments
+    if(!is.null(clusters$assignments)) {
+      indices$cluster <- clusters$assignments$cluster[match(actor_names, clusters$assignments$actor)]
+    }
+
+    # Limit rows
+    if(nrow(indices) > input$ctna_indices_max_rows) {
+      indices <- indices[1:input$ctna_indices_max_rows, ]
+    }
+
+    styled_datatable(indices, caption = "Sequence Indices")
   })
 
   # ==========================================================================
