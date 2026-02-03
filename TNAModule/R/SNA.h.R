@@ -725,7 +725,7 @@ SNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "JTNA",
                 name = "SNA",
-                version = c(1,9,2),
+                version = c(1,12,0),
                 options = options,
                 results = SNAResults$new(options=options),
                 data = data,

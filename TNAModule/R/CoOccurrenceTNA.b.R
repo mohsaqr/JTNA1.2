@@ -95,7 +95,7 @@ CoOccurrenceTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
                         args_prepare_data <- args_prepare_data[!sapply(args_prepare_data, is.null)]
 
-                        dataForTNA <- do.call(prepare_data, args_prepare_data)
+                        dataForTNA <- do.call(tna::prepare_data, args_prepare_data)
                     }
 
                     if(!is.null(dataForTNA)) {
@@ -104,7 +104,7 @@ CoOccurrenceTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                             scaling = character(0L)
                         }
 
-                        model <- build_model(x=dataForTNA, type=type, scaling=scaling)
+                        model <- tna::build_model(x=dataForTNA, type=type, scaling=scaling)
                     }
 
                 }, error = function(e) {
@@ -191,11 +191,15 @@ CoOccurrenceTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 if(length(vectorCharacter) > 0 && !is.null(model) &&
                     (!self$results$centrality_plot$isFilled() || !fullTable))
                 {
-                    cent <- centralities(x=model, loops=centrality_loops, normalize=centrality_normalize, measures=vectorCharacter)
+                    cent <- tna::centralities(x=model, loops=centrality_loops, normalize=centrality_normalize, measures=vectorCharacter)
                     self$results$centralityTable$setState(cent)
                 }
 
-                for (i in 1:lengths(cent[1])) {
+                # Check if cent is valid before iterating
+                if(is.null(cent) || !is.data.frame(cent) || nrow(cent) == 0) {
+                    self$results$centralityTitle$setVisible(FALSE)
+                } else {
+                for (i in 1:nrow(cent)) {
                     index <- 1
                     rowValues <- list()
 
@@ -242,6 +246,7 @@ CoOccurrenceTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 self$results$centralityTitle$setVisible(self$options$centrality_show_plot || self$options$centrality_show_table)
                 self$results$centrality_plot$setVisible(self$options$centrality_show_plot)
                 self$results$centralityTable$setVisible(self$options$centrality_show_table)
+                }
 
             }
 
@@ -255,10 +260,6 @@ CoOccurrenceTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 coms <- self$results$community_plot$state
 
                 if((!self$results$communityContent$isFilled() || !self$results$community_plot$isFilled())) {
-
-                    if(is.null(coms)) {
-                        coms <- NULL
-                    }
 
                     resultComs <- tryCatch({
                         coms <- tna::communities(x=model, methods=methods, gamma=community_gamma)
@@ -323,7 +324,7 @@ CoOccurrenceTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             if(!is.null(model) && ( self$options$cliques_show_text || self$options$cliques_show_plot) ) {
 
                 if(!self$results$cliques_multiple_plot$isFilled() || !self$results$cliquesContent$isFilled()) {
-                    cliques <- cliques(x=model, size=cliques_size, threshold=cliques_threshold)
+                    cliques <- tna::cliques(x=model, size=cliques_size, threshold=cliques_threshold)
 
                     if(!self$results$cliquesContent$isFilled()) {
                         self$results$cliquesContent$setContent(cliques)
@@ -356,7 +357,7 @@ CoOccurrenceTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
                     threshold <- self$options$bootstrap_threshold
 
-                    bs <- bootstrap(
+                    bs <- tna::bootstrap(
                                     x=model,
                                     iter=iteration,
                                     level=level,

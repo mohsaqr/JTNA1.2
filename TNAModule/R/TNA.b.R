@@ -89,16 +89,6 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         actionColumn <- self$options$buildModel_variables_long_action
                         orderColumn <- self$options$buildModel_variables_long_order
 
-                        ##### TO REMOVE
-                        values_to_replace <- c("Applications", "Ethics", "General", "La_types", "Theory")
-                        new_value <- "Resources"
-                        longData[[self$options$buildModel_variables_long_action]] <- replace(
-                            longData[[self$options$buildModel_variables_long_action]], 
-                            longData[[self$options$buildModel_variables_long_action]] %in% values_to_replace, 
-                            new_value
-                        )
-                        ##### END TO REMOVE
-
                         args_prepare_data <- list(
                             data = longData,
                             actor = actorColumn,
@@ -110,7 +100,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                         args_prepare_data <- args_prepare_data[!sapply(args_prepare_data, is.null)]
 
-                        dataForTNA <- do.call(prepare_data, args_prepare_data)
+                        dataForTNA <- do.call(tna::prepare_data, args_prepare_data)
                     }
 
                     if(!is.null(dataForTNA)) {
@@ -121,9 +111,9 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                         if(type == "attention") {
                             lambda <- self$options$buildModel_lambda
-                            model <- build_model(x=dataForTNA, type=type, scaling=scaling, lambda=lambda)
+                            model <- tna::build_model(x=dataForTNA, type=type, scaling=scaling, lambda=lambda)
                         } else {
-                            model <- build_model(x=dataForTNA, type=type, scaling=scaling)
+                            model <- tna::build_model(x=dataForTNA, type=type, scaling=scaling)
                         }
                     }
                     
@@ -217,14 +207,18 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
                 cent <- self$results$centralityTable$state
-                if(length(vectorCharacter) > 0 && !is.null(model) && 
-                    (!self$results$centrality_plot$isFilled() || !fullTable)) 
+                if(length(vectorCharacter) > 0 && !is.null(model) &&
+                    (!self$results$centrality_plot$isFilled() || !fullTable))
                 {
-                    cent <- centralities(x=model, loops=centrality_loops, normalize=centrality_normalize, measures=vectorCharacter)
+                    cent <- tna::centralities(x=model, loops=centrality_loops, normalize=centrality_normalize, measures=vectorCharacter)
                     self$results$centralityTable$setState(cent)
                 }
 
-                for (i in 1:lengths(cent[1])) {
+                # Check if cent is valid before iterating
+                if(is.null(cent) || !is.data.frame(cent) || nrow(cent) == 0) {
+                    self$results$centralityTitle$setVisible(FALSE)
+                } else {
+                for (i in 1:nrow(cent)) {
                     index <- 1
                     rowValues <- list()
 
@@ -271,6 +265,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$results$centralityTitle$setVisible(self$options$centrality_show_plot || self$options$centrality_show_table)
                 self$results$centrality_plot$setVisible(self$options$centrality_show_plot)
                 self$results$centralityTable$setVisible(self$options$centrality_show_table)
+                }
 
             }
 
@@ -335,7 +330,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ### Edge betweenness
 
             if(!is.null(model) && (self$options$edgeBetweenness_show_table || self$options$edgeBetweenness_show_plot)) {
-                edgeBetwenness <- betweenness_network(x=model)
+                edgeBetwenness <- tna::betweenness_network(x=model)
 
                 # Plot
                 if(!self$results$edgeBetweenness_plot$isFilled()) {
@@ -468,7 +463,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if(!is.null(model) && ( self$options$cliques_show_text || self$options$cliques_show_plot) ) {
 
                 if(!self$results$cliques_multiple_plot$isFilled() || !self$results$cliquesContent$isFilled()) {
-                    cliques <- cliques(x=model, size=cliques_size, threshold=cliques_threshold)
+                    cliques <- tna::cliques(x=model, size=cliques_size, threshold=cliques_threshold)
 
                     if(!self$results$cliquesContent$isFilled()) {
                         self$results$cliquesContent$setContent(cliques)
@@ -501,7 +496,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                     threshold <- self$options$bootstrap_threshold
 
-                    bs <- bootstrap(
+                    bs <- tna::bootstrap(
                                     x=model, 
                                     iter=iteration,
                                     level=level,
@@ -599,7 +594,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             order = self$options$buildModel_variables_long_order
                         )
                         args_prepare_data <- args_prepare_data[!sapply(args_prepare_data, is.null)]
-                        dataForTNA <- do.call(prepare_data, args_prepare_data)
+                        dataForTNA <- do.call(tna::prepare_data, args_prepare_data)
                     }
 
                     if(is.null(dataForTNA)) {
@@ -733,7 +728,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         }
 
                         self$results$indicesTitle$setContent("Step 4: Calling prepare_data...")
-                        dataForTNA <- do.call(prepare_data, args_prepare_data)
+                        dataForTNA <- do.call(tna::prepare_data, args_prepare_data)
                     }
 
                     if(is.null(dataForTNA)) {

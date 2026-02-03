@@ -333,22 +333,15 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
 
       ### Community
-      if(!is.null(model) && isTRUE(self$options$community_show_plot) ) {
+      if(!is.null(model) && (isTRUE(self$options$community_show_plot) || isTRUE(self$options$community_show_table))) {
         community_gamma <- as.numeric(self$options$community_gamma)
         methods <- self$options$community_methods
 
-        # Use state to avoid recalculating community detection, but allow recalculation when needed
         coms <- self$results$community_plot$state
         if(is.null(coms)) {
           resultComs <- tryCatch({
             coms <- tna::communities(x=model, methods=methods, gamma=community_gamma)
-            
-            # Store state to avoid recalculation
             self$results$community_plot$setState(coms)
-            # Community table disabled for GroupTNA
-            # if(isTRUE(self$options$community_show_table)) {
-            #     self$results$communityContent$setContent(coms)
-            # }
             TRUE
           }, error = function(e) {
             self$results$communityTitle$setVisible(TRUE)
@@ -356,14 +349,51 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             self$results$communityErrorText$setVisible(TRUE)
             FALSE
           })
-          
+
           if(!resultComs) return()
+        }
+
+        # Populate communities table
+        # Structure: coms$A$assignments, coms$B$assignments, etc.
+        if(!is.null(coms) && isTRUE(self$options$community_show_table)) {
+            row_key <- 1
+            method_names <- NULL
+
+            for(group_name in names(coms)) {
+                group_coms <- coms[[group_name]]
+                if(!is.null(group_coms) && !is.null(group_coms$assignments)) {
+                    assignments <- group_coms$assignments
+
+                    # Add columns for each community detection method (only once)
+                    if(is.null(method_names)) {
+                        method_names <- colnames(assignments)[colnames(assignments) != "state"]
+                        for(method in method_names) {
+                            self$results$communityTable$addColumn(name=method, title=method, type="integer")
+                        }
+                    }
+
+                    # Add rows with community assignments
+                    for (i in 1:nrow(assignments)) {
+                        rowValues <- list()
+                        rowValues$group <- as.character(group_name)
+                        rowValues$state <- as.character(assignments[i, "state"])
+
+                        for(method in method_names) {
+                            rowValues[[method]] <- as.integer(assignments[i, method])
+                        }
+
+                        self$results$communityTable$addRow(rowKey=row_key, values=rowValues)
+                        row_key <- row_key + 1
+                    }
+                }
+            }
         }
 
         # Set visibility
         self$results$community_plot$setVisible(self$options$community_show_plot)
-        self$results$communityContent$setVisible(FALSE)  # Hide community table in GroupTNA
-        self$results$communityTitle$setVisible(isTRUE(self$options$community_show_plot))
+        self$results$communityTable$setVisible(self$options$community_show_table)
+        self$results$communityContent$setVisible(FALSE)
+        self$results$communityTitle$setVisible(isTRUE(self$options$community_show_plot) || isTRUE(self$options$community_show_table))
       }
 
       ### Cliques
@@ -517,6 +547,8 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Populate table if we have data and table option is enabled
         if (!is.null(permutationTest) && isTRUE(self$options$permutation_show_text)) {
           row_key_counter <- 1
+          max_rows <- self$options$permutation_table_max_rows
+          show_all <- isTRUE(self$options$permutation_table_show_all)
           for (comparison_name in names(permutationTest)) {
             comparison_data <- permutationTest[[comparison_name]]
             if (!is.null(comparison_data$edges) && !is.null(comparison_data$edges$stats)) {
@@ -529,12 +561,12 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
               # Sort by p_value and then by diff_true (descending)
               filtered_sorted_stats <- stats_df[order(stats_df$p_value, -stats_df$diff_true), ]
-              
+
               # Add debug info about edge names
               if("edge_name" %in% colnames(filtered_sorted_stats)) {
                 sample_edges <- head(filtered_sorted_stats$edge_name, 3)
                 # Also check character encoding and length
-                debug_info <- paste("Found", nrow(filtered_sorted_stats), "edges. Sample:", 
+                debug_info <- paste("Found", nrow(filtered_sorted_stats), "edges. Sample:",
                                   paste(sample_edges, collapse="; "),
                                   ". Lengths:", paste(nchar(sample_edges), collapse=","))
                 self$results$permutationContent$setNote(key = "edge_debug", note = debug_info)
@@ -544,6 +576,8 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               }
 
               for (i in 1:nrow(filtered_sorted_stats)) {
+                # Check row limit unless show_all is enabled
+                if (!show_all && row_key_counter > max_rows) break
                 # Get edge name with robust handling
                 edge_name_value <- filtered_sorted_stats[i, "edge_name"]
                 
@@ -571,6 +605,8 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$results$permutationContent$addRow(rowKey=as.character(row_key_counter), values=rowValues)
                 row_key_counter <- row_key_counter + 1
               }
+              # Break outer loop if row limit reached
+              if (!show_all && row_key_counter > max_rows) break
             }
           }
         }
@@ -646,25 +682,154 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           self$results$compareSequencesTable$addColumn(name="statistic", title="Statistic", type="number")
           self$results$compareSequencesTable$addColumn(name="p_value", title="p-value", type="number")
 
-          # Add rows
+          # Add rows - extract vectors first to ensure atomic access
+          patterns <- as.character(compSeq$pattern)
+          statistics <- as.numeric(compSeq$statistic)
+          p_values <- as.numeric(compSeq$p_value)
+
           for(i in 1:nrow(compSeq)) {
+            patt <- patterns[i]
             rowValues <- list(
-              pattern = as.character(compSeq[i, "pattern"]),
-              length = nchar(gsub("[^-]", "", as.character(compSeq[i, "pattern"]))) + 1
+              pattern = patt,
+              length = nchar(gsub("[^-]", "", patt)) + 1L
             )
             for(fc in freqCols) {
-              rowValues[[fc]] <- as.integer(compSeq[i, fc])
+              rowValues[[fc]] <- as.integer(compSeq[[fc]])[i]
             }
             for(pc in propCols) {
-              rowValues[[pc]] <- as.numeric(compSeq[i, pc])
+              rowValues[[pc]] <- as.numeric(compSeq[[pc]])[i]
             }
-            rowValues$statistic <- as.numeric(compSeq[i, "statistic"])
-            rowValues$p_value <- as.numeric(compSeq[i, "p_value"])
+            rowValues$statistic <- statistics[i]
+            rowValues$p_value <- p_values[i]
             self$results$compareSequencesTable$addRow(rowKey=i, values=rowValues)
           }
         }
 
         self$results$compareSequencesTable$setVisible(self$options$compare_sequences_show_table)
+      }
+
+      ### Compare Network Properties
+      showAnyCompare <- isTRUE(self$options$compare_show_summary) ||
+                        isTRUE(self$options$compare_show_network) ||
+                        isTRUE(self$options$compare_show_plot)
+
+      if(!is.null(model) && showAnyCompare) {
+
+        # Show instructions
+        self$results$compareInstructions$setContent(
+          '<div style="border: 2px solid #d4edda; border-radius: 10px; padding: 10px; background-color: #d4edda; margin: 10px 0;">
+          <b>Compare Network Properties</b>: Compares general network properties between two groups, including edge weight correlations, distances, and structural metrics like density and reciprocity.
+          </div>'
+        )
+        self$results$compareInstructions$setVisible(TRUE)
+
+        # Get available group names from model
+        available_groups <- names(model)
+
+        # Get selected group names, auto-select first two if not specified
+        group_i_name <- self$options$compare_group_i
+        group_j_name <- self$options$compare_group_j
+
+        # Auto-select first group if not specified
+        if(is.null(group_i_name) || group_i_name == "") {
+          if(length(available_groups) >= 1) {
+            group_i_name <- available_groups[1]
+          }
+        }
+
+        # Auto-select second group if not specified
+        if(is.null(group_j_name) || group_j_name == "") {
+          if(length(available_groups) >= 2) {
+            group_j_name <- available_groups[2]
+          }
+        }
+
+        # Check if groups are valid
+        if(is.null(group_i_name) || is.null(group_j_name) || group_i_name == "" || group_j_name == "") {
+          self$results$compareTitle$setContent("Need at least two groups to compare")
+          self$results$compareTitle$setVisible(TRUE)
+          return()
+        }
+
+        if(group_i_name == group_j_name) {
+          self$results$compareTitle$setContent("Please select two different groups to compare")
+          self$results$compareTitle$setVisible(TRUE)
+          return()
+        }
+
+        compResult <- self$results$compare_plot$state
+        if(is.null(compResult)) {
+          tryCatch({
+            # Call tna::compare for group_tna using group names
+            compResult <- tna::compare(
+              x = model,
+              i = group_i_name,
+              j = group_j_name,
+              scaling = self$options$compare_scaling,
+              network = TRUE
+            )
+
+            # Store state along with group names
+            self$results$compare_plot$setState(list(
+              result = compResult,
+              group_i = group_i_name,
+              group_j = group_j_name
+            ))
+          }, error = function(e) {
+            self$results$errorText$setContent(paste("Compare Error:", e$message))
+            self$results$errorText$setVisible(TRUE)
+          })
+        } else {
+          # Extract from stored state
+          compResult <- compResult$result
+        }
+
+        # Set title with group names
+        self$results$compareTitle$setContent(paste("Comparing:", group_i_name, "vs", group_j_name))
+
+        # Summary metrics table
+        if(!is.null(compResult) && isTRUE(self$options$compare_show_summary)) {
+          if(!is.null(compResult$summary_metrics) && nrow(compResult$summary_metrics) > 0) {
+            self$results$compareSummaryTable$setTitle(paste("Summary Metrics:", group_i_name, "vs", group_j_name))
+            for(i in 1:nrow(compResult$summary_metrics)) {
+              self$results$compareSummaryTable$addRow(rowKey=i, values=list(
+                metric = as.character(compResult$summary_metrics$metric[i]),
+                value = as.numeric(compResult$summary_metrics$value[i])
+              ))
+            }
+          }
+          self$results$compareSummaryTable$setVisible(TRUE)
+        }
+
+        # Network metrics table
+        if(!is.null(compResult) && isTRUE(self$options$compare_show_network)) {
+          if(!is.null(compResult$network_metrics) && nrow(compResult$network_metrics) > 0) {
+            self$results$compareNetworkTable$setTitle(paste("Network Properties:", group_i_name, "vs", group_j_name))
+
+            # Update column titles with actual group names
+            self$results$compareNetworkTable$getColumn("group_i")$setTitle(group_i_name)
+            self$results$compareNetworkTable$getColumn("group_j")$setTitle(group_j_name)
+
+            for(i in 1:nrow(compResult$network_metrics)) {
+              row_data <- compResult$network_metrics[i, ]
+              self$results$compareNetworkTable$addRow(rowKey=i, values=list(
+                metric = as.character(row_data$metric),
+                group_i = as.numeric(row_data[[2]]),
+                group_j = as.numeric(row_data[[3]])
+              ))
+            }
+          }
+          self$results$compareNetworkTable$setVisible(TRUE)
+        }
+
+        # Set visibility
+        self$results$compare_plot$setVisible(self$options$compare_show_plot)
+        self$results$compareTitle$setVisible(showAnyCompare)
+      }
+
+      ### Network Difference Plot (independent section)
+      if (!is.null(model) && isTRUE(self$options$compare_show_network_diff_plot)) {
+        self$results$compare_network_diff_plot$setVisible(TRUE)
       }
 
       ### Sequence Indices
@@ -694,7 +859,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             args_prepare_data$order <- order_col
           }
 
-          dataForIndices <- do.call(prepare_data, args_prepare_data)
+          dataForIndices <- do.call(tna::prepare_data, args_prepare_data)
 
           if(is.null(dataForIndices)) {
             self$results$indicesTitle$setContent("Error: Could not prepare sequence data")
@@ -930,8 +1095,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           column <- ceiling(length(plotData) / row)
           par(mfrow = c(row, column))
         }
-        methods <- self$options$community_methods
-        plot(x=plotData, method=methods)
+        plot(plotData)
         TRUE
       }
       else {
@@ -1214,6 +1378,83 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         print(p)
       }, error = function(e) {
         plot(1, type="n", main="Compare Sequences Error", sub=e$message)
+      })
+      TRUE
+    },
+    .showComparePlot = function(image, ...) {
+      if(!self$options$compare_show_plot) return(FALSE)
+      stateData <- self$results$compare_plot$state
+      if(is.null(stateData)) return(FALSE)
+
+      tryCatch({
+        # Extract comparison result and group names from state
+        plotData <- stateData$result
+        name_x <- stateData$group_i
+        name_y <- stateData$group_j
+
+        if(is.null(plotData)) return(FALSE)
+
+        p <- plot(
+          x = plotData,
+          type = self$options$compare_plot_type,
+          name_x = name_x,
+          name_y = name_y
+        )
+        print(p)
+      }, error = function(e) {
+        plot(1, type="n", main="Compare Plot Error", sub=e$message)
+      })
+      TRUE
+    },
+    .showCompareNetworkDiffPlot = function(image, ...) {
+      if(!isTRUE(self$options$compare_show_network_diff_plot)) return(FALSE)
+
+      model <- self$results$buildModelContent$state
+      if(is.null(model)) return(FALSE)
+
+      # Set up multi-panel layout for pairwise comparisons
+      n_groups <- length(model)
+      n_comparisons <- choose(n_groups, 2)
+
+      if(n_comparisons == 1) {
+        par(mfrow = c(1, 1))
+      } else if(n_comparisons <= 4) {
+        par(mfrow = c(2, 2))
+      } else if(n_comparisons <= 6) {
+        par(mfrow = c(2, 3))
+      } else if(n_comparisons <= 9) {
+        par(mfrow = c(3, 3))
+      } else {
+        rows <- ceiling(sqrt(n_comparisons))
+        cols <- ceiling(n_comparisons / rows)
+        par(mfrow = c(rows, cols))
+      }
+
+      tryCatch({
+        # Get group names for labels
+        group_names <- names(model)
+
+        # Loop through all pairwise comparisons
+        for(i in 1:(n_groups - 1)) {
+          for(j in (i + 1):n_groups) {
+            plot_title <- paste(group_names[i], "vs", group_names[j])
+            tna::plot_compare(
+              x = model,
+              i = i,
+              j = j,
+              cut = self$options$compare_network_diff_plot_cut,
+              minimum = self$options$compare_network_diff_plot_min_value,
+              edge.label.cex = self$options$compare_network_diff_plot_edge_label_size,
+              node.width = self$options$compare_network_diff_plot_node_size,
+              label.cex = self$options$compare_network_diff_plot_node_label_size,
+              layout = self$options$compare_network_diff_plot_layout,
+              title = plot_title
+            )
+          }
+        }
+      }, error = function(e) {
+        plot(1, type="n", axes=FALSE, xlab="", ylab="",
+             main="Network Difference Plot Error", sub=e$message)
       })
       TRUE
     }

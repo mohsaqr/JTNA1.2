@@ -17,7 +17,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             buildModel_show_matrix = FALSE,
             buildModel_threshold = 900,
             buildModel_show_plot = TRUE,
-            buildModel_plot_cut = 0,
+            buildModel_plot_cut = 0.1,
             buildModel_plot_min_value = 0.05,
             buildModel_plot_edge_label_size = 1,
             buildModel_plot_node_size = 1,
@@ -43,11 +43,12 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             community_methods = "spinglass",
             community_gamma = 1,
             community_show_plot = FALSE,
+            community_show_table = FALSE,
             cliques_size = 2,
             cliques_threshold = 0,
             cliques_show_text = FALSE,
             cliques_show_plot = FALSE,
-            cliques_plot_cut = 0,
+            cliques_plot_cut = 0.1,
             cliques_plot_min_value = 0,
             cliques_plot_edge_label_size = 1,
             cliques_plot_node_size = 1,
@@ -64,7 +65,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bootstrap_table_show_all = FALSE,
             bootstrap_table_significant_only = FALSE,
             bootstrap_show_plot = FALSE,
-            bootstrap_plot_cut = 0,
+            bootstrap_plot_cut = 0.1,
             bootstrap_plot_min_value = 0.05,
             bootstrap_plot_edge_label_size = 1,
             bootstrap_plot_node_size = 1,
@@ -75,6 +76,8 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             permutation_iter = 1000,
             permutation_paired = FALSE,
             permutation_level = 0.05,
+            permutation_table_max_rows = 20,
+            permutation_table_show_all = FALSE,
             sequences_type = "index",
             sequences_scale = "proportion",
             sequences_geom = "bar",
@@ -87,6 +90,20 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             compare_sequences_sub_max = 4,
             compare_sequences_min_freq = 20,
             compare_sequences_correction = "bonferroni",
+            compare_show_summary = FALSE,
+            compare_show_network = FALSE,
+            compare_show_plot = FALSE,
+            compare_group_i = NULL,
+            compare_group_j = NULL,
+            compare_scaling = "none",
+            compare_plot_type = "heatmap",
+            compare_show_network_diff_plot = FALSE,
+            compare_network_diff_plot_cut = 0.1,
+            compare_network_diff_plot_min_value = 0.05,
+            compare_network_diff_plot_edge_label_size = 1,
+            compare_network_diff_plot_node_size = 1,
+            compare_network_diff_plot_node_label_size = 1,
+            compare_network_diff_plot_layout = "circle",
             indices_show_table = FALSE,
             indices_favorable = NULL,
             indices_omega = 1,
@@ -152,7 +169,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..buildModel_plot_cut <- jmvcore::OptionNumber$new(
                 "buildModel_plot_cut",
                 buildModel_plot_cut,
-                default=0,
+                default=0.1,
                 min=0,
                 max=1)
             private$..buildModel_plot_min_value <- jmvcore::OptionNumber$new(
@@ -287,6 +304,10 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "community_show_plot",
                 community_show_plot,
                 default=FALSE)
+            private$..community_show_table <- jmvcore::OptionBool$new(
+                "community_show_table",
+                community_show_table,
+                default=FALSE)
             private$..cliques_size <- jmvcore::OptionInteger$new(
                 "cliques_size",
                 cliques_size,
@@ -310,7 +331,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..cliques_plot_cut <- jmvcore::OptionNumber$new(
                 "cliques_plot_cut",
                 cliques_plot_cut,
-                default=0,
+                default=0.1,
                 min=0,
                 max=1)
             private$..cliques_plot_min_value <- jmvcore::OptionNumber$new(
@@ -418,7 +439,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..bootstrap_plot_cut <- jmvcore::OptionNumber$new(
                 "bootstrap_plot_cut",
                 bootstrap_plot_cut,
-                default=0,
+                default=0.1,
                 min=0,
                 max=1)
             private$..bootstrap_plot_min_value <- jmvcore::OptionNumber$new(
@@ -486,6 +507,16 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=0.05,
                 min=0,
                 max=1)
+            private$..permutation_table_max_rows <- jmvcore::OptionInteger$new(
+                "permutation_table_max_rows",
+                permutation_table_max_rows,
+                default=20,
+                min=1,
+                max=1000)
+            private$..permutation_table_show_all <- jmvcore::OptionBool$new(
+                "permutation_table_show_all",
+                permutation_table_show_all,
+                default=FALSE)
             private$..sequences_type <- jmvcore::OptionList$new(
                 "sequences_type",
                 sequences_type,
@@ -558,6 +589,91 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "BH",
                     "BY",
                     "none"))
+            private$..compare_show_summary <- jmvcore::OptionBool$new(
+                "compare_show_summary",
+                compare_show_summary,
+                default=FALSE)
+            private$..compare_show_network <- jmvcore::OptionBool$new(
+                "compare_show_network",
+                compare_show_network,
+                default=FALSE)
+            private$..compare_show_plot <- jmvcore::OptionBool$new(
+                "compare_show_plot",
+                compare_show_plot,
+                default=FALSE)
+            private$..compare_group_i <- jmvcore::OptionLevel$new(
+                "compare_group_i",
+                compare_group_i,
+                variable="(buildModel_variables_long_group)")
+            private$..compare_group_j <- jmvcore::OptionLevel$new(
+                "compare_group_j",
+                compare_group_j,
+                variable="(buildModel_variables_long_group)")
+            private$..compare_scaling <- jmvcore::OptionList$new(
+                "compare_scaling",
+                compare_scaling,
+                default="none",
+                options=list(
+                    "none",
+                    "minmax",
+                    "max",
+                    "rank",
+                    "zscore",
+                    "robust",
+                    "log",
+                    "log1p",
+                    "softmax",
+                    "quantile"))
+            private$..compare_plot_type <- jmvcore::OptionList$new(
+                "compare_plot_type",
+                compare_plot_type,
+                default="heatmap",
+                options=list(
+                    "heatmap",
+                    "scatterplot",
+                    "weight_density"))
+            private$..compare_show_network_diff_plot <- jmvcore::OptionBool$new(
+                "compare_show_network_diff_plot",
+                compare_show_network_diff_plot,
+                default=FALSE)
+            private$..compare_network_diff_plot_cut <- jmvcore::OptionNumber$new(
+                "compare_network_diff_plot_cut",
+                compare_network_diff_plot_cut,
+                default=0.1,
+                min=0,
+                max=1)
+            private$..compare_network_diff_plot_min_value <- jmvcore::OptionNumber$new(
+                "compare_network_diff_plot_min_value",
+                compare_network_diff_plot_min_value,
+                default=0.05,
+                min=0,
+                max=1)
+            private$..compare_network_diff_plot_edge_label_size <- jmvcore::OptionNumber$new(
+                "compare_network_diff_plot_edge_label_size",
+                compare_network_diff_plot_edge_label_size,
+                default=1,
+                min=0,
+                max=10)
+            private$..compare_network_diff_plot_node_size <- jmvcore::OptionNumber$new(
+                "compare_network_diff_plot_node_size",
+                compare_network_diff_plot_node_size,
+                default=1,
+                min=0,
+                max=2)
+            private$..compare_network_diff_plot_node_label_size <- jmvcore::OptionNumber$new(
+                "compare_network_diff_plot_node_label_size",
+                compare_network_diff_plot_node_label_size,
+                default=1,
+                min=0,
+                max=10)
+            private$..compare_network_diff_plot_layout <- jmvcore::OptionList$new(
+                "compare_network_diff_plot_layout",
+                compare_network_diff_plot_layout,
+                default="circle",
+                options=list(
+                    "circle",
+                    "spring",
+                    "layout_with_fr"))
             private$..indices_show_table <- jmvcore::OptionBool$new(
                 "indices_show_table",
                 indices_show_table,
@@ -620,6 +736,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..community_methods)
             self$.addOption(private$..community_gamma)
             self$.addOption(private$..community_show_plot)
+            self$.addOption(private$..community_show_table)
             self$.addOption(private$..cliques_size)
             self$.addOption(private$..cliques_threshold)
             self$.addOption(private$..cliques_show_text)
@@ -652,6 +769,8 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..permutation_iter)
             self$.addOption(private$..permutation_paired)
             self$.addOption(private$..permutation_level)
+            self$.addOption(private$..permutation_table_max_rows)
+            self$.addOption(private$..permutation_table_show_all)
             self$.addOption(private$..sequences_type)
             self$.addOption(private$..sequences_scale)
             self$.addOption(private$..sequences_geom)
@@ -664,6 +783,20 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..compare_sequences_sub_max)
             self$.addOption(private$..compare_sequences_min_freq)
             self$.addOption(private$..compare_sequences_correction)
+            self$.addOption(private$..compare_show_summary)
+            self$.addOption(private$..compare_show_network)
+            self$.addOption(private$..compare_show_plot)
+            self$.addOption(private$..compare_group_i)
+            self$.addOption(private$..compare_group_j)
+            self$.addOption(private$..compare_scaling)
+            self$.addOption(private$..compare_plot_type)
+            self$.addOption(private$..compare_show_network_diff_plot)
+            self$.addOption(private$..compare_network_diff_plot_cut)
+            self$.addOption(private$..compare_network_diff_plot_min_value)
+            self$.addOption(private$..compare_network_diff_plot_edge_label_size)
+            self$.addOption(private$..compare_network_diff_plot_node_size)
+            self$.addOption(private$..compare_network_diff_plot_node_label_size)
+            self$.addOption(private$..compare_network_diff_plot_layout)
             self$.addOption(private$..indices_show_table)
             self$.addOption(private$..indices_favorable)
             self$.addOption(private$..indices_omega)
@@ -708,6 +841,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         community_methods = function() private$..community_methods$value,
         community_gamma = function() private$..community_gamma$value,
         community_show_plot = function() private$..community_show_plot$value,
+        community_show_table = function() private$..community_show_table$value,
         cliques_size = function() private$..cliques_size$value,
         cliques_threshold = function() private$..cliques_threshold$value,
         cliques_show_text = function() private$..cliques_show_text$value,
@@ -740,6 +874,8 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         permutation_iter = function() private$..permutation_iter$value,
         permutation_paired = function() private$..permutation_paired$value,
         permutation_level = function() private$..permutation_level$value,
+        permutation_table_max_rows = function() private$..permutation_table_max_rows$value,
+        permutation_table_show_all = function() private$..permutation_table_show_all$value,
         sequences_type = function() private$..sequences_type$value,
         sequences_scale = function() private$..sequences_scale$value,
         sequences_geom = function() private$..sequences_geom$value,
@@ -752,6 +888,20 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         compare_sequences_sub_max = function() private$..compare_sequences_sub_max$value,
         compare_sequences_min_freq = function() private$..compare_sequences_min_freq$value,
         compare_sequences_correction = function() private$..compare_sequences_correction$value,
+        compare_show_summary = function() private$..compare_show_summary$value,
+        compare_show_network = function() private$..compare_show_network$value,
+        compare_show_plot = function() private$..compare_show_plot$value,
+        compare_group_i = function() private$..compare_group_i$value,
+        compare_group_j = function() private$..compare_group_j$value,
+        compare_scaling = function() private$..compare_scaling$value,
+        compare_plot_type = function() private$..compare_plot_type$value,
+        compare_show_network_diff_plot = function() private$..compare_show_network_diff_plot$value,
+        compare_network_diff_plot_cut = function() private$..compare_network_diff_plot_cut$value,
+        compare_network_diff_plot_min_value = function() private$..compare_network_diff_plot_min_value$value,
+        compare_network_diff_plot_edge_label_size = function() private$..compare_network_diff_plot_edge_label_size$value,
+        compare_network_diff_plot_node_size = function() private$..compare_network_diff_plot_node_size$value,
+        compare_network_diff_plot_node_label_size = function() private$..compare_network_diff_plot_node_label_size$value,
+        compare_network_diff_plot_layout = function() private$..compare_network_diff_plot_layout$value,
         indices_show_table = function() private$..indices_show_table$value,
         indices_favorable = function() private$..indices_favorable$value,
         indices_omega = function() private$..indices_omega$value,
@@ -795,6 +945,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..community_methods = NA,
         ..community_gamma = NA,
         ..community_show_plot = NA,
+        ..community_show_table = NA,
         ..cliques_size = NA,
         ..cliques_threshold = NA,
         ..cliques_show_text = NA,
@@ -827,6 +978,8 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..permutation_iter = NA,
         ..permutation_paired = NA,
         ..permutation_level = NA,
+        ..permutation_table_max_rows = NA,
+        ..permutation_table_show_all = NA,
         ..sequences_type = NA,
         ..sequences_scale = NA,
         ..sequences_geom = NA,
@@ -839,6 +992,20 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..compare_sequences_sub_max = NA,
         ..compare_sequences_min_freq = NA,
         ..compare_sequences_correction = NA,
+        ..compare_show_summary = NA,
+        ..compare_show_network = NA,
+        ..compare_show_plot = NA,
+        ..compare_group_i = NA,
+        ..compare_group_j = NA,
+        ..compare_scaling = NA,
+        ..compare_plot_type = NA,
+        ..compare_show_network_diff_plot = NA,
+        ..compare_network_diff_plot_cut = NA,
+        ..compare_network_diff_plot_min_value = NA,
+        ..compare_network_diff_plot_edge_label_size = NA,
+        ..compare_network_diff_plot_node_size = NA,
+        ..compare_network_diff_plot_node_label_size = NA,
+        ..compare_network_diff_plot_layout = NA,
         ..indices_show_table = NA,
         ..indices_favorable = NA,
         ..indices_omega = NA,
@@ -867,6 +1034,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         communityErrorText = function() private$.items[["communityErrorText"]],
         communityContent = function() private$.items[["communityContent"]],
         community_plot = function() private$.items[["community_plot"]],
+        communityTable = function() private$.items[["communityTable"]],
         cliquesTitle = function() private$.items[["cliquesTitle"]],
         cliquesContent = function() private$.items[["cliquesContent"]],
         cliques_multiple_plot = function() private$.items[["cliques_multiple_plot"]],
@@ -876,10 +1044,16 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         permutationTitle = function() private$.items[["permutationTitle"]],
         permutationContent = function() private$.items[["permutationContent"]],
         permutation_plot = function() private$.items[["permutation_plot"]],
-        sequences_plot = function() private$.items[["sequences_plot"]],
+        compare_network_diff_plot = function() private$.items[["compare_network_diff_plot"]],
+        compareInstructions = function() private$.items[["compareInstructions"]],
+        compareTitle = function() private$.items[["compareTitle"]],
+        compare_plot = function() private$.items[["compare_plot"]],
+        compareSummaryTable = function() private$.items[["compareSummaryTable"]],
+        compareNetworkTable = function() private$.items[["compareNetworkTable"]],
         compareSequencesTitle = function() private$.items[["compareSequencesTitle"]],
         compareSequences_plot = function() private$.items[["compareSequences_plot"]],
         compareSequencesTable = function() private$.items[["compareSequencesTable"]],
+        sequences_plot = function() private$.items[["sequences_plot"]],
         indicesTitle = function() private$.items[["indicesTitle"]],
         indicesTable = function() private$.items[["indicesTable"]]),
     private = list(),
@@ -925,7 +1099,8 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_long_group",
                     "buildModel_type",
                     "buildModel_scaling",
-                    "buildModel_threshold")))
+                    "buildModel_threshold",
+                    "buildModel_lambda")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="buildModel_plot",
@@ -942,6 +1117,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "buildModel_plot_cut",
                     "buildModel_plot_min_value",
                     "buildModel_plot_edge_label_size",
@@ -963,7 +1139,8 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_long_group",
                     "buildModel_type",
                     "buildModel_scaling",
-                    "buildModel_threshold")))
+                    "buildModel_threshold",
+                    "buildModel_lambda")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="buildModel_frequencies",
@@ -979,7 +1156,8 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_long_group",
                     "buildModel_type",
                     "buildModel_scaling",
-                    "buildModel_threshold")))
+                    "buildModel_threshold",
+                    "buildModel_lambda")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="buildModel_mosaic",
@@ -996,6 +1174,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "buildModel_digits")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -1015,6 +1194,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "centrality_loops",
                     "centrality_normalize",
                     "centrality_Betweenness",
@@ -1044,6 +1224,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "centrality_loops",
                     "centrality_normalize",
                     "centrality_Betweenness",
@@ -1071,6 +1252,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "centrality_loops",
                     "centrality_normalize",
                     "centrality_Betweenness",
@@ -1105,6 +1287,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "community_methods",
                     "community_gamma")))
             self$add(jmvcore::Image$new(
@@ -1123,6 +1306,33 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
+                    "community_methods",
+                    "community_gamma")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="communityTable",
+                title="Community Assignments",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Group", 
+                        `type`="text"),
+                    list(
+                        `name`="state", 
+                        `title`="State", 
+                        `type`="text")),
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_variables_long_group",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "buildModel_lambda",
                     "community_methods",
                     "community_gamma")))
             self$add(jmvcore::Preformatted$new(
@@ -1143,6 +1353,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "cliques_size",
                     "cliques_threshold")))
             self$add(R6::R6Class(
@@ -1170,6 +1381,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "cliques_size",
                     "cliques_threshold",
                     "cliques_plot_cut",
@@ -1280,6 +1492,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "bootstrap_iteration",
                     "bootstrap_level",
                     "bootstrap_method",
@@ -1302,6 +1515,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "bootstrap_iteration",
                     "bootstrap_level",
                     "bootstrap_method",
@@ -1350,6 +1564,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "permutation_iter",
                     "permutation_paired",
                     "permutation_level")))
@@ -1369,17 +1584,18 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "permutation_iter",
                     "permutation_paired",
                     "permutation_level")))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="sequences_plot",
-                title="Sequence Analysis Plot",
+                name="compare_network_diff_plot",
+                title="Network Difference Plot",
                 width=1000,
                 height=800,
                 visible=FALSE,
-                renderFun=".showSequencesPlot",
+                renderFun=".showCompareNetworkDiffPlot",
                 clearWith=list(
                     "buildModel_variables_long_actor",
                     "buildModel_variables_long_time",
@@ -1389,11 +1605,102 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
-                    "sequences_type",
-                    "sequences_scale",
-                    "sequences_geom",
-                    "sequences_include_na",
-                    "sequences_tick")))
+                    "buildModel_lambda",
+                    "compare_network_diff_plot_cut",
+                    "compare_network_diff_plot_min_value",
+                    "compare_network_diff_plot_edge_label_size",
+                    "compare_network_diff_plot_node_size",
+                    "compare_network_diff_plot_node_label_size",
+                    "compare_network_diff_plot_layout")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="compareInstructions",
+                visible=FALSE))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="compareTitle",
+                title="Compare Network Properties",
+                visible=FALSE))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="compare_plot",
+                title="Group Comparison Plot",
+                width=700,
+                height=500,
+                visible=FALSE,
+                renderFun=".showComparePlot",
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_variables_long_group",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "buildModel_lambda",
+                    "compare_group_i",
+                    "compare_group_j",
+                    "compare_scaling",
+                    "compare_plot_type")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="compareSummaryTable",
+                title="Summary Metrics",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_variables_long_group",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "buildModel_lambda",
+                    "compare_group_i",
+                    "compare_group_j",
+                    "compare_scaling")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="compareNetworkTable",
+                title="Network Properties",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="group_i", 
+                        `title`="Group 1", 
+                        `type`="number"),
+                    list(
+                        `name`="group_j", 
+                        `title`="Group 2", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_variables_long_group",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "buildModel_lambda",
+                    "compare_group_i",
+                    "compare_group_j",
+                    "compare_scaling")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="compareSequencesTitle",
@@ -1413,6 +1720,10 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_long_action",
                     "buildModel_variables_long_order",
                     "buildModel_variables_long_group",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "buildModel_lambda",
                     "compare_sequences_sub_min",
                     "compare_sequences_sub_max",
                     "compare_sequences_min_freq",
@@ -1437,10 +1748,37 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_long_action",
                     "buildModel_variables_long_order",
                     "buildModel_variables_long_group",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "buildModel_lambda",
                     "compare_sequences_sub_min",
                     "compare_sequences_sub_max",
                     "compare_sequences_min_freq",
                     "compare_sequences_correction")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="sequences_plot",
+                title="Sequence Analysis Plot",
+                width=1000,
+                height=800,
+                visible=FALSE,
+                renderFun=".showSequencesPlot",
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_variables_long_group",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "buildModel_lambda",
+                    "sequences_type",
+                    "sequences_scale",
+                    "sequences_geom",
+                    "sequences_include_na",
+                    "sequences_tick")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="indicesTitle",
@@ -1514,6 +1852,10 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_long_action",
                     "buildModel_variables_long_order",
                     "buildModel_variables_long_group",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "buildModel_lambda",
                     "indices_favorable",
                     "indices_omega")))}))
 
@@ -1525,7 +1867,7 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "JTNA",
                 name = "GroupTNA",
-                version = c(1,10,0),
+                version = c(1,12,0),
                 options = options,
                 results = GroupTNAResults$new(options=options),
                 data = data,
@@ -1586,6 +1928,7 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param community_methods .
 #' @param community_gamma .
 #' @param community_show_plot .
+#' @param community_show_table .
 #' @param cliques_size .
 #' @param cliques_threshold .
 #' @param cliques_show_text .
@@ -1618,6 +1961,8 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param permutation_iter .
 #' @param permutation_paired .
 #' @param permutation_level .
+#' @param permutation_table_max_rows .
+#' @param permutation_table_show_all .
 #' @param sequences_type .
 #' @param sequences_scale .
 #' @param sequences_geom .
@@ -1630,6 +1975,20 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param compare_sequences_sub_max .
 #' @param compare_sequences_min_freq .
 #' @param compare_sequences_correction .
+#' @param compare_show_summary .
+#' @param compare_show_network .
+#' @param compare_show_plot .
+#' @param compare_group_i First group to compare
+#' @param compare_group_j Second group to compare
+#' @param compare_scaling .
+#' @param compare_plot_type .
+#' @param compare_show_network_diff_plot .
+#' @param compare_network_diff_plot_cut .
+#' @param compare_network_diff_plot_min_value .
+#' @param compare_network_diff_plot_edge_label_size .
+#' @param compare_network_diff_plot_node_size .
+#' @param compare_network_diff_plot_node_label_size .
+#' @param compare_network_diff_plot_layout .
 #' @param indices_show_table .
 #' @param indices_favorable State considered favorable for computing
 #'   integrative potential.
@@ -1655,6 +2014,7 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$communityErrorText} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$communityContent} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$community_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$communityTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cliquesTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$cliquesContent} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$cliques_multiple_plot$cliques_plot1} \tab \tab \tab \tab \tab an image \cr
@@ -1669,10 +2029,16 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$permutationTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$permutationContent} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$permutation_plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$sequences_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$compare_network_diff_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$compareInstructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$compareTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$compare_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$compareSummaryTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$compareNetworkTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$compareSequencesTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$compareSequences_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$compareSequencesTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$sequences_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$indicesTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$indicesTable} \tab \tab \tab \tab \tab a table \cr
 #' }
@@ -1697,7 +2063,7 @@ GroupTNA <- function(
     buildModel_show_matrix = FALSE,
     buildModel_threshold = 900,
     buildModel_show_plot = TRUE,
-    buildModel_plot_cut = 0,
+    buildModel_plot_cut = 0.1,
     buildModel_plot_min_value = 0.05,
     buildModel_plot_edge_label_size = 1,
     buildModel_plot_node_size = 1,
@@ -1723,11 +2089,12 @@ GroupTNA <- function(
     community_methods = "spinglass",
     community_gamma = 1,
     community_show_plot = FALSE,
+    community_show_table = FALSE,
     cliques_size = 2,
     cliques_threshold = 0,
     cliques_show_text = FALSE,
     cliques_show_plot = FALSE,
-    cliques_plot_cut = 0,
+    cliques_plot_cut = 0.1,
     cliques_plot_min_value = 0,
     cliques_plot_edge_label_size = 1,
     cliques_plot_node_size = 1,
@@ -1744,7 +2111,7 @@ GroupTNA <- function(
     bootstrap_table_show_all = FALSE,
     bootstrap_table_significant_only = FALSE,
     bootstrap_show_plot = FALSE,
-    bootstrap_plot_cut = 0,
+    bootstrap_plot_cut = 0.1,
     bootstrap_plot_min_value = 0.05,
     bootstrap_plot_edge_label_size = 1,
     bootstrap_plot_node_size = 1,
@@ -1755,6 +2122,8 @@ GroupTNA <- function(
     permutation_iter = 1000,
     permutation_paired = FALSE,
     permutation_level = 0.05,
+    permutation_table_max_rows = 20,
+    permutation_table_show_all = FALSE,
     sequences_type = "index",
     sequences_scale = "proportion",
     sequences_geom = "bar",
@@ -1767,6 +2136,20 @@ GroupTNA <- function(
     compare_sequences_sub_max = 4,
     compare_sequences_min_freq = 20,
     compare_sequences_correction = "bonferroni",
+    compare_show_summary = FALSE,
+    compare_show_network = FALSE,
+    compare_show_plot = FALSE,
+    compare_group_i,
+    compare_group_j,
+    compare_scaling = "none",
+    compare_plot_type = "heatmap",
+    compare_show_network_diff_plot = FALSE,
+    compare_network_diff_plot_cut = 0.1,
+    compare_network_diff_plot_min_value = 0.05,
+    compare_network_diff_plot_edge_label_size = 1,
+    compare_network_diff_plot_node_size = 1,
+    compare_network_diff_plot_node_label_size = 1,
+    compare_network_diff_plot_layout = "circle",
     indices_show_table = FALSE,
     indices_favorable,
     indices_omega = 1,
@@ -1829,6 +2212,7 @@ GroupTNA <- function(
         community_methods = community_methods,
         community_gamma = community_gamma,
         community_show_plot = community_show_plot,
+        community_show_table = community_show_table,
         cliques_size = cliques_size,
         cliques_threshold = cliques_threshold,
         cliques_show_text = cliques_show_text,
@@ -1861,6 +2245,8 @@ GroupTNA <- function(
         permutation_iter = permutation_iter,
         permutation_paired = permutation_paired,
         permutation_level = permutation_level,
+        permutation_table_max_rows = permutation_table_max_rows,
+        permutation_table_show_all = permutation_table_show_all,
         sequences_type = sequences_type,
         sequences_scale = sequences_scale,
         sequences_geom = sequences_geom,
@@ -1873,6 +2259,20 @@ GroupTNA <- function(
         compare_sequences_sub_max = compare_sequences_sub_max,
         compare_sequences_min_freq = compare_sequences_min_freq,
         compare_sequences_correction = compare_sequences_correction,
+        compare_show_summary = compare_show_summary,
+        compare_show_network = compare_show_network,
+        compare_show_plot = compare_show_plot,
+        compare_group_i = compare_group_i,
+        compare_group_j = compare_group_j,
+        compare_scaling = compare_scaling,
+        compare_plot_type = compare_plot_type,
+        compare_show_network_diff_plot = compare_show_network_diff_plot,
+        compare_network_diff_plot_cut = compare_network_diff_plot_cut,
+        compare_network_diff_plot_min_value = compare_network_diff_plot_min_value,
+        compare_network_diff_plot_edge_label_size = compare_network_diff_plot_edge_label_size,
+        compare_network_diff_plot_node_size = compare_network_diff_plot_node_size,
+        compare_network_diff_plot_node_label_size = compare_network_diff_plot_node_label_size,
+        compare_network_diff_plot_layout = compare_network_diff_plot_layout,
         indices_show_table = indices_show_table,
         indices_favorable = indices_favorable,
         indices_omega = indices_omega,

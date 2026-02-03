@@ -2,7 +2,7 @@
 name:  OneHotTNA
 title: One-Hot Co-occurrence Network Analysis
 menuGroup: JTNA
-version: '1.10.0'
+version: '1.12.0'
 jas: '1.2'
 
 options:
@@ -531,5 +531,194 @@ options:
       default: 0.05
       min: 0
       max: 1
+
+    - name: permutation_table_max_rows
+      title: Max rows
+      type: Integer
+      default: 20
+      min: 1
+      max: 1000
+
+    - name: permutation_table_show_all
+      title: Show all rows
+      type: Bool
+      default: False
+
+    ### PATTERN DISCOVERY
+    - name: pattern_show_table
+      title: Show patterns table
+      type: Bool
+      default: False
+
+    - name: pattern_type
+      title: Pattern Type
+      type: List
+      default: ngram
+      options:
+        - name: ngram
+          title: N-gram
+        - name: gapped
+          title: Gapped
+        - name: repeated
+          title: Repeated
+
+    - name: pattern_len_min
+      title: Minimum length
+      type: Integer
+      default: 2
+      min: 2
+      max: 10
+
+    - name: pattern_len_max
+      title: Maximum length
+      type: Integer
+      default: 3
+      min: 2
+      max: 20
+
+    - name: pattern_gap_min
+      title: Minimum gap
+      type: Integer
+      default: 1
+      min: 1
+      max: 10
+
+    - name: pattern_gap_max
+      title: Maximum gap
+      type: Integer
+      default: 2
+      min: 1
+      max: 20
+
+    - name: pattern_min_support
+      title: Minimum support
+      type: Number
+      default: 0.01
+      min: 0
+      max: 1
+
+    - name: pattern_min_count
+      title: Minimum count
+      type: Integer
+      default: 5
+      min: 1
+      max: 1000
+
+    - name: pattern_table_max_rows
+      title: Max rows
+      type: Integer
+      default: 50
+      min: 1
+      max: 1000
+
+    - name: pattern_table_show_all
+      title: Show all rows
+      type: Bool
+      default: False
+
+    ### COMPARE GROUPS
+
+    - name: compare_show_summary
+      title: Summary Metrics Table
+      type: Bool
+      default: False
+
+    - name: compare_show_network
+      title: Network Properties Table
+      type: Bool
+      default: False
+
+    - name: compare_show_plot
+      title: Comparison Plot
+      type: Bool
+      default: False
+
+    - name: compare_group_i
+      title: First Network
+      type: Level
+      variable: (buildModel_variables_group)
+
+    - name: compare_group_j
+      title: Second Network
+      type: Level
+      variable: (buildModel_variables_group)
+
+    - name: compare_scaling
+      title: Scaling
+      type: List
+      default: none
+      options:
+        - title: None
+          name: none
+        - title: MinMax
+          name: minmax
+        - title: Max
+          name: max
+        - title: Rank
+          name: rank
+
+    - name: compare_plot_type
+      title: Plot Type
+      type: List
+      default: heatmap
+      options:
+        - title: Heatmap
+          name: heatmap
+        - title: Scatterplot
+          name: scatterplot
+        - title: Weight Density
+          name: weight_density
+
+    - name: compare_show_network_diff_plot
+      title: Network Difference Plot
+      type: Bool
+      default: False
+
+    - name: compare_network_diff_plot_cut
+      title: Cut value
+      type: Number
+      default: 0.1
+      min: 0
+      max: 1
+
+    - name: compare_network_diff_plot_min_value
+      title: Minimum value
+      type: Number
+      default: 0.05
+      min: 0
+      max: 1
+
+    - name: compare_network_diff_plot_edge_label_size
+      title: Edge label size
+      type: Number
+      default: 1
+      min: 0
+      max: 10
+
+    - name: compare_network_diff_plot_node_size
+      title: Node size
+      type: Number
+      default: 1
+      min: 0
+      max: 2
+
+    - name: compare_network_diff_plot_node_label_size
+      title: Node label size
+      type: Number
+      default: 1
+      min: 0
+      max: 10
+
+    - name: compare_network_diff_plot_layout
+      title: Layout
+      type: List
+      default: circle
+      options:
+        - title: Circle
+          name: circle
+        - title: Spring
+          name: spring
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
 
 ...

@@ -215,7 +215,7 @@ SNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 if(length(measures) > 0) {
                     # Get centralities dataframe
-                    cent <- centralities(x=model, loops=self$options$centrality_loops,
+                    cent <- tna::centralities(x=model, loops=self$options$centrality_loops,
                                         normalize=self$options$centrality_normalize, measures=measures)
 
                     # Add columns
@@ -251,7 +251,7 @@ SNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 if(length(methods) > 0) {
                     # Get communities
-                    comm <- communities(x=model, methods=methods)
+                    comm <- tna::communities(x=model, methods=methods)
 
                     # Add columns for each method
                     for(m in methods) {
@@ -280,7 +280,7 @@ SNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if(!is.null(model) && self$options$edge_betweenness_show_table) {
 
                 # Get edge betweenness network
-                ebNetwork <- betweenness_network(x=model, directed=self$options$edge_betweenness_directed)
+                ebNetwork <- tna::betweenness_network(x=model, directed=self$options$edge_betweenness_directed)
 
                 # Get the weights matrix (which now contains betweenness values)
                 ebMatrix <- ebNetwork$weights

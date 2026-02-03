@@ -72,6 +72,10 @@ children:
                 name: buildModel_scaling_rank
                 optionName: buildModel_scaling
                 optionPart: rank
+  - type: Label
+    label: ━━ 𝗡𝗲𝘁𝘄𝗼𝗿𝗸 𝗔𝗻𝗮𝗹𝘆𝘀𝗶𝘀 ━━
+    style: list-inline
+    margin: large
   - type: CollapseBox
     label: Visualization Settings
     margin: large
@@ -310,6 +314,10 @@ children:
               - type: ComboBox
                 name: cliques_plot_layout
                 enable: (cliques_show_plot)
+  - type: Label
+    label: ━━ 𝗖𝗼𝗻𝗳𝗶𝗿𝗺𝗮𝘁𝗼𝗿𝘆 𝗧𝗲𝘀𝘁𝗶𝗻𝗴 ━━
+    style: list-inline
+    margin: large
   - type: CollapseBox
     label: Bootstrap Analysis
     margin: large
@@ -427,12 +435,29 @@ children:
               - type: CheckBox
                 name: permutation_paired
                 label: Paired test
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Table Options
+            children:
+              - type: TextBox
+                name: permutation_table_max_rows
+                format: number
+                enable: (permutation_show_table)
+              - type: CheckBox
+                name: permutation_table_show_all
+                enable: (permutation_show_table)
   - type: LayoutBox
     margin: large
     children:
       - type: TextBox
         name: bootstrap_table_max_rows
         format: number
+  - type: Label
+    label: ━━ 𝗦𝗲𝗾𝘂𝗲𝗻𝗰𝗲 𝗔𝗻𝗮𝗹𝘆𝘀𝗶𝘀 ━━
+    style: list-inline
+    margin: large
   - type: LayoutBox
     margin: large
     children:
@@ -440,3 +465,155 @@ children:
         name: bootstrap_table_show_all
       - type: CheckBox
         name: bootstrap_table_significant_only
+  - type: CollapseBox
+    label: Pattern Discovery
+    margin: large
+    stretchFactor: 1
+    style: inline
+    collapsed: true
+    children:
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: pattern_show_table
+                label: Show patterns table
+          - type: Label
+            label: Pattern Type
+            children:
+              - type: RadioButton
+                name: pattern_type_ngram
+                optionName: pattern_type
+                optionPart: ngram
+              - type: RadioButton
+                name: pattern_type_gapped
+                optionName: pattern_type
+                optionPart: gapped
+              - type: RadioButton
+                name: pattern_type_repeated
+                optionName: pattern_type
+                optionPart: repeated
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Length (N-gram/Repeated)
+            children:
+              - type: TextBox
+                name: pattern_len_min
+                format: number
+                enable: (pattern_type_ngram || pattern_type_repeated)
+              - type: TextBox
+                name: pattern_len_max
+                format: number
+                enable: (pattern_type_ngram || pattern_type_repeated)
+          - type: Label
+            label: Gap (Gapped)
+            children:
+              - type: TextBox
+                name: pattern_gap_min
+                format: number
+                enable: (pattern_type_gapped)
+              - type: TextBox
+                name: pattern_gap_max
+                format: number
+                enable: (pattern_type_gapped)
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Thresholds
+            children:
+              - type: TextBox
+                name: pattern_min_support
+                format: number
+              - type: TextBox
+                name: pattern_min_count
+                format: number
+          - type: Label
+            label: Table Options
+            children:
+              - type: TextBox
+                name: pattern_table_max_rows
+                format: number
+              - type: CheckBox
+                name: pattern_table_show_all
+  - type: Label
+    label: ━━ 𝗖𝗼𝗺𝗽𝗮𝗿𝗶𝘀𝗼𝗻𝘀 ━━
+    style: list-inline
+    margin: large
+  - type: CollapseBox
+    label: Network Difference Plot
+    collapsed: true
+    stretchFactor: 1
+    style: inline
+    children:
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: compare_show_network_diff_plot
+                label: Show Plot
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Plot Parameters
+            children:
+              - type: TextBox
+                name: compare_network_diff_plot_cut
+                format: number
+                enable: (compare_show_network_diff_plot)
+              - type: TextBox
+                name: compare_network_diff_plot_min_value
+                format: number
+                enable: (compare_show_network_diff_plot)
+              - type: TextBox
+                name: compare_network_diff_plot_edge_label_size
+                format: number
+                enable: (compare_show_network_diff_plot)
+              - type: TextBox
+                name: compare_network_diff_plot_node_size
+                format: number
+                enable: (compare_show_network_diff_plot)
+              - type: TextBox
+                name: compare_network_diff_plot_node_label_size
+                format: number
+                enable: (compare_show_network_diff_plot)
+              - type: ComboBox
+                name: compare_network_diff_plot_layout
+                enable: (compare_show_network_diff_plot)
+  - type: CollapseBox
+    label: Compare Network Properties
+    collapsed: true
+    children:
+      - type: LevelSelector
+        name: compare_group_i
+        variable: (buildModel_variables_group)
+        label: First Network
+      - type: LevelSelector
+        name: compare_group_j
+        variable: (buildModel_variables_group)
+        label: Second Network
+      - type: CheckBox
+        name: compare_show_summary
+        label: Summary Metrics Table
+      - type: CheckBox
+        name: compare_show_network
+        label: Network Properties Table
+      - type: CheckBox
+        name: compare_show_plot
+        label: Comparison Plot
+      - type: ComboBox
+        name: compare_plot_type
+        label: Plot Type
+        enable: (compare_show_plot)
+      - type: ComboBox
+        name: compare_scaling
+        label: Scaling Method

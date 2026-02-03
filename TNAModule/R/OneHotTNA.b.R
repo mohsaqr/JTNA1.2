@@ -38,6 +38,13 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       group_col <- self$options$buildModel_variables_group
       window_size <- self$options$buildModel_window
 
+      # Validate window_size to prevent division by zero
+      if (is.null(window_size) || window_size < 1) {
+        self$results$errorText$setContent("Window size must be at least 1")
+        self$results$errorText$setVisible(TRUE)
+        return()
+      }
+
       model <- NULL
       is_group_model <- !is.null(group_col)
 
@@ -331,6 +338,8 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Populate table if we have data
         if (!is.null(permutationTest) && isTRUE(self$options$permutation_show_table)) {
           row_key_counter <- 1
+          max_rows <- self$options$permutation_table_max_rows
+          show_all <- isTRUE(self$options$permutation_table_show_all)
           for (comparison_name in names(permutationTest)) {
             comparison_data <- permutationTest[[comparison_name]]
             if (!is.null(comparison_data$edges) && !is.null(comparison_data$edges$stats)) {
@@ -341,6 +350,8 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               filtered_sorted_stats <- stats_df[order(stats_df$p_value, -stats_df$diff_true), ]
 
               for (i in 1:nrow(filtered_sorted_stats)) {
+                # Check row limit unless show_all is enabled
+                if (!show_all && row_key_counter > max_rows) break
                 edge_name_value <- filtered_sorted_stats[i, "edge_name"]
                 if (is.null(edge_name_value) || is.na(edge_name_value) || edge_name_value == "") {
                   edge_name_value <- rownames(filtered_sorted_stats)[i]
@@ -361,6 +372,8 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$results$permutationTable$addRow(rowKey = as.character(row_key_counter), values = rowValues)
                 row_key_counter <- row_key_counter + 1
               }
+              # Break outer loop if row limit reached
+              if (!show_all && row_key_counter > max_rows) break
             }
           }
         }
@@ -368,6 +381,251 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         self$results$permutation_plot$setVisible(self$options$permutation_show_plot)
         self$results$permutationTable$setVisible(self$options$permutation_show_table)
         self$results$permutationTitle$setVisible(isTRUE(self$options$permutation_show_table) || isTRUE(self$options$permutation_show_plot))
+      }
+
+      ### Pattern Discovery
+      if (isTRUE(self$options$pattern_show_table)) {
+        self$results$patternTitle$setVisible(TRUE)
+
+        tryCatch({
+          # Get the sequence data from the model building process
+          # We need to rebuild seq_data if not available
+          df <- as.data.frame(self$data)
+          onehot_cols <- self$options$buildModel_variables_onehot
+          actor_col <- self$options$buildModel_variables_actor
+          session_col <- self$options$buildModel_variables_session
+          window_size <- self$options$buildModel_window
+
+          # Create sequence data: replace 1 with column name, 0 with NA
+          seq_data <- as.data.frame(lapply(onehot_cols, function(col) {
+            ifelse(df[[col]] == 1, col, NA)
+          }))
+          colnames(seq_data) <- paste0("Action_T", seq_along(onehot_cols))
+
+          # Aggregate by actor + session/window if provided
+          if (!is.null(actor_col) || !is.null(session_col)) {
+            if (!is.null(actor_col) && !is.null(session_col)) {
+              session_numeric <- as.numeric(factor(df[[session_col]]))
+              window_id <- floor((session_numeric - 1) / window_size)
+              group_id <- paste(df[[actor_col]], window_id, sep = "_")
+            } else if (!is.null(actor_col)) {
+              row_window <- floor((seq_len(nrow(df)) - 1) / window_size)
+              group_id <- paste(df[[actor_col]], row_window, sep = "_")
+            } else {
+              session_numeric <- as.numeric(factor(df[[session_col]]))
+              group_id <- floor((session_numeric - 1) / window_size)
+            }
+
+            seq_data$..group_id.. <- group_id
+            seq_data <- aggregate(
+              seq_data[paste0("Action_T", seq_along(onehot_cols))],
+              by = list(..group_id.. = seq_data$..group_id..),
+              FUN = function(x) {
+                non_na <- na.omit(x)
+                if (length(non_na) > 0) non_na[1] else NA
+              }
+            )
+            seq_data$..group_id.. <- NULL
+          }
+
+          # Discover patterns using codyna
+          pattern_type <- self$options$pattern_type
+
+          # Calculate max possible length/gap based on sequence width
+          max_cols <- ncol(seq_data)
+
+          # Adjust ranges to fit data
+          len_min <- min(self$options$pattern_len_min, max_cols - 1)
+          len_max <- min(self$options$pattern_len_max, max_cols - 1)
+          gap_min <- min(self$options$pattern_gap_min, max_cols - 2)
+          gap_max <- min(self$options$pattern_gap_max, max_cols - 2)
+
+          # Ensure valid ranges
+          if (len_min < 2) len_min <- 2
+          if (len_max < len_min) len_max <- len_min
+          if (gap_min < 1) gap_min <- 1
+          if (gap_max < gap_min) gap_max <- gap_min
+
+          len_range <- len_min:len_max
+          gap_range <- gap_min:gap_max
+
+          # All pattern types need both len and gap
+          patterns <- codyna::discover_patterns(
+            data = seq_data,
+            type = pattern_type,
+            len = len_range,
+            gap = gap_range,
+            min_support = self$options$pattern_min_support,
+            min_count = self$options$pattern_min_count
+          )
+
+          # Populate table with row limit
+          if (!is.null(patterns) && nrow(patterns) > 0) {
+            total_patterns <- nrow(patterns)
+
+            # Apply row limit unless show_all is checked
+            if (!isTRUE(self$options$pattern_table_show_all)) {
+              max_rows <- self$options$pattern_table_max_rows
+              if (nrow(patterns) > max_rows) {
+                patterns <- patterns[1:max_rows, ]
+              }
+            }
+
+            for (i in 1:nrow(patterns)) {
+              self$results$patternTable$addRow(rowKey = i, values = list(
+                pattern = as.character(patterns$pattern[i]),
+                length = as.integer(patterns$length[i]),
+                count = as.integer(patterns$count[i]),
+                proportion = as.numeric(patterns$proportion[i]),
+                support = as.numeric(patterns$support[i])
+              ))
+            }
+
+            # Update title with count info
+            if (total_patterns > nrow(patterns)) {
+              self$results$patternTitle$setContent(
+                paste0("Pattern Discovery (showing ", nrow(patterns), " of ", total_patterns, " patterns)")
+              )
+            } else {
+              self$results$patternTitle$setContent(
+                paste0("Pattern Discovery (", total_patterns, " patterns found)")
+              )
+            }
+          } else {
+            self$results$patternTitle$setContent("Pattern Discovery (no patterns found)")
+          }
+
+          self$results$patternTable$setVisible(TRUE)
+
+        }, error = function(e) {
+          self$results$patternTitle$setContent(paste("Pattern Discovery Error:", e$message))
+        })
+      }
+
+      ### Compare Network Properties (only for group models)
+      showAnyCompare <- isTRUE(self$options$compare_show_summary) ||
+                        isTRUE(self$options$compare_show_network) ||
+                        isTRUE(self$options$compare_show_plot)
+
+      if (!is.null(model) && is_group_model && showAnyCompare) {
+        # Show instructions
+        self$results$compareInstructions$setContent(
+          '<div style="border: 2px solid #d4edda; border-radius: 10px; padding: 10px; background-color: #d4edda; margin: 10px 0;">
+          <b>Compare Network Properties</b>: Compares general network properties between two groups including correlations, distances, and structural metrics. Select two groups to compare from the dropdowns below.
+          </div>'
+        )
+        self$results$compareInstructions$setVisible(TRUE)
+        self$results$compareTitle$setVisible(TRUE)
+
+        tryCatch({
+          # Get available groups
+          available_groups <- names(model)
+
+          # Get selected groups or use defaults
+          group_i_name <- self$options$compare_group_i
+          group_j_name <- self$options$compare_group_j
+
+          if (is.null(group_i_name) || group_i_name == "") {
+            group_i_name <- available_groups[1]
+          }
+          if (is.null(group_j_name) || group_j_name == "") {
+            if (length(available_groups) >= 2) {
+              group_j_name <- available_groups[2]
+            } else {
+              group_j_name <- available_groups[1]
+            }
+          }
+
+          # Call tna::compare
+          compResult <- tna::compare(
+            x = model,
+            i = group_i_name,
+            j = group_j_name,
+            scaling = self$options$compare_scaling,
+            network = TRUE
+          )
+
+          # Store state for plot
+          self$results$compare_plot$setState(list(
+            result = compResult,
+            group_i = group_i_name,
+            group_j = group_j_name
+          ))
+
+          # Summary table
+          if (isTRUE(self$options$compare_show_summary)) {
+            self$results$compareSummaryTable$setTitle(paste("Summary Metrics:", group_i_name, "vs", group_j_name))
+
+            if (!is.null(compResult$correlation)) {
+              self$results$compareSummaryTable$addRow(rowKey = 1, values = list(
+                metric = "Pearson Correlation",
+                value = as.numeric(compResult$correlation)
+              ))
+            }
+            if (!is.null(compResult$cosine_similarity)) {
+              self$results$compareSummaryTable$addRow(rowKey = 2, values = list(
+                metric = "Cosine Similarity",
+                value = as.numeric(compResult$cosine_similarity)
+              ))
+            }
+            if (!is.null(compResult$euclidean_distance)) {
+              self$results$compareSummaryTable$addRow(rowKey = 3, values = list(
+                metric = "Euclidean Distance",
+                value = as.numeric(compResult$euclidean_distance)
+              ))
+            }
+            if (!is.null(compResult$manhattan_distance)) {
+              self$results$compareSummaryTable$addRow(rowKey = 4, values = list(
+                metric = "Manhattan Distance",
+                value = as.numeric(compResult$manhattan_distance)
+              ))
+            }
+            if (!is.null(compResult$frobenius_norm)) {
+              self$results$compareSummaryTable$addRow(rowKey = 5, values = list(
+                metric = "Frobenius Norm",
+                value = as.numeric(compResult$frobenius_norm)
+              ))
+            }
+            if (!is.null(compResult$jaccard_index)) {
+              self$results$compareSummaryTable$addRow(rowKey = 6, values = list(
+                metric = "Jaccard Index",
+                value = as.numeric(compResult$jaccard_index)
+              ))
+            }
+            self$results$compareSummaryTable$setVisible(TRUE)
+          }
+
+          # Network properties table
+          if (isTRUE(self$options$compare_show_network) && !is.null(compResult$network)) {
+            self$results$compareNetworkTable$setTitle(paste("Network Properties:", group_i_name, "vs", group_j_name))
+
+            network_df <- compResult$network
+            row_count <- 1
+            for (metric_name in rownames(network_df)) {
+              self$results$compareNetworkTable$addRow(rowKey = row_count, values = list(
+                metric = metric_name,
+                group_i = as.numeric(network_df[metric_name, 1]),
+                group_j = as.numeric(network_df[metric_name, 2])
+              ))
+              row_count <- row_count + 1
+            }
+            self$results$compareNetworkTable$setVisible(TRUE)
+          }
+
+          # Show plot
+          self$results$compare_plot$setVisible(isTRUE(self$options$compare_show_plot))
+
+        }, error = function(e) {
+          self$results$compareInstructions$setContent(
+            paste('<div style="border: 2px solid #f8d7da; border-radius: 10px; padding: 10px; background-color: #f8d7da; margin: 10px 0;">',
+                  '<b>Error:</b>', e$message, '</div>')
+          )
+        })
+      }
+
+      ### Network Difference Plot (independent section)
+      if (!is.null(model) && is_group_model && isTRUE(self$options$compare_show_network_diff_plot)) {
+        self$results$compare_network_diff_plot$setVisible(TRUE)
       }
     },
 
@@ -526,6 +784,84 @@ OneHotTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       }
 
       plot(x = plotData)
+      TRUE
+    },
+
+    .showComparePlot = function(image, ...) {
+      if (!isTRUE(self$options$compare_show_plot)) return(FALSE)
+
+      stateData <- self$results$compare_plot$state
+      if (is.null(stateData)) return(FALSE)
+
+      tryCatch({
+        plotData <- stateData$result
+        name_x <- stateData$group_i
+        name_y <- stateData$group_j
+
+        p <- plot(
+          x = plotData,
+          type = self$options$compare_plot_type,
+          name_x = name_x,
+          name_y = name_y
+        )
+        print(p)
+      }, error = function(e) {
+        plot(1, type = "n", axes = FALSE, xlab = "", ylab = "",
+             main = "Compare Plot Error", sub = e$message)
+      })
+      TRUE
+    },
+
+    .showCompareNetworkDiffPlot = function(image, ...) {
+      if (!isTRUE(self$options$compare_show_network_diff_plot)) return(FALSE)
+
+      model <- self$results$buildModelContent$state
+      if (is.null(model)) return(FALSE)
+
+      # Set up multi-panel layout for pairwise comparisons
+      n_groups <- length(model)
+      n_comparisons <- choose(n_groups, 2)
+
+      if (n_comparisons == 1) {
+        par(mfrow = c(1, 1))
+      } else if (n_comparisons <= 4) {
+        par(mfrow = c(2, 2))
+      } else if (n_comparisons <= 6) {
+        par(mfrow = c(2, 3))
+      } else if (n_comparisons <= 9) {
+        par(mfrow = c(3, 3))
+      } else {
+        rows <- ceiling(sqrt(n_comparisons))
+        cols <- ceiling(n_comparisons / rows)
+        par(mfrow = c(rows, cols))
+      }
+
+      tryCatch({
+        # Get group names for labels
+        group_names <- names(model)
+
+        # Loop through all pairwise comparisons
+        for (i in 1:(n_groups - 1)) {
+          for (j in (i + 1):n_groups) {
+            plot_title <- paste(group_names[i], "vs", group_names[j])
+            tna::plot_compare(
+              x = model,
+              i = i,
+              j = j,
+              cut = self$options$compare_network_diff_plot_cut,
+              minimum = self$options$compare_network_diff_plot_min_value,
+              edge.label.cex = self$options$compare_network_diff_plot_edge_label_size,
+              node.width = self$options$compare_network_diff_plot_node_size,
+              label.cex = self$options$compare_network_diff_plot_node_label_size,
+              layout = self$options$compare_network_diff_plot_layout,
+              title = plot_title
+            )
+          }
+        }
+      }, error = function(e) {
+        plot(1, type = "n", axes = FALSE, xlab = "", ylab = "",
+             main = "Network Difference Plot Error", sub = e$message)
+      })
       TRUE
     }
   )

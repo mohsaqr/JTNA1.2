@@ -61,8 +61,6 @@ items:
         - clustering_k
         - clustering_dissimilarity
         - clustering_method
-        - clustering_weighted
-        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -87,8 +85,6 @@ items:
         - clustering_k
         - clustering_dissimilarity
         - clustering_method
-        - clustering_weighted
-        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -107,8 +103,6 @@ items:
         - clustering_k
         - clustering_dissimilarity
         - clustering_method
-        - clustering_weighted
-        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -127,8 +121,6 @@ items:
         - clustering_k
         - clustering_dissimilarity
         - clustering_method
-        - clustering_weighted
-        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -152,8 +144,6 @@ items:
         - clustering_k
         - clustering_dissimilarity
         - clustering_method
-        - clustering_weighted
-        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -184,8 +174,6 @@ items:
         - clustering_k
         - clustering_dissimilarity
         - clustering_method
-        - clustering_weighted
-        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -215,8 +203,6 @@ items:
         - clustering_k
         - clustering_dissimilarity
         - clustering_method
-        - clustering_weighted
-        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -253,8 +239,6 @@ items:
         - clustering_k
         - clustering_dissimilarity
         - clustering_method
-        - clustering_weighted
-        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -275,8 +259,31 @@ items:
         - clustering_k
         - clustering_dissimilarity
         - clustering_method
-        - clustering_weighted
-        - clustering_lambda
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - community_methods
+        - community_gamma
+
+    - name: communityTable
+      type: Table
+      title: Community Assignments
+      visible: False
+      columns:
+        - name: cluster
+          title: Cluster
+          type: text
+        - name: state
+          title: State
+          type: text
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -301,8 +308,6 @@ items:
         - clustering_k
         - clustering_dissimilarity
         - clustering_method
-        - clustering_weighted
-        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -321,8 +326,6 @@ items:
         - clustering_k
         - clustering_dissimilarity
         - clustering_method
-        - clustering_weighted
-        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -422,8 +425,6 @@ items:
         - clustering_k
         - clustering_dissimilarity
         - clustering_method
-        - clustering_weighted
-        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -448,8 +449,6 @@ items:
         - clustering_k
         - clustering_dissimilarity
         - clustering_method
-        - clustering_weighted
-        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -498,8 +497,6 @@ items:
         - clustering_k
         - clustering_dissimilarity
         - clustering_method
-        - clustering_weighted
-        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -522,8 +519,6 @@ items:
         - clustering_k
         - clustering_dissimilarity
         - clustering_method
-        - clustering_weighted
-        - clustering_lambda
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
@@ -531,32 +526,122 @@ items:
         - permutation_paired
         - permutation_level
 
-    ### Sequence Analysis
+    ### COMPARISONS
 
-    - name: sequences_plot
+    # Network Difference Plot (first in Comparisons section)
+    - name: compare_network_diff_plot
       type: Image
-      title: Sequence Analysis Plot
+      title: Network Difference Plot
       width: 1000
       height: 800
       visible: False
-      renderFun: .showSequencesPlot
+      renderFun: .showCompareNetworkDiffPlot
       clearWith:
         - buildModel_variables_long_actor
         - buildModel_variables_long_time
         - buildModel_variables_long_action
         - buildModel_variables_long_order
         - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - buildModel_type
+        - buildModel_scaling
+        - compare_network_diff_plot_cut
+        - compare_network_diff_plot_min_value
+        - compare_network_diff_plot_edge_label_size
+        - compare_network_diff_plot_node_size
+        - compare_network_diff_plot_node_label_size
+        - compare_network_diff_plot_layout
+
+    # Compare Network Properties (second in Comparisons section)
+    - name: compareInstructions
+      type: Html
+      visible: False
+
+    - name: compareTitle
+      type: Preformatted
+      title: Compare Network Properties
+      visible: False
+
+    - name: compare_plot
+      type: Image
+      title: Cluster Comparison Plot
+      width: 700
+      height: 500
+      visible: False
+      renderFun: .showComparePlot
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-        - sequences_type
-        - sequences_scale
-        - sequences_geom
-        - sequences_include_na
-        - sequences_tick
+        - compare_cluster_i
+        - compare_cluster_j
+        - compare_scaling
+        - compare_plot_type
 
-    ### Compare Sequences
+    - name: compareSummaryTable
+      type: Table
+      title: Summary Metrics
+      visible: False
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - compare_cluster_i
+        - compare_cluster_j
+        - compare_scaling
 
+    - name: compareNetworkTable
+      type: Table
+      title: Network Properties
+      visible: False
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: cluster_i
+          title: Cluster 1
+          type: number
+        - name: cluster_j
+          title: Cluster 2
+          type: number
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - compare_cluster_i
+        - compare_cluster_j
+        - compare_scaling
+
+    # Compare Sequences (third in Comparisons section)
     - name: compareSequencesTitle
       type: Preformatted
       title: Compare Sequences
@@ -575,6 +660,11 @@ items:
         - buildModel_variables_long_action
         - buildModel_variables_long_order
         - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
         - compare_sequences_sub_min
         - compare_sequences_sub_max
         - compare_sequences_min_freq
@@ -597,10 +687,41 @@ items:
         - buildModel_variables_long_action
         - buildModel_variables_long_order
         - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
         - compare_sequences_sub_min
         - compare_sequences_sub_max
         - compare_sequences_min_freq
         - compare_sequences_correction
+
+    ### SEQUENCE ANALYSIS
+
+    - name: sequences_plot
+      type: Image
+      title: Sequence Analysis Plot
+      width: 1000
+      height: 800
+      visible: False
+      renderFun: .showSequencesPlot
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - sequences_type
+        - sequences_scale
+        - sequences_geom
+        - sequences_include_na
+        - sequences_tick
 
     ### SEQUENCE INDICES
 
@@ -662,6 +783,11 @@ items:
         - buildModel_variables_long_action
         - buildModel_variables_long_order
         - clustering_k
+        - clustering_dissimilarity
+        - clustering_method
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
         - indices_favorable
         - indices_omega
 

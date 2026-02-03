@@ -2,7 +2,7 @@
 name:  TNA
 title: Transition Network Analysis
 menuGroup: JTNA
-version: '1.10.0'
+version: '1.12.0'
 jas: '1.2'
 
 options:
@@ -677,7 +677,7 @@ options:
     - name: sequences_include_na
       title: Include missing values
       type: Bool
-      default: False
+      default: false
 
     - name: sequences_tick
       title: Tick

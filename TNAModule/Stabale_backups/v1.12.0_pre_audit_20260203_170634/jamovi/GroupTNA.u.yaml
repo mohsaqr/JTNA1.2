@@ -1,0 +1,701 @@
+title: Group Transition Network Analysis
+name: GroupTNA
+jus: '3.0'
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: buildModel_variables_long_action
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: buildModel_variables_long_actor
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: buildModel_variables_long_time
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: buildModel_variables_long_order
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: buildModel_variables_long_group
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    stretchFactor: 1
+    style: inline
+    children:
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Type
+            children:
+              - type: RadioButton
+                name: buildModel_type_relative
+                optionName: buildModel_type
+                optionPart: relative
+              - type: RadioButton
+                name: buildModel_type_frequency
+                optionName: buildModel_type
+                optionPart: frequency
+              - type: RadioButton
+                name: buildModel_type_attention
+                optionName: buildModel_type
+                optionPart: attention
+          - type: Label
+            label: Basic Options
+            children:
+              - type: CheckBox
+                name: buildModel_show_matrix
+                label: Matrix
+              - type: TextBox
+                name: buildModel_lambda
+                format: number
+                enable: (buildModel_type_attention)
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Scaling
+            children:
+              - type: RadioButton
+                name: buildModel_scaling_noScaling
+                optionName: buildModel_scaling
+                optionPart: noScaling
+              - type: RadioButton
+                name: buildModel_scaling_minmax
+                optionName: buildModel_scaling
+                optionPart: minmax
+              - type: RadioButton
+                name: buildModel_scaling_max
+                optionName: buildModel_scaling
+                optionPart: max
+              - type: RadioButton
+                name: buildModel_scaling_rank
+                optionName: buildModel_scaling
+                optionPart: rank
+          - type: Label
+            label: Parameters
+            children:
+              - type: TextBox
+                name: buildModel_threshold
+                format: number
+  # ── Network Analysis ──
+  - type: Label
+    label: "━━ 𝗡𝗲𝘁𝘄𝗼𝗿𝗸 𝗔𝗻𝗮𝗹𝘆𝘀𝗶𝘀 ━━"
+    style: list-inline
+    margin: large
+
+  - type: CollapseBox
+    label: Visualization Settings
+    margin: large
+    collapsed: true
+    stretchFactor: 1
+    style: inline
+    children:
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: buildModel_show_plot
+                label: TNA plot
+              - type: CheckBox
+                name: buildModel_show_histo
+                label: Histogram
+              - type: CheckBox
+                name: buildModel_show_frequencies
+                label: Frequencies plot
+              - type: CheckBox
+                name: buildModel_show_mosaic
+                label: Mosaic plot
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Plot Parameters
+            children:
+              - type: TextBox
+                name: buildModel_plot_cut
+                format: number
+                enable: (buildModel_show_plot)
+              - type: TextBox
+                name: buildModel_plot_min_value
+                format: number
+                enable: (buildModel_show_plot)
+              - type: TextBox
+                name: buildModel_plot_edge_label_size
+                format: number
+                enable: (buildModel_show_plot)
+              - type: TextBox
+                name: buildModel_plot_node_size
+                format: number
+                enable: (buildModel_show_plot)
+              - type: TextBox
+                name: buildModel_plot_node_label_size
+                format: number
+                enable: (buildModel_show_plot)
+              - type: ComboBox
+                name: buildModel_plot_layout
+                enable: (buildModel_show_plot)
+              - type: TextBox
+                name: buildModel_digits
+                format: number
+                enable: (buildModel_show_mosaic)
+  - type: CollapseBox
+    label: Centrality Analysis
+    margin: large
+    stretchFactor: 1
+    style: inline
+    collapsed: true
+    children:
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: centrality_show_table
+                label: Table
+              - type: CheckBox
+                name: centrality_show_plot
+                label: Plot
+          - type: Label
+            label: Measures
+            children:
+              - type: CheckBox
+                name: centrality_OutStrength
+                label: Out Strength
+              - type: CheckBox
+                name: centrality_InStrength
+                label: In Strength
+              - type: CheckBox
+                name: centrality_Closeness
+                label: Closeness
+              - type: CheckBox
+                name: centrality_ClosenessIn
+                label: Closeness In
+              - type: CheckBox
+                name: centrality_ClosenessOut
+                label: Closeness Out
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Parameters
+            children:
+              - type: CheckBox
+                name: centrality_loops
+                label: Include loops
+              - type: CheckBox
+                name: centrality_normalize
+                label: Normalize values
+          - type: Label
+            label: Advanced Measures
+            children:
+              - type: CheckBox
+                name: centrality_Betweenness
+                label: Betweenness
+              - type: CheckBox
+                name: centrality_BetweennessRSP
+                label: Betweenness RSP
+              - type: CheckBox
+                name: centrality_Clustering
+                label: Clustering
+              - type: CheckBox
+                name: centrality_Diffusion
+                label: Diffusion
+  - type: CollapseBox
+    label: Community Detection
+    margin: large
+    stretchFactor: 1
+    style: inline
+    collapsed: true
+    children:
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: community_show_plot
+                label: Plot
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Methods
+            children:
+              - type: RadioButton
+                name: community_methods_spinglass
+                optionName: community_methods
+                optionPart: spinglass
+              - name: community_methods_walktrap
+                type: RadioButton
+                optionName: community_methods
+                optionPart: walktrap
+              - name: community_methods_fast_greedy
+                type: RadioButton
+                optionName: community_methods
+                optionPart: fast_greedy
+              - name: community_methods_label_prop
+                type: RadioButton
+                optionName: community_methods
+                optionPart: label_prop
+              - name: community_methods_infomap
+                type: RadioButton
+                optionName: community_methods
+                optionPart: infomap
+              - name: community_methods_edge_betweenness
+                type: RadioButton
+                optionName: community_methods
+                optionPart: edge_betweenness
+              - name: community_methods_leading_eigen
+                type: RadioButton
+                optionName: community_methods
+                optionPart: leading_eigen
+          - type: Label
+            label: Parameters
+            children:
+              - type: TextBox
+                name: community_gamma
+                format: number
+  - type: CollapseBox
+    label: Clique Analysis
+    margin: large
+    stretchFactor: 1
+    style: inline
+    collapsed: true
+    children:
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: cliques_show_text
+                label: Table
+              - type: CheckBox
+                name: cliques_show_plot
+                label: Plot
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Parameters
+            children:
+              - type: TextBox
+                name: cliques_size
+                format: number
+              - type: TextBox
+                name: cliques_threshold
+                format: number
+          - type: Label
+            label: Plot Parameters
+            children:
+              - type: TextBox
+                name: cliques_plot_cut
+                format: number
+                enable: (cliques_show_plot)
+              - type: TextBox
+                name: cliques_plot_min_value
+                format: number
+                enable: (cliques_show_plot)
+              - type: TextBox
+                name: cliques_plot_edge_label_size
+                format: number
+                enable: (cliques_show_plot)
+              - type: TextBox
+                name: cliques_plot_node_size
+                format: number
+                enable: (cliques_show_plot)
+              - type: TextBox
+                name: cliques_plot_node_label_size
+                format: number
+                enable: (cliques_show_plot)
+              - type: ComboBox
+                name: cliques_plot_layout
+                enable: (cliques_show_plot)
+  # ── Confirmatory Testing ──
+  - type: Label
+    label: "━━ 𝗖𝗼𝗻𝗳𝗶𝗿𝗺𝗮𝘁𝗼𝗿𝘆 𝗧𝗲𝘀𝘁𝗶𝗻𝗴 ━━"
+    style: list-inline
+    margin: large
+
+  - type: CollapseBox
+    label: Bootstrap Analysis
+    margin: large
+    stretchFactor: 1
+    style: inline
+    collapsed: true
+    children:
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: bootstrap_show_table
+                label: Bootstrap Results Table
+              - type: CheckBox
+                name: bootstrap_show_plot
+                label: Plot
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Parameters
+            children:
+              - type: TextBox
+                name: bootstrap_iteration
+                format: number
+              - type: TextBox
+                name: bootstrap_level
+                format: number
+          - type: Label
+            label: Methods
+            children:
+              - type: RadioButton
+                name: bootstrap_method_stability
+                optionName: bootstrap_method
+                optionPart: stability
+              - type: RadioButton
+                name: bootstrap_method_threshold
+                optionName: bootstrap_method
+                optionPart: threshold
+          - type: Label
+            label: Method Parameters
+            children:
+              - type: TextBox
+                name: bootstrap_range_low
+                format: number
+                enable: (bootstrap_method_stability)
+              - type: TextBox
+                name: bootstrap_range_up
+                format: number
+                enable: (bootstrap_method_stability)
+              - type: TextBox
+                name: bootstrap_threshold
+                format: number
+                enable: (bootstrap_method_threshold)
+          - type: Label
+            label: Plot Parameters
+            children:
+              - type: TextBox
+                name: bootstrap_plot_cut
+                format: number
+                enable: (bootstrap_show_plot)
+              - type: TextBox
+                name: bootstrap_plot_min_value
+                format: number
+                enable: (bootstrap_show_plot)
+              - type: TextBox
+                name: bootstrap_plot_edge_label_size
+                format: number
+                enable: (bootstrap_show_plot)
+              - type: TextBox
+                name: bootstrap_plot_node_size
+                format: number
+                enable: (bootstrap_show_plot)
+              - type: TextBox
+                name: bootstrap_plot_node_label_size
+                format: number
+                enable: (bootstrap_show_plot)
+              - type: ComboBox
+                name: bootstrap_plot_layout
+                enable: (bootstrap_show_plot)
+          - type: Label
+            label: Table Options
+            children:
+              - type: TextBox
+                name: bootstrap_table_max_rows
+                format: number
+                enable: (bootstrap_show_table)
+              - type: CheckBox
+                name: bootstrap_table_show_all
+                enable: (bootstrap_show_table)
+              - type: CheckBox
+                name: bootstrap_table_significant_only
+                enable: (bootstrap_show_table)
+  - type: CollapseBox
+    label: Permutation Analysis
+    margin: large
+    stretchFactor: 1
+    style: inline
+    collapsed: true
+    children:
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: permutation_show_text
+                label: Table
+              - type: CheckBox
+                name: permutation_show_plot
+                label: Plot
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Parameters
+            children:
+              - type: TextBox
+                name: permutation_iter
+                format: number
+              - type: TextBox
+                name: permutation_level
+                format: number
+              - type: CheckBox
+                name: permutation_paired
+                label: Paired test
+  # ── Comparisons ──
+  - type: Label
+    label: "━━ 𝗖𝗼𝗺𝗽𝗮𝗿𝗶𝘀𝗼𝗻𝘀 ━━"
+    style: list-inline
+    margin: large
+
+  - type: CollapseBox
+    label: Network Difference Plot
+    collapsed: true
+    stretchFactor: 1
+    style: inline
+    children:
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: compare_show_network_diff_plot
+                label: Show Plot
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Plot Parameters
+            children:
+              - type: TextBox
+                name: compare_network_diff_plot_cut
+                format: number
+                enable: (compare_show_network_diff_plot)
+              - type: TextBox
+                name: compare_network_diff_plot_min_value
+                format: number
+                enable: (compare_show_network_diff_plot)
+              - type: TextBox
+                name: compare_network_diff_plot_edge_label_size
+                format: number
+                enable: (compare_show_network_diff_plot)
+              - type: TextBox
+                name: compare_network_diff_plot_node_size
+                format: number
+                enable: (compare_show_network_diff_plot)
+              - type: TextBox
+                name: compare_network_diff_plot_node_label_size
+                format: number
+                enable: (compare_show_network_diff_plot)
+              - type: ComboBox
+                name: compare_network_diff_plot_layout
+                enable: (compare_show_network_diff_plot)
+
+  - type: CollapseBox
+    label: Compare Network Properties
+    collapsed: true
+    children:
+      - type: LevelSelector
+        name: compare_group_i
+        variable: (buildModel_variables_long_group)
+        label: First Network
+      - type: LevelSelector
+        name: compare_group_j
+        variable: (buildModel_variables_long_group)
+        label: Second Network
+      - type: CheckBox
+        name: compare_show_summary
+        label: Summary Metrics Table
+      - type: CheckBox
+        name: compare_show_network
+        label: Network Properties Table
+      - type: CheckBox
+        name: compare_show_plot
+        label: Comparison Plot
+      - type: ComboBox
+        name: compare_plot_type
+        label: Plot Type
+        enable: (compare_show_plot)
+      - type: ComboBox
+        name: compare_scaling
+        label: Scaling Method
+
+  - type: CollapseBox
+    label: Compare Sequences
+    margin: large
+    stretchFactor: 1
+    style: inline
+    collapsed: true
+    children:
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: compare_sequences_show_table
+                label: Table
+              - type: CheckBox
+                name: compare_sequences_show_plot
+                label: Plot
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Parameters
+            children:
+              - type: TextBox
+                name: compare_sequences_sub_min
+                format: number
+              - type: TextBox
+                name: compare_sequences_sub_max
+                format: number
+              - type: TextBox
+                name: compare_sequences_min_freq
+                format: number
+              - type: ComboBox
+                name: compare_sequences_correction
+
+  # ── Sequence Analysis ──
+  - type: Label
+    label: "━━ 𝗦𝗲𝗾𝘂𝗲𝗻𝗰𝗲 𝗔𝗻𝗮𝗹𝘆𝘀𝗶𝘀 ━━"
+    style: list-inline
+    margin: large
+
+  - type: CollapseBox
+    label: Sequence Analysis
+    margin: large
+    stretchFactor: 1
+    style: inline
+    collapsed: true
+    children:
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: sequences_show_plot
+                label: Sequence plot
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Plot Type
+            children:
+              - type: RadioButton
+                name: sequences_type_index
+                optionName: sequences_type
+                optionPart: index
+              - type: RadioButton
+                name: sequences_type_distribution
+                optionName: sequences_type
+                optionPart: distribution
+          - type: Label
+            label: Scale
+            children:
+              - type: RadioButton
+                name: sequences_scale_proportion
+                optionName: sequences_scale
+                optionPart: proportion
+              - type: RadioButton
+                name: sequences_scale_count
+                optionName: sequences_scale
+                optionPart: count
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Geometry
+            children:
+              - type: RadioButton
+                name: sequences_geom_bar
+                optionName: sequences_geom
+                optionPart: bar
+              - type: RadioButton
+                name: sequences_geom_area
+                optionName: sequences_geom
+                optionPart: area
+          - type: Label
+            label: Options
+            children:
+              - type: CheckBox
+                name: sequences_include_na
+                label: Include missing values
+              - type: TextBox
+                name: sequences_tick
+                format: number
+                label: Tick Interval
+
+  - type: CollapseBox
+    label: Sequence Indices
+    collapsed: true
+    children:
+    - type: LayoutBox
+      margin: large
+      children:
+        - type: Label
+          label: Display Options
+          children:
+            - type: CheckBox
+              name: indices_show_table
+              label: Show indices table
+        - type: Label
+          label: Favorable State (optional)
+          children:
+            - type: LevelSelector
+              name: indices_favorable
+              variable: (buildModel_variables_long_action)
+    - type: LayoutBox
+      stretchFactor: 1
+      children:
+        - type: Label
+          label: Parameters
+          children:
+            - type: TextBox
+              name: indices_omega
+              format: number
+        - type: Label
+          label: Table Options
+          children:
+            - type: TextBox
+              name: indices_table_max_rows
+              format: number
+            - type: CheckBox
+              name: indices_table_show_all

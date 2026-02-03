@@ -72,7 +72,33 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             permutation_show_plot = FALSE,
             permutation_iter = 1000,
             permutation_paired = FALSE,
-            permutation_level = 0.05, ...) {
+            permutation_level = 0.05,
+            permutation_table_max_rows = 20,
+            permutation_table_show_all = FALSE,
+            pattern_show_table = FALSE,
+            pattern_type = "ngram",
+            pattern_len_min = 2,
+            pattern_len_max = 3,
+            pattern_gap_min = 1,
+            pattern_gap_max = 2,
+            pattern_min_support = 0.01,
+            pattern_min_count = 5,
+            pattern_table_max_rows = 50,
+            pattern_table_show_all = FALSE,
+            compare_show_summary = FALSE,
+            compare_show_network = FALSE,
+            compare_show_plot = FALSE,
+            compare_group_i = NULL,
+            compare_group_j = NULL,
+            compare_scaling = "none",
+            compare_plot_type = "heatmap",
+            compare_show_network_diff_plot = FALSE,
+            compare_network_diff_plot_cut = 0.1,
+            compare_network_diff_plot_min_value = 0.05,
+            compare_network_diff_plot_edge_label_size = 1,
+            compare_network_diff_plot_node_size = 1,
+            compare_network_diff_plot_node_label_size = 1,
+            compare_network_diff_plot_layout = "circle", ...) {
 
             super$initialize(
                 package="JTNA",
@@ -461,6 +487,153 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=0.05,
                 min=0,
                 max=1)
+            private$..permutation_table_max_rows <- jmvcore::OptionInteger$new(
+                "permutation_table_max_rows",
+                permutation_table_max_rows,
+                default=20,
+                min=1,
+                max=1000)
+            private$..permutation_table_show_all <- jmvcore::OptionBool$new(
+                "permutation_table_show_all",
+                permutation_table_show_all,
+                default=FALSE)
+            private$..pattern_show_table <- jmvcore::OptionBool$new(
+                "pattern_show_table",
+                pattern_show_table,
+                default=FALSE)
+            private$..pattern_type <- jmvcore::OptionList$new(
+                "pattern_type",
+                pattern_type,
+                default="ngram",
+                options=list(
+                    "ngram",
+                    "gapped",
+                    "repeated"))
+            private$..pattern_len_min <- jmvcore::OptionInteger$new(
+                "pattern_len_min",
+                pattern_len_min,
+                default=2,
+                min=2,
+                max=10)
+            private$..pattern_len_max <- jmvcore::OptionInteger$new(
+                "pattern_len_max",
+                pattern_len_max,
+                default=3,
+                min=2,
+                max=20)
+            private$..pattern_gap_min <- jmvcore::OptionInteger$new(
+                "pattern_gap_min",
+                pattern_gap_min,
+                default=1,
+                min=1,
+                max=10)
+            private$..pattern_gap_max <- jmvcore::OptionInteger$new(
+                "pattern_gap_max",
+                pattern_gap_max,
+                default=2,
+                min=1,
+                max=20)
+            private$..pattern_min_support <- jmvcore::OptionNumber$new(
+                "pattern_min_support",
+                pattern_min_support,
+                default=0.01,
+                min=0,
+                max=1)
+            private$..pattern_min_count <- jmvcore::OptionInteger$new(
+                "pattern_min_count",
+                pattern_min_count,
+                default=5,
+                min=1,
+                max=1000)
+            private$..pattern_table_max_rows <- jmvcore::OptionInteger$new(
+                "pattern_table_max_rows",
+                pattern_table_max_rows,
+                default=50,
+                min=1,
+                max=1000)
+            private$..pattern_table_show_all <- jmvcore::OptionBool$new(
+                "pattern_table_show_all",
+                pattern_table_show_all,
+                default=FALSE)
+            private$..compare_show_summary <- jmvcore::OptionBool$new(
+                "compare_show_summary",
+                compare_show_summary,
+                default=FALSE)
+            private$..compare_show_network <- jmvcore::OptionBool$new(
+                "compare_show_network",
+                compare_show_network,
+                default=FALSE)
+            private$..compare_show_plot <- jmvcore::OptionBool$new(
+                "compare_show_plot",
+                compare_show_plot,
+                default=FALSE)
+            private$..compare_group_i <- jmvcore::OptionLevel$new(
+                "compare_group_i",
+                compare_group_i,
+                variable="(buildModel_variables_group)")
+            private$..compare_group_j <- jmvcore::OptionLevel$new(
+                "compare_group_j",
+                compare_group_j,
+                variable="(buildModel_variables_group)")
+            private$..compare_scaling <- jmvcore::OptionList$new(
+                "compare_scaling",
+                compare_scaling,
+                default="none",
+                options=list(
+                    "none",
+                    "minmax",
+                    "max",
+                    "rank"))
+            private$..compare_plot_type <- jmvcore::OptionList$new(
+                "compare_plot_type",
+                compare_plot_type,
+                default="heatmap",
+                options=list(
+                    "heatmap",
+                    "scatterplot",
+                    "weight_density"))
+            private$..compare_show_network_diff_plot <- jmvcore::OptionBool$new(
+                "compare_show_network_diff_plot",
+                compare_show_network_diff_plot,
+                default=FALSE)
+            private$..compare_network_diff_plot_cut <- jmvcore::OptionNumber$new(
+                "compare_network_diff_plot_cut",
+                compare_network_diff_plot_cut,
+                default=0.1,
+                min=0,
+                max=1)
+            private$..compare_network_diff_plot_min_value <- jmvcore::OptionNumber$new(
+                "compare_network_diff_plot_min_value",
+                compare_network_diff_plot_min_value,
+                default=0.05,
+                min=0,
+                max=1)
+            private$..compare_network_diff_plot_edge_label_size <- jmvcore::OptionNumber$new(
+                "compare_network_diff_plot_edge_label_size",
+                compare_network_diff_plot_edge_label_size,
+                default=1,
+                min=0,
+                max=10)
+            private$..compare_network_diff_plot_node_size <- jmvcore::OptionNumber$new(
+                "compare_network_diff_plot_node_size",
+                compare_network_diff_plot_node_size,
+                default=1,
+                min=0,
+                max=2)
+            private$..compare_network_diff_plot_node_label_size <- jmvcore::OptionNumber$new(
+                "compare_network_diff_plot_node_label_size",
+                compare_network_diff_plot_node_label_size,
+                default=1,
+                min=0,
+                max=10)
+            private$..compare_network_diff_plot_layout <- jmvcore::OptionList$new(
+                "compare_network_diff_plot_layout",
+                compare_network_diff_plot_layout,
+                default="circle",
+                options=list(
+                    "circle",
+                    "spring",
+                    "layout_with_fr"))
 
             self$.addOption(private$..buildModel_variables_onehot)
             self$.addOption(private$..buildModel_variables_actor)
@@ -529,6 +702,32 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..permutation_iter)
             self$.addOption(private$..permutation_paired)
             self$.addOption(private$..permutation_level)
+            self$.addOption(private$..permutation_table_max_rows)
+            self$.addOption(private$..permutation_table_show_all)
+            self$.addOption(private$..pattern_show_table)
+            self$.addOption(private$..pattern_type)
+            self$.addOption(private$..pattern_len_min)
+            self$.addOption(private$..pattern_len_max)
+            self$.addOption(private$..pattern_gap_min)
+            self$.addOption(private$..pattern_gap_max)
+            self$.addOption(private$..pattern_min_support)
+            self$.addOption(private$..pattern_min_count)
+            self$.addOption(private$..pattern_table_max_rows)
+            self$.addOption(private$..pattern_table_show_all)
+            self$.addOption(private$..compare_show_summary)
+            self$.addOption(private$..compare_show_network)
+            self$.addOption(private$..compare_show_plot)
+            self$.addOption(private$..compare_group_i)
+            self$.addOption(private$..compare_group_j)
+            self$.addOption(private$..compare_scaling)
+            self$.addOption(private$..compare_plot_type)
+            self$.addOption(private$..compare_show_network_diff_plot)
+            self$.addOption(private$..compare_network_diff_plot_cut)
+            self$.addOption(private$..compare_network_diff_plot_min_value)
+            self$.addOption(private$..compare_network_diff_plot_edge_label_size)
+            self$.addOption(private$..compare_network_diff_plot_node_size)
+            self$.addOption(private$..compare_network_diff_plot_node_label_size)
+            self$.addOption(private$..compare_network_diff_plot_layout)
         }),
     active = list(
         buildModel_variables_onehot = function() private$..buildModel_variables_onehot$value,
@@ -597,7 +796,33 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         permutation_show_plot = function() private$..permutation_show_plot$value,
         permutation_iter = function() private$..permutation_iter$value,
         permutation_paired = function() private$..permutation_paired$value,
-        permutation_level = function() private$..permutation_level$value),
+        permutation_level = function() private$..permutation_level$value,
+        permutation_table_max_rows = function() private$..permutation_table_max_rows$value,
+        permutation_table_show_all = function() private$..permutation_table_show_all$value,
+        pattern_show_table = function() private$..pattern_show_table$value,
+        pattern_type = function() private$..pattern_type$value,
+        pattern_len_min = function() private$..pattern_len_min$value,
+        pattern_len_max = function() private$..pattern_len_max$value,
+        pattern_gap_min = function() private$..pattern_gap_min$value,
+        pattern_gap_max = function() private$..pattern_gap_max$value,
+        pattern_min_support = function() private$..pattern_min_support$value,
+        pattern_min_count = function() private$..pattern_min_count$value,
+        pattern_table_max_rows = function() private$..pattern_table_max_rows$value,
+        pattern_table_show_all = function() private$..pattern_table_show_all$value,
+        compare_show_summary = function() private$..compare_show_summary$value,
+        compare_show_network = function() private$..compare_show_network$value,
+        compare_show_plot = function() private$..compare_show_plot$value,
+        compare_group_i = function() private$..compare_group_i$value,
+        compare_group_j = function() private$..compare_group_j$value,
+        compare_scaling = function() private$..compare_scaling$value,
+        compare_plot_type = function() private$..compare_plot_type$value,
+        compare_show_network_diff_plot = function() private$..compare_show_network_diff_plot$value,
+        compare_network_diff_plot_cut = function() private$..compare_network_diff_plot_cut$value,
+        compare_network_diff_plot_min_value = function() private$..compare_network_diff_plot_min_value$value,
+        compare_network_diff_plot_edge_label_size = function() private$..compare_network_diff_plot_edge_label_size$value,
+        compare_network_diff_plot_node_size = function() private$..compare_network_diff_plot_node_size$value,
+        compare_network_diff_plot_node_label_size = function() private$..compare_network_diff_plot_node_label_size$value,
+        compare_network_diff_plot_layout = function() private$..compare_network_diff_plot_layout$value),
     private = list(
         ..buildModel_variables_onehot = NA,
         ..buildModel_variables_actor = NA,
@@ -665,7 +890,33 @@ OneHotTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..permutation_show_plot = NA,
         ..permutation_iter = NA,
         ..permutation_paired = NA,
-        ..permutation_level = NA)
+        ..permutation_level = NA,
+        ..permutation_table_max_rows = NA,
+        ..permutation_table_show_all = NA,
+        ..pattern_show_table = NA,
+        ..pattern_type = NA,
+        ..pattern_len_min = NA,
+        ..pattern_len_max = NA,
+        ..pattern_gap_min = NA,
+        ..pattern_gap_max = NA,
+        ..pattern_min_support = NA,
+        ..pattern_min_count = NA,
+        ..pattern_table_max_rows = NA,
+        ..pattern_table_show_all = NA,
+        ..compare_show_summary = NA,
+        ..compare_show_network = NA,
+        ..compare_show_plot = NA,
+        ..compare_group_i = NA,
+        ..compare_group_j = NA,
+        ..compare_scaling = NA,
+        ..compare_plot_type = NA,
+        ..compare_show_network_diff_plot = NA,
+        ..compare_network_diff_plot_cut = NA,
+        ..compare_network_diff_plot_min_value = NA,
+        ..compare_network_diff_plot_edge_label_size = NA,
+        ..compare_network_diff_plot_node_size = NA,
+        ..compare_network_diff_plot_node_label_size = NA,
+        ..compare_network_diff_plot_layout = NA)
 )
 
 OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -698,7 +949,15 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         bootstrap_plot = function() private$.items[["bootstrap_plot"]],
         permutationTitle = function() private$.items[["permutationTitle"]],
         permutationTable = function() private$.items[["permutationTable"]],
-        permutation_plot = function() private$.items[["permutation_plot"]]),
+        permutation_plot = function() private$.items[["permutation_plot"]],
+        patternTitle = function() private$.items[["patternTitle"]],
+        patternTable = function() private$.items[["patternTable"]],
+        compare_network_diff_plot = function() private$.items[["compare_network_diff_plot"]],
+        compareInstructions = function() private$.items[["compareInstructions"]],
+        compareTitle = function() private$.items[["compareTitle"]],
+        compare_plot = function() private$.items[["compare_plot"]],
+        compareSummaryTable = function() private$.items[["compareSummaryTable"]],
+        compareNetworkTable = function() private$.items[["compareNetworkTable"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -1129,7 +1388,151 @@ OneHotTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "permutation_iter",
                     "permutation_paired",
-                    "permutation_level")))}))
+                    "permutation_level")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="patternTitle",
+                title="Pattern Discovery",
+                visible=FALSE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="patternTable",
+                title="Discovered Patterns",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="pattern", 
+                        `title`="Pattern", 
+                        `type`="text"),
+                    list(
+                        `name`="length", 
+                        `title`="Length", 
+                        `type`="integer"),
+                    list(
+                        `name`="count", 
+                        `title`="Count", 
+                        `type`="integer"),
+                    list(
+                        `name`="proportion", 
+                        `title`="Proportion", 
+                        `type`="number"),
+                    list(
+                        `name`="support", 
+                        `title`="Support", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_onehot",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_session",
+                    "buildModel_window",
+                    "pattern_type",
+                    "pattern_len_min",
+                    "pattern_len_max",
+                    "pattern_gap_min",
+                    "pattern_gap_max",
+                    "pattern_min_support",
+                    "pattern_min_count")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="compare_network_diff_plot",
+                title="Network Difference Plot",
+                width=1000,
+                height=800,
+                visible=FALSE,
+                renderFun=".showCompareNetworkDiffPlot",
+                clearWith=list(
+                    "buildModel_variables_onehot",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_session",
+                    "buildModel_variables_group",
+                    "buildModel_window",
+                    "buildModel_scaling",
+                    "compare_network_diff_plot_cut",
+                    "compare_network_diff_plot_min_value",
+                    "compare_network_diff_plot_edge_label_size",
+                    "compare_network_diff_plot_node_size",
+                    "compare_network_diff_plot_node_label_size",
+                    "compare_network_diff_plot_layout")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="compareInstructions",
+                visible=FALSE))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="compareTitle",
+                title="Compare Network Properties",
+                visible=FALSE))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="compare_plot",
+                title="Group Comparison Plot",
+                width=700,
+                height=500,
+                visible=FALSE,
+                renderFun=".showComparePlot",
+                clearWith=list(
+                    "buildModel_variables_onehot",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_session",
+                    "buildModel_variables_group",
+                    "buildModel_window",
+                    "buildModel_scaling",
+                    "compare_group_i",
+                    "compare_group_j",
+                    "compare_scaling",
+                    "compare_plot_type")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="compareSummaryTable",
+                title="Summary Metrics",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_onehot",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_session",
+                    "buildModel_variables_group",
+                    "buildModel_window",
+                    "buildModel_scaling",
+                    "compare_group_i",
+                    "compare_group_j",
+                    "compare_scaling")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="compareNetworkTable",
+                title="Network Properties",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="group_i", 
+                        `title`="Group 1", 
+                        `type`="number"),
+                    list(
+                        `name`="group_j", 
+                        `title`="Group 2", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_onehot",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_session",
+                    "buildModel_variables_group",
+                    "buildModel_window",
+                    "buildModel_scaling",
+                    "compare_group_i",
+                    "compare_group_j",
+                    "compare_scaling")))}))
 
 OneHotTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "OneHotTNABase",
@@ -1139,7 +1542,7 @@ OneHotTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "JTNA",
                 name = "OneHotTNA",
-                version = c(1,10,0),
+                version = c(1,12,0),
                 options = options,
                 results = OneHotTNAResults$new(options=options),
                 data = data,
@@ -1230,6 +1633,32 @@ OneHotTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param permutation_iter .
 #' @param permutation_paired .
 #' @param permutation_level .
+#' @param permutation_table_max_rows .
+#' @param permutation_table_show_all .
+#' @param pattern_show_table .
+#' @param pattern_type .
+#' @param pattern_len_min .
+#' @param pattern_len_max .
+#' @param pattern_gap_min .
+#' @param pattern_gap_max .
+#' @param pattern_min_support .
+#' @param pattern_min_count .
+#' @param pattern_table_max_rows .
+#' @param pattern_table_show_all .
+#' @param compare_show_summary .
+#' @param compare_show_network .
+#' @param compare_show_plot .
+#' @param compare_group_i .
+#' @param compare_group_j .
+#' @param compare_scaling .
+#' @param compare_plot_type .
+#' @param compare_show_network_diff_plot .
+#' @param compare_network_diff_plot_cut .
+#' @param compare_network_diff_plot_min_value .
+#' @param compare_network_diff_plot_edge_label_size .
+#' @param compare_network_diff_plot_node_size .
+#' @param compare_network_diff_plot_node_label_size .
+#' @param compare_network_diff_plot_layout .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -1259,6 +1688,14 @@ OneHotTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$permutationTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$permutationTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$permutation_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$patternTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$patternTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$compare_network_diff_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$compareInstructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$compareTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$compare_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$compareSummaryTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$compareNetworkTable} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -1336,7 +1773,33 @@ OneHotTNA <- function(
     permutation_show_plot = FALSE,
     permutation_iter = 1000,
     permutation_paired = FALSE,
-    permutation_level = 0.05) {
+    permutation_level = 0.05,
+    permutation_table_max_rows = 20,
+    permutation_table_show_all = FALSE,
+    pattern_show_table = FALSE,
+    pattern_type = "ngram",
+    pattern_len_min = 2,
+    pattern_len_max = 3,
+    pattern_gap_min = 1,
+    pattern_gap_max = 2,
+    pattern_min_support = 0.01,
+    pattern_min_count = 5,
+    pattern_table_max_rows = 50,
+    pattern_table_show_all = FALSE,
+    compare_show_summary = FALSE,
+    compare_show_network = FALSE,
+    compare_show_plot = FALSE,
+    compare_group_i,
+    compare_group_j,
+    compare_scaling = "none",
+    compare_plot_type = "heatmap",
+    compare_show_network_diff_plot = FALSE,
+    compare_network_diff_plot_cut = 0.1,
+    compare_network_diff_plot_min_value = 0.05,
+    compare_network_diff_plot_edge_label_size = 1,
+    compare_network_diff_plot_node_size = 1,
+    compare_network_diff_plot_node_label_size = 1,
+    compare_network_diff_plot_layout = "circle") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("OneHotTNA requires jmvcore to be installed (restart may be required)")
@@ -1421,7 +1884,33 @@ OneHotTNA <- function(
         permutation_show_plot = permutation_show_plot,
         permutation_iter = permutation_iter,
         permutation_paired = permutation_paired,
-        permutation_level = permutation_level)
+        permutation_level = permutation_level,
+        permutation_table_max_rows = permutation_table_max_rows,
+        permutation_table_show_all = permutation_table_show_all,
+        pattern_show_table = pattern_show_table,
+        pattern_type = pattern_type,
+        pattern_len_min = pattern_len_min,
+        pattern_len_max = pattern_len_max,
+        pattern_gap_min = pattern_gap_min,
+        pattern_gap_max = pattern_gap_max,
+        pattern_min_support = pattern_min_support,
+        pattern_min_count = pattern_min_count,
+        pattern_table_max_rows = pattern_table_max_rows,
+        pattern_table_show_all = pattern_table_show_all,
+        compare_show_summary = compare_show_summary,
+        compare_show_network = compare_show_network,
+        compare_show_plot = compare_show_plot,
+        compare_group_i = compare_group_i,
+        compare_group_j = compare_group_j,
+        compare_scaling = compare_scaling,
+        compare_plot_type = compare_plot_type,
+        compare_show_network_diff_plot = compare_show_network_diff_plot,
+        compare_network_diff_plot_cut = compare_network_diff_plot_cut,
+        compare_network_diff_plot_min_value = compare_network_diff_plot_min_value,
+        compare_network_diff_plot_edge_label_size = compare_network_diff_plot_edge_label_size,
+        compare_network_diff_plot_node_size = compare_network_diff_plot_node_size,
+        compare_network_diff_plot_node_label_size = compare_network_diff_plot_node_label_size,
+        compare_network_diff_plot_layout = compare_network_diff_plot_layout)
 
     analysis <- OneHotTNAClass$new(
         options = options,

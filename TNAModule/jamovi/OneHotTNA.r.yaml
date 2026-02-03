@@ -415,4 +415,144 @@ items:
         - permutation_paired
         - permutation_level
 
+    ### PATTERN DISCOVERY
+
+    - name: patternTitle
+      type: Preformatted
+      title: Pattern Discovery
+      visible: False
+
+    - name: patternTable
+      type: Table
+      title: Discovered Patterns
+      visible: False
+      columns:
+        - name: pattern
+          title: Pattern
+          type: text
+        - name: length
+          title: Length
+          type: integer
+        - name: count
+          title: Count
+          type: integer
+        - name: proportion
+          title: Proportion
+          type: number
+        - name: support
+          title: Support
+          type: number
+      clearWith:
+        - buildModel_variables_onehot
+        - buildModel_variables_actor
+        - buildModel_variables_session
+        - buildModel_window
+        - pattern_type
+        - pattern_len_min
+        - pattern_len_max
+        - pattern_gap_min
+        - pattern_gap_max
+        - pattern_min_support
+        - pattern_min_count
+
+    ### COMPARISONS
+
+    # Network Difference Plot (first in Comparisons section)
+    - name: compare_network_diff_plot
+      type: Image
+      title: Network Difference Plot
+      width: 1000
+      height: 800
+      visible: False
+      renderFun: .showCompareNetworkDiffPlot
+      clearWith:
+        - buildModel_variables_onehot
+        - buildModel_variables_actor
+        - buildModel_variables_session
+        - buildModel_variables_group
+        - buildModel_window
+        - buildModel_scaling
+        - compare_network_diff_plot_cut
+        - compare_network_diff_plot_min_value
+        - compare_network_diff_plot_edge_label_size
+        - compare_network_diff_plot_node_size
+        - compare_network_diff_plot_node_label_size
+        - compare_network_diff_plot_layout
+
+    # Compare Network Properties (second in Comparisons section)
+    - name: compareInstructions
+      type: Html
+      visible: False
+
+    - name: compareTitle
+      type: Preformatted
+      title: Compare Network Properties
+      visible: False
+
+    - name: compare_plot
+      type: Image
+      title: Group Comparison Plot
+      width: 700
+      height: 500
+      visible: False
+      renderFun: .showComparePlot
+      clearWith:
+        - buildModel_variables_onehot
+        - buildModel_variables_actor
+        - buildModel_variables_session
+        - buildModel_variables_group
+        - buildModel_window
+        - buildModel_scaling
+        - compare_group_i
+        - compare_group_j
+        - compare_scaling
+        - compare_plot_type
+
+    - name: compareSummaryTable
+      type: Table
+      title: Summary Metrics
+      visible: False
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+      clearWith:
+        - buildModel_variables_onehot
+        - buildModel_variables_actor
+        - buildModel_variables_session
+        - buildModel_variables_group
+        - buildModel_window
+        - buildModel_scaling
+        - compare_group_i
+        - compare_group_j
+        - compare_scaling
+
+    - name: compareNetworkTable
+      type: Table
+      title: Network Properties
+      visible: False
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: group_i
+          title: Group 1
+          type: number
+        - name: group_j
+          title: Group 2
+          type: number
+      clearWith:
+        - buildModel_variables_onehot
+        - buildModel_variables_actor
+        - buildModel_variables_session
+        - buildModel_variables_group
+        - buildModel_window
+        - buildModel_scaling
+        - compare_group_i
+        - compare_group_j
+        - compare_scaling
+
 ...
