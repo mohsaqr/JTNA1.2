@@ -231,7 +231,7 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       }
 
       ### Cliques
-      if(!is.null(model) && (isTRUE(self$options$cliques_show_text) || isTRUE(self$options$cliques_show_plot))) {
+      if(!is.null(model) && isTRUE(self$options$cliques_show_plot)) {
         cliques_size <- as.numeric(self$options$cliques_size)
         cliques_threshold <- as.numeric(self$options$cliques_threshold)
         if (cliques_threshold == 0) {
@@ -242,13 +242,9 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if(is.null(cliques)) {
           cliques <- tna::cliques(x=model, size=cliques_size, threshold=cliques_threshold)
           self$results$cliques_multiple_plot$setState(cliques)
-          if(isTRUE(self$options$cliques_show_text)) {
-              self$results$cliquesContent$setContent(cliques)
-          }
         }
-        self$results$cliques_multiple_plot$setVisible(self$options$cliques_show_plot)
-        self$results$cliquesContent$setVisible(self$options$cliques_show_text)
-        self$results$cliquesTitle$setVisible(self$options$cliques_show_text || self$options$cliques_show_plot)
+        self$results$cliques_multiple_plot$setVisible(TRUE)
+        self$results$cliquesTitle$setVisible(TRUE)
       }
 
       ### Bootstrap

@@ -297,23 +297,6 @@ items:
       title: Cliques
       visible: False
 
-    - name:  cliquesContent
-      type:  Preformatted
-      visible: False
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - clustering_k
-        - clustering_dissimilarity
-        - clustering_method
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - cliques_size
-        - cliques_threshold
-
     - name: cliques_multiple_plot
       type: Group
       title: ""

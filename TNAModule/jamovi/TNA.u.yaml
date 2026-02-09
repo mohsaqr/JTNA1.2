@@ -342,9 +342,6 @@ children:
             label: Display Options
             children:
               - type: CheckBox
-                name: cliques_show_text
-                label: Table
-              - type: CheckBox
                 name: cliques_show_plot
                 label: Plot
       - type: LayoutBox
