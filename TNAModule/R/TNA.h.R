@@ -61,7 +61,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             community_show_plot = FALSE,
             cliques_size = 2,
             cliques_threshold = 0,
-            cliques_show_text = FALSE,
             cliques_show_plot = FALSE,
             cliques_plot_cut = 0.1,
             cliques_plot_min_value = 0,
@@ -413,10 +412,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=0,
                 min=0,
                 max=1)
-            private$..cliques_show_text <- jmvcore::OptionBool$new(
-                "cliques_show_text",
-                cliques_show_text,
-                default=FALSE)
             private$..cliques_show_plot <- jmvcore::OptionBool$new(
                 "cliques_show_plot",
                 cliques_show_plot,
@@ -767,7 +762,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..community_show_plot)
             self$.addOption(private$..cliques_size)
             self$.addOption(private$..cliques_threshold)
-            self$.addOption(private$..cliques_show_text)
             self$.addOption(private$..cliques_show_plot)
             self$.addOption(private$..cliques_plot_cut)
             self$.addOption(private$..cliques_plot_min_value)
@@ -874,7 +868,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         community_show_plot = function() private$..community_show_plot$value,
         cliques_size = function() private$..cliques_size$value,
         cliques_threshold = function() private$..cliques_threshold$value,
-        cliques_show_text = function() private$..cliques_show_text$value,
         cliques_show_plot = function() private$..cliques_show_plot$value,
         cliques_plot_cut = function() private$..cliques_plot_cut$value,
         cliques_plot_min_value = function() private$..cliques_plot_min_value$value,
@@ -980,7 +973,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..community_show_plot = NA,
         ..cliques_size = NA,
         ..cliques_threshold = NA,
-        ..cliques_show_text = NA,
         ..cliques_show_plot = NA,
         ..cliques_plot_cut = NA,
         ..cliques_plot_min_value = NA,
@@ -1061,7 +1053,6 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         community_plot = function() private$.items[["community_plot"]],
         communityTable = function() private$.items[["communityTable"]],
         cliquesTitle = function() private$.items[["cliquesTitle"]],
-        cliquesContent = function() private$.items[["cliquesContent"]],
         cliques_multiple_plot = function() private$.items[["cliques_multiple_plot"]],
         bootstrapTitle = function() private$.items[["bootstrapTitle"]],
         bootstrap_plot = function() private$.items[["bootstrap_plot"]],
@@ -1463,21 +1454,6 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="cliquesTitle",
                 title="Cliques",
                 visible=FALSE))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="cliquesContent",
-                visible=FALSE,
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda",
-                    "cliques_size",
-                    "cliques_threshold")))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
@@ -1875,7 +1851,6 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param community_show_plot .
 #' @param cliques_size .
 #' @param cliques_threshold .
-#' @param cliques_show_text .
 #' @param cliques_show_plot .
 #' @param cliques_plot_cut .
 #' @param cliques_plot_min_value .
@@ -1953,7 +1928,6 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$community_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$communityTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cliquesTitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$cliquesContent} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$cliques_multiple_plot$cliques_combined_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$bootstrapTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$bootstrap_plot} \tab \tab \tab \tab \tab an image \cr
@@ -2030,7 +2004,6 @@ TNA <- function(
     community_show_plot = FALSE,
     cliques_size = 2,
     cliques_threshold = 0,
-    cliques_show_text = FALSE,
     cliques_show_plot = FALSE,
     cliques_plot_cut = 0.1,
     cliques_plot_min_value = 0,
@@ -2153,7 +2126,6 @@ TNA <- function(
         community_show_plot = community_show_plot,
         cliques_size = cliques_size,
         cliques_threshold = cliques_threshold,
-        cliques_show_text = cliques_show_text,
         cliques_show_plot = cliques_show_plot,
         cliques_plot_cut = cliques_plot_cut,
         cliques_plot_min_value = cliques_plot_min_value,
