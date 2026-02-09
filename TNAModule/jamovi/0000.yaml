@@ -1,7 +1,7 @@
 ---
 title: Transition Network Analysis
 name: JTNA
-version: 1.12.0
+version: 1.6t
 jms: '1.0'
 authors:
   - Dylan Girault
@@ -38,29 +38,11 @@ analyses:
     menuGroup: JTNA
     menuTitle: Cluster Transition Network Analysis
     category: analyses
-  - title: Co-occurrence Network Analysis
-    name: CoOccurrenceTNA
-    ns: JTNA
-    menuGroup: JTNA
-    menuTitle: Co-occurrence Network Analysis
-    category: analyses
-  - title: Group Co-occurrence Network Analysis
-    name: GroupCoOccurrenceTNA
-    ns: JTNA
-    menuGroup: JTNA
-    menuTitle: Group Co-occurrence Network Analysis
-    category: analyses
   - title: One-Hot Co-occurrence Network Analysis
     name: OneHotTNA
     ns: JTNA
     menuGroup: JTNA
     menuTitle: One-Hot Co-occurrence Network Analysis
-    category: analyses
-  - title: Social Network Analysis
-    name: SNA
-    ns: JTNA
-    menuGroup: JTNA
-    menuTitle: Social Network Analysis
     category: analyses
 usesNative: true
 minApp: 1.8.0
