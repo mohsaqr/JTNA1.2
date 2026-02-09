@@ -18,7 +18,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                   <li><b>Action</b>: Column containing the actions/states/events (required). Each unique value becomes a node.</li>
                   <li><b>Actor</b>: Column identifying individuals (optional). Separates sequences by person.</li>
                   <li><b>Time</b> or <b>Order</b>: For ordering events chronologically (optional, use one or the other).</li>
-                  <li>Learn more: <a href="https://lamethods.org/book2/chapters/ch15-tna/ch15-tna.html" target="_blank">TNA Tutorial</a> | <a href="https://lamethods.org/book2/chapters/ch16-ftna/ch16-ftna.html" target="_blank">FTNA</a> | <a href="https://lamethods.org/book2/chapters/ch17-tna-clusters/ch17-tna-clusters.html" target="_blank">Group TNA</a></li>
+                  <li>Learn more: <a href="https://lamethods.org/book2/chapters/ch15-tna/ch15-tna.html" target="_blank">TNA Chapter</a> | <a href="https://sonsoles.me/posts/tna-tutorial" target="_blank">Updated Tutorial</a></li>
                 </ul>
                 </div>
                 </div>'

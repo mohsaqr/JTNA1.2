@@ -17,7 +17,7 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           <li><b>Actor</b>: Column identifying individuals (required). Actors will be clustered based on their transition patterns.</li>
           <li><b>Time</b> or <b>Order</b>: For ordering events chronologically (optional).</li>
           <li>Set the <b>Number of Clusters (k)</b> and enable <b>Run Clustering</b> to cluster actors.</li>
-          <li>Learn more: <a href="https://lamethods.org/book2/chapters/ch15-tna/ch15-tna.html" target="_blank">TNA Tutorial</a> | <a href="https://lamethods.org/book2/chapters/ch16-ftna/ch16-ftna.html" target="_blank">FTNA</a> | <a href="https://lamethods.org/book2/chapters/ch17-tna-clusters/ch17-tna-clusters.html" target="_blank">Group TNA</a></li>
+          <li>Learn more: <a href="https://lamethods.org/book2/chapters/ch17-tna-clusters/ch17-tna-clusters.html" target="_blank">TNA Clusters Chapter</a> | <a href="https://sonsoles.me/posts/tna-tutorial" target="_blank">Updated Tutorial</a> | <a href="https://sonsoles.me/posts/tna-clustering" target="_blank">Clustering</a></li>
         </ul>
         </div>
         </div>'
