@@ -433,28 +433,18 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 if(!self$results$cliques_multiple_plot$isFilled() || !self$results$cliquesContent$isFilled()) {
                     cliques <- tna::cliques(x=model, size=cliques_size, threshold=cliques_threshold)
-                    n_cliques <- lengths(cliques[1])
 
-                    if (n_cliques == 0) {
-                        self$results$cliquesTitle$setContent(
-                            paste0("No cliques of size ", cliques_size, " found with threshold ", cliques_threshold,
-                                   ". Try lowering the threshold or reducing the clique size."))
-                        self$results$cliquesTitle$setVisible(TRUE)
-                        self$results$cliques_multiple_plot$setVisible(FALSE)
-                        self$results$cliquesContent$setVisible(FALSE)
-                    } else {
-                        if(!self$results$cliquesContent$isFilled()) {
-                            self$results$cliquesContent$setContent(cliques)
-                        }
+                    if(!self$results$cliquesContent$isFilled()) {
+                        self$results$cliquesContent$setContent(cliques)
+                    }
 
-                        if(!self$results$cliques_multiple_plot$isFilled()) {
-                            self$results$cliques_multiple_plot$setState(cliques)
-                        }
-                        self$results$cliques_multiple_plot$setVisible(self$options$cliques_show_plot)
-                        self$results$cliquesContent$setVisible(self$options$cliques_show_text)
-                        self$results$cliquesTitle$setVisible(self$options$cliques_show_text || self$options$cliques_show_plot)
+                    if(!self$results$cliques_multiple_plot$isFilled()) {
+                        self$results$cliques_multiple_plot$setState(cliques)
                     }
                 }
+                self$results$cliques_multiple_plot$setVisible(self$options$cliques_show_plot)
+                self$results$cliquesContent$setVisible(self$options$cliques_show_text)
+                self$results$cliquesTitle$setVisible(self$options$cliques_show_text || self$options$cliques_show_plot)
             }
 
                         ### Bootstrap
@@ -948,7 +938,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plotData <- self$results$bootstrap_plot$state
             if(!is.null(plotData) && self$options$bootstrap_show_plot)  {
                 tryCatch({
-                    plot(x=plotData, cut = 0.01)
+                    plot(x=plotData, cut = 0.1)
                 }, error = function(e) {
                     plot(1, type="n", main="Bootstrap Plot Error", sub=e$message)
                 })
@@ -959,12 +949,12 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plotData <- self$results$cliques_multiple_plot$state
             if (!is.null(plotData) && self$options$cliques_show_plot) {
                 tryCatch({
-                    n_cliques <- lengths(plotData[1])
-                    if (n_cliques == 0) return(FALSE)
-                    ncol <- ceiling(sqrt(n_cliques))
-                    nrow <- ceiling(n_cliques / ncol)
-                    par(mfrow = c(nrow, ncol), mar = c(2, 2, 3, 1))
-                    for (i in seq_len(n_cliques)) {
+                    n <- lengths(plotData[1])
+                    if (n == 0) return(FALSE)
+                    nc <- ceiling(sqrt(n))
+                    nr <- ceiling(n / nc)
+                    par(mfrow = c(nr, nc))
+                    for (i in seq_len(n)) {
                         plot(x=plotData, ask=FALSE, first=i, n=1,
                             cut=self$options$cliques_plot_cut,
                             minimum=self$options$cliques_plot_min_value,
