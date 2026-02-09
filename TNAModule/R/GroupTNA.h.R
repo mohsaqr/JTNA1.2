@@ -1359,12 +1359,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
-                    cliques_plot1 = function() private$.items[["cliques_plot1"]],
-                    cliques_plot2 = function() private$.items[["cliques_plot2"]],
-                    cliques_plot3 = function() private$.items[["cliques_plot3"]],
-                    cliques_plot4 = function() private$.items[["cliques_plot4"]],
-                    cliques_plot5 = function() private$.items[["cliques_plot5"]],
-                    cliques_plot6 = function() private$.items[["cliques_plot6"]]),
+                    cliques_combined_plot = function() private$.items[["cliques_combined_plot"]]),
                 private = list(),
                 public=list(
                     initialize=function(options) {
@@ -1392,46 +1387,11 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "cliques_plot_layout"))
                         self$add(jmvcore::Image$new(
                             options=options,
-                            name="cliques_plot1",
-                            width=1000,
-                            height=800,
+                            name="cliques_combined_plot",
+                            width=900,
+                            height=700,
                             visible=TRUE,
-                            renderFun=".showCliquesPlot1"))
-                        self$add(jmvcore::Image$new(
-                            options=options,
-                            name="cliques_plot2",
-                            width=1000,
-                            height=800,
-                            visible=TRUE,
-                            renderFun=".showCliquesPlot2"))
-                        self$add(jmvcore::Image$new(
-                            options=options,
-                            name="cliques_plot3",
-                            width=1000,
-                            height=800,
-                            visible=TRUE,
-                            renderFun=".showCliquesPlot3"))
-                        self$add(jmvcore::Image$new(
-                            options=options,
-                            name="cliques_plot4",
-                            width=1000,
-                            height=800,
-                            visible=TRUE,
-                            renderFun=".showCliquesPlot4"))
-                        self$add(jmvcore::Image$new(
-                            options=options,
-                            name="cliques_plot5",
-                            width=1000,
-                            height=800,
-                            visible=TRUE,
-                            renderFun=".showCliquesPlot5"))
-                        self$add(jmvcore::Image$new(
-                            options=options,
-                            name="cliques_plot6",
-                            width=1000,
-                            height=800,
-                            visible=TRUE,
-                            renderFun=".showCliquesPlot6"))}))$new(options=options))
+                            renderFun=".showCliquesMultiPlot"))}))$new(options=options))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="bootstrapTitle",
@@ -2017,12 +1977,7 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$communityTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cliquesTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$cliquesContent} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$cliques_multiple_plot$cliques_plot1} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$cliques_multiple_plot$cliques_plot2} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$cliques_multiple_plot$cliques_plot3} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$cliques_multiple_plot$cliques_plot4} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$cliques_multiple_plot$cliques_plot5} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$cliques_multiple_plot$cliques_plot6} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$cliques_multiple_plot$cliques_combined_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$bootstrapTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$bootstrap_plot} \tab \tab \tab \tab \tab an image \cr

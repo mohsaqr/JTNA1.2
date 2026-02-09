@@ -440,42 +440,12 @@ items:
         - cliques_plot_node_label_size
         - cliques_plot_layout
       items:
-      - name: cliques_plot1
+      - name: cliques_combined_plot
         type: Image
-        width: 600
-        height: 600
+        width: 900
+        height: 700
         visible: True
-        renderFun: .showCliquesPlot1
-      - name: cliques_plot2
-        type: Image
-        width: 600
-        height: 600
-        visible: True
-        renderFun: .showCliquesPlot2
-      - name: cliques_plot3
-        type: Image
-        width: 600
-        height: 600
-        visible: True
-        renderFun: .showCliquesPlot3
-      - name: cliques_plot4
-        type: Image
-        width: 600
-        height: 600
-        visible: True
-        renderFun: .showCliquesPlot4
-      - name: cliques_plot5
-        type: Image
-        width: 600
-        height: 600
-        visible: True
-        renderFun: .showCliquesPlot5
-      - name: cliques_plot6
-        type: Image
-        width: 600
-        height: 600
-        visible: True
-        renderFun: .showCliquesPlot6
+        renderFun: .showCliquesMultiPlot
     
     ### Bootstrap
 

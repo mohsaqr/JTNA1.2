@@ -391,26 +391,34 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       cliques_size <- as.numeric(self$options$cliques_size)
       cliques_threshold <- as.numeric(self$options$cliques_threshold)
+      if (cliques_threshold == 0) {
+          cliques_threshold <- if (cliques_size <= 2) 0.1 else 0.01
+      }
 
       if(!is.null(model) && (isTRUE(self$options$cliques_show_text) || isTRUE(self$options$cliques_show_plot)) ) {
 
-          # Use state to avoid recalculating expensive cliques analysis, but allow recalculation when needed
           cliques <- self$results$cliques_multiple_plot$state
           if(is.null(cliques)) {
               cliques <- tna::cliques(x=model, size=cliques_size, threshold=cliques_threshold)
+              n_cliques <- lengths(cliques[1])
 
-              # Store state to avoid recalculation
-              self$results$cliques_multiple_plot$setState(cliques)
-              
-              if(isTRUE(self$options$cliques_show_text)) {
-                self$results$cliquesContent$setContent(cliques)
+              if (n_cliques == 0) {
+                  self$results$cliquesTitle$setContent(
+                      paste0("No cliques of size ", cliques_size, " found with threshold ", cliques_threshold,
+                             ". Try lowering the threshold or reducing the clique size."))
+                  self$results$cliquesTitle$setVisible(TRUE)
+                  self$results$cliques_multiple_plot$setVisible(FALSE)
+                  self$results$cliquesContent$setVisible(FALSE)
+              } else {
+                  self$results$cliques_multiple_plot$setState(cliques)
+                  if(isTRUE(self$options$cliques_show_text)) {
+                      self$results$cliquesContent$setContent(cliques)
+                  }
+                  self$results$cliques_multiple_plot$setVisible(self$options$cliques_show_plot)
+                  self$results$cliquesContent$setVisible(self$options$cliques_show_text)
+                  self$results$cliquesTitle$setVisible(isTRUE(self$options$cliques_show_text) || isTRUE(self$options$cliques_show_plot))
               }
           }
-          
-          # Set visibility
-          self$results$cliques_multiple_plot$setVisible(self$options$cliques_show_plot)
-          self$results$cliquesContent$setVisible(self$options$cliques_show_text)
-          self$results$cliquesTitle$setVisible(isTRUE(self$options$cliques_show_text) || isTRUE(self$options$cliques_show_plot))
       }
 
       ### Bootstrap
@@ -882,7 +890,11 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Add actor if provided
             if(!is.null(actor_col) && length(actor_col) > 0 && actor_col != "") {
               unique_actors <- unique(self$data[[actor_col]])
-              indices$actor <- as.character(unique_actors)
+              if (length(unique_actors) == nrow(indices)) {
+                indices$actor <- as.character(unique_actors)
+              } else {
+                indices$actor <- NA
+              }
             } else {
               indices$actor <- NA
             }
@@ -891,12 +903,16 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if(!is.null(group_col) && length(group_col) > 0 && group_col != "") {
               if(!is.null(actor_col) && length(actor_col) > 0 && actor_col != "") {
                 unique_actors <- unique(self$data[[actor_col]])
-                group_values <- sapply(unique_actors, function(a) {
-                  self$data[[group_col]][self$data[[actor_col]] == a][1]
-                })
-                indices$group <- as.character(group_values)
+                if (length(unique_actors) == nrow(indices)) {
+                  group_values <- sapply(unique_actors, function(a) {
+                    self$data[[group_col]][self$data[[actor_col]] == a][1]
+                  })
+                  indices$group <- as.character(group_values)
+                } else {
+                  indices$group <- NA
+                }
               } else {
-                indices$group <- as.character(self$data[[group_col]][1])
+                indices$group <- NA
               }
             } else {
               indices$group <- NA
@@ -1115,141 +1131,27 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         FALSE
       }
     },
-    .showCliquesPlot1=function(image, ...) {
+    .showCliquesMultiPlot=function(image, ...) {
         plotData <- self$results$cliques_multiple_plot$state
-        number_value <- lengths(plotData[1])
-        if(!is.null(plotData) && self$options$cliques_show_plot && number_value > 0)  {
+        if (!is.null(plotData) && self$options$cliques_show_plot) {
             tryCatch({
-                len <- length(plotData)
-                if (len == 0) return(FALSE)
-                column <- ceiling(sqrt(len))
-                row <- ceiling(len / column)
-                par(mfrow = c(row, column))
-                plot(x=plotData, ask=FALSE, first=1, n=1,
-                    cut=self$options$cliques_plot_cut, minimum=self$options$cliques_plot_min_value,
-                    edge.label.cex=self$options$cliques_plot_edge_label_size,
-                    node.width=self$options$cliques_plot_node_size,
-                    label.cex=self$options$cliques_plot_node_label_size,
-                    layout=self$options$cliques_plot_layout)
+                n_cliques <- lengths(plotData[1])
+                if (n_cliques == 0) return(FALSE)
+                ncol <- ceiling(sqrt(n_cliques))
+                nrow <- ceiling(n_cliques / ncol)
+                par(mfrow = c(nrow, ncol), mar = c(2, 2, 3, 1))
+                for (i in seq_len(n_cliques)) {
+                    plot(x=plotData, ask=FALSE, first=i, n=1,
+                        cut=self$options$cliques_plot_cut,
+                        minimum=self$options$cliques_plot_min_value,
+                        edge.label.cex=self$options$cliques_plot_edge_label_size,
+                        node.width=self$options$cliques_plot_node_size,
+                        label.cex=self$options$cliques_plot_node_label_size,
+                        layout=self$options$cliques_plot_layout)
+                }
             }, error = function(e) { plot(1, type="n", main="Cliques Plot Error", sub=e$message) })
             TRUE
         } else {
-            self$results$cliques_multiple_plot$cliques_plot1$setVisible(FALSE)
-            FALSE
-        }
-    },
-    .showCliquesPlot2=function(image, ...) {
-        plotData <- self$results$cliques_multiple_plot$state
-        number_value <- lengths(plotData[1])
-        if(!is.null(plotData) && self$options$cliques_show_plot && number_value > 1)  {
-            tryCatch({
-                len <- length(plotData)
-                if (len == 0) return(FALSE)
-                column <- ceiling(sqrt(len))
-                row <- ceiling(len / column)
-                par(mfrow = c(row, column))
-                plot(x=plotData, ask=FALSE, first=2, n=1,
-                    cut=self$options$cliques_plot_cut, minimum=self$options$cliques_plot_min_value,
-                    edge.label.cex=self$options$cliques_plot_edge_label_size,
-                    node.width=self$options$cliques_plot_node_size,
-                    label.cex=self$options$cliques_plot_node_label_size,
-                    layout=self$options$cliques_plot_layout)
-            }, error = function(e) { plot(1, type="n", main="Cliques Plot Error", sub=e$message) })
-            TRUE
-        } else {
-            self$results$cliques_multiple_plot$cliques_plot2$setVisible(FALSE)
-            FALSE
-        }
-    },
-    .showCliquesPlot3=function(image, ...) {
-        plotData <- self$results$cliques_multiple_plot$state
-        number_value <- lengths(plotData[1])
-        if(!is.null(plotData) && self$options$cliques_show_plot && number_value > 2)  {
-            tryCatch({
-                len <- length(plotData)
-                if (len == 0) return(FALSE)
-                column <- ceiling(sqrt(len))
-                row <- ceiling(len / column)
-                par(mfrow = c(row, column))
-                plot(x=plotData, ask=FALSE, first=3, n=1,
-                    cut=self$options$cliques_plot_cut, minimum=self$options$cliques_plot_min_value,
-                    edge.label.cex=self$options$cliques_plot_edge_label_size,
-                    node.width=self$options$cliques_plot_node_size,
-                    label.cex=self$options$cliques_plot_node_label_size,
-                    layout=self$options$cliques_plot_layout)
-            }, error = function(e) { plot(1, type="n", main="Cliques Plot Error", sub=e$message) })
-            TRUE
-        } else {
-            self$results$cliques_multiple_plot$cliques_plot3$setVisible(FALSE)
-            FALSE
-        }
-    },
-    .showCliquesPlot4=function(image, ...) {
-        plotData <- self$results$cliques_multiple_plot$state
-        number_value <- lengths(plotData[1])
-        if(!is.null(plotData) && self$options$cliques_show_plot && number_value > 3)  {
-            tryCatch({
-                len <- length(plotData)
-                if (len == 0) return(FALSE)
-                column <- ceiling(sqrt(len))
-                row <- ceiling(len / column)
-                par(mfrow = c(row, column))
-                plot(x=plotData, ask=FALSE, first=4, n=1,
-                    cut=self$options$cliques_plot_cut, minimum=self$options$cliques_plot_min_value,
-                    edge.label.cex=self$options$cliques_plot_edge_label_size,
-                    node.width=self$options$cliques_plot_node_size,
-                    label.cex=self$options$cliques_plot_node_label_size,
-                    layout=self$options$cliques_plot_layout)
-            }, error = function(e) { plot(1, type="n", main="Cliques Plot Error", sub=e$message) })
-            TRUE
-        } else {
-            self$results$cliques_multiple_plot$cliques_plot4$setVisible(FALSE)
-            FALSE
-        }
-    },
-    .showCliquesPlot5=function(image, ...) {
-        plotData <- self$results$cliques_multiple_plot$state
-        number_value <- lengths(plotData[1])
-        if(!is.null(plotData) && self$options$cliques_show_plot && number_value > 4)  {
-            tryCatch({
-                len <- length(plotData)
-                if (len == 0) return(FALSE)
-                column <- ceiling(sqrt(len))
-                row <- ceiling(len / column)
-                par(mfrow = c(row, column))
-                plot(x=plotData, ask=FALSE, first=5, n=1,
-                    cut=self$options$cliques_plot_cut, minimum=self$options$cliques_plot_min_value,
-                    edge.label.cex=self$options$cliques_plot_edge_label_size,
-                    node.width=self$options$cliques_plot_node_size,
-                    label.cex=self$options$cliques_plot_node_label_size,
-                    layout=self$options$cliques_plot_layout)
-            }, error = function(e) { plot(1, type="n", main="Cliques Plot Error", sub=e$message) })
-            TRUE
-        } else {
-            self$results$cliques_multiple_plot$cliques_plot5$setVisible(FALSE)
-            FALSE
-        }
-    },
-    .showCliquesPlot6=function(image, ...) {
-        plotData <- self$results$cliques_multiple_plot$state
-        number_value <- lengths(plotData[1])
-        if(!is.null(plotData) && self$options$cliques_show_plot && number_value > 5)  {
-            tryCatch({
-                len <- length(plotData)
-                if (len == 0) return(FALSE)
-                column <- ceiling(sqrt(len))
-                row <- ceiling(len / column)
-                par(mfrow = c(row, column))
-                plot(x=plotData, ask=FALSE, first=6, n=1,
-                    cut=self$options$cliques_plot_cut, minimum=self$options$cliques_plot_min_value,
-                    edge.label.cex=self$options$cliques_plot_edge_label_size,
-                    node.width=self$options$cliques_plot_node_size,
-                    label.cex=self$options$cliques_plot_node_label_size,
-                    layout=self$options$cliques_plot_layout)
-            }, error = function(e) { plot(1, type="n", main="Cliques Plot Error", sub=e$message) })
-            TRUE
-        } else {
-            self$results$cliques_multiple_plot$cliques_plot6$setVisible(FALSE)
             FALSE
         }
     },
