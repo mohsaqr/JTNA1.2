@@ -1,7 +1,7 @@
 ---
 title: Transition Network Analysis
 name: JTNA
-version: 1.6t
+version: 1.6.0
 jms: '1.0'
 authors:
   - Dylan Girault
@@ -17,8 +17,11 @@ description: >-
   calculating centrality measures, and identifying dominant events and patterns.
   TNA statistical techniques (e.g., bootstrapping and permutation tests) ensure
   the reliability of observed insights and confirm that identified dynamics are
-  meaningful. <a href="https://doi.org/10.1145/3706468.3706513"
-  target="_blank">See (Saqr et al., 2025)</a> for more details on TNA.
+  meaningful. See <a href="https://doi.org/10.1145/3706468.3706513"
+  target="_blank">(Saqr et al., 2025)</a> for more details, <a
+  href="https://github.com/sonsoleslp/JTNA" target="_blank">(Girault et al.,
+  2025)</a> for JTNA, and <a href="https://doi.org/10.1177/01466216251348840"
+  target="_blank">(Tikka et al., 2025)</a> for TNA.
 analyses:
   - title: Transition Network Analysis
     name: TNA
@@ -37,12 +40,6 @@ analyses:
     ns: JTNA
     menuGroup: JTNA
     menuTitle: Cluster Transition Network Analysis
-    category: analyses
-  - title: One-Hot Co-occurrence Network Analysis
-    name: OneHotTNA
-    ns: JTNA
-    menuGroup: JTNA
-    menuTitle: One-Hot Co-occurrence Network Analysis
     category: analyses
 usesNative: true
 minApp: 1.8.0
