@@ -1099,7 +1099,8 @@ ClusterTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "JTNA",
                     "TNA",
-                    "TNALAK"))
+                    "TNALAK",
+                    "CODYNA"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

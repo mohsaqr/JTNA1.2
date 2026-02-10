@@ -699,13 +699,6 @@ options:
           name: gapped
         - title: Repeated
           name: repeated
-        - title: Custom
-          name: custom
-
-    - name: pattern_custom
-      title: Custom Pattern
-      type: String
-      default: ""
 
     - name: pattern_len_min
       title: Min Length

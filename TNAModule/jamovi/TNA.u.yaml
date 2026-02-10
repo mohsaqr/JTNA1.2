@@ -92,12 +92,10 @@ children:
               - type: TextBox
                 name: buildModel_threshold
                 format: number
-  # ── Network Analysis ──
   - type: Label
-    label: "━━ 𝗡𝗲𝘁𝘄𝗼𝗿𝗸 𝗔𝗻𝗮𝗹𝘆𝘀𝗶𝘀 ━━"
+    label: ━━ 𝗡𝗲𝘁𝘄𝗼𝗿𝗸 𝗔𝗻𝗮𝗹𝘆𝘀𝗶𝘀 ━━
     style: list-inline
     margin: large
-
   - type: CollapseBox
     label: Visualization Settings
     margin: large
@@ -382,12 +380,10 @@ children:
               - type: ComboBox
                 name: cliques_plot_layout
                 enable: (cliques_show_plot)
-  # ── Confirmatory Testing ──
   - type: Label
-    label: "━━ 𝗖𝗼𝗻𝗳𝗶𝗿𝗺𝗮𝘁𝗼𝗿𝘆 𝗧𝗲𝘀𝘁𝗶𝗻𝗴 ━━"
+    label: ━━ 𝗖𝗼𝗻𝗳𝗶𝗿𝗺𝗮𝘁𝗼𝗿𝘆 𝗧𝗲𝘀𝘁𝗶𝗻𝗴 ━━
     style: list-inline
     margin: large
-
   - type: CollapseBox
     label: Bootstrap Analysis
     margin: large
@@ -527,12 +523,10 @@ children:
               - type: TextBox
                 name: centrality_stability_certainty
                 format: number
-  # ── Sequence Analysis ──
   - type: Label
-    label: "━━ 𝗦𝗲𝗾𝘂𝗲𝗻𝗰𝗲 𝗔𝗻𝗮𝗹𝘆𝘀𝗶𝘀 ━━"
+    label: ━━ 𝗦𝗲𝗾𝘂𝗲𝗻𝗰𝗲 𝗔𝗻𝗮𝗹𝘆𝘀𝗶𝘀 ━━
     style: list-inline
     margin: large
-
   - type: CollapseBox
     label: Sequence Analysis
     margin: large
@@ -629,20 +623,9 @@ children:
                 name: pattern_type_repeated
                 optionName: pattern_type
                 optionPart: repeated
-              - type: RadioButton
-                name: pattern_type_custom
-                optionName: pattern_type
-                optionPart: custom
       - type: LayoutBox
         stretchFactor: 1
         children:
-          - type: Label
-            label: Custom Pattern
-            children:
-              - type: TextBox
-                name: pattern_custom
-                format: string
-                enable: (pattern_type_custom)
           - type: Label
             label: Length (N-gram/Repeated)
             children:
@@ -697,40 +680,39 @@ children:
                 format: number
               - type: CheckBox
                 name: pattern_table_show_all
-
   - type: CollapseBox
     label: Sequence Indices
     collapsed: true
     children:
-    - type: LayoutBox
-      margin: large
-      children:
-        - type: Label
-          label: Display Options
-          children:
-            - type: CheckBox
-              name: indices_show_table
-              label: Show indices table
-        - type: Label
-          label: Favorable State (optional)
-          children:
-            - type: LevelSelector
-              name: indices_favorable
-              variable: (buildModel_variables_long_action)
-    - type: LayoutBox
-      stretchFactor: 1
-      children:
-        - type: Label
-          label: Parameters
-          children:
-            - type: TextBox
-              name: indices_omega
-              format: number
-        - type: Label
-          label: Table Options
-          children:
-            - type: TextBox
-              name: indices_table_max_rows
-              format: number
-            - type: CheckBox
-              name: indices_table_show_all
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: indices_show_table
+                label: Show indices table
+          - type: Label
+            label: Favorable State (optional)
+            children:
+              - type: LevelSelector
+                name: indices_favorable
+                variable: (buildModel_variables_long_action)
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Parameters
+            children:
+              - type: TextBox
+                name: indices_omega
+                format: number
+          - type: Label
+            label: Table Options
+            children:
+              - type: TextBox
+                name: indices_table_max_rows
+                format: number
+              - type: CheckBox
+                name: indices_table_show_all

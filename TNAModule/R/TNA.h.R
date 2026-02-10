@@ -93,7 +93,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             sequences_tick = 5,
             pattern_show_table = FALSE,
             pattern_type = "ngram",
-            pattern_custom = "",
             pattern_len_min = 2,
             pattern_len_max = 5,
             pattern_gap_min = 1,
@@ -618,12 +617,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "ngram",
                     "gapped",
-                    "repeated",
-                    "custom"))
-            private$..pattern_custom <- jmvcore::OptionString$new(
-                "pattern_custom",
-                pattern_custom,
-                default="")
+                    "repeated"))
             private$..pattern_len_min <- jmvcore::OptionInteger$new(
                 "pattern_len_min",
                 pattern_len_min,
@@ -794,7 +788,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..sequences_tick)
             self$.addOption(private$..pattern_show_table)
             self$.addOption(private$..pattern_type)
-            self$.addOption(private$..pattern_custom)
             self$.addOption(private$..pattern_len_min)
             self$.addOption(private$..pattern_len_max)
             self$.addOption(private$..pattern_gap_min)
@@ -900,7 +893,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         sequences_tick = function() private$..sequences_tick$value,
         pattern_show_table = function() private$..pattern_show_table$value,
         pattern_type = function() private$..pattern_type$value,
-        pattern_custom = function() private$..pattern_custom$value,
         pattern_len_min = function() private$..pattern_len_min$value,
         pattern_len_max = function() private$..pattern_len_max$value,
         pattern_gap_min = function() private$..pattern_gap_min$value,
@@ -1005,7 +997,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..sequences_tick = NA,
         ..pattern_show_table = NA,
         ..pattern_type = NA,
-        ..pattern_custom = NA,
         ..pattern_len_min = NA,
         ..pattern_len_max = NA,
         ..pattern_gap_min = NA,
@@ -1073,7 +1064,8 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "JTNA",
                     "TNA",
-                    "TNALAK"))
+                    "TNALAK",
+                    "CODYNA"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -1883,7 +1875,6 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param sequences_tick .
 #' @param pattern_show_table .
 #' @param pattern_type .
-#' @param pattern_custom .
 #' @param pattern_len_min .
 #' @param pattern_len_max .
 #' @param pattern_gap_min .
@@ -2036,7 +2027,6 @@ TNA <- function(
     sequences_tick = 5,
     pattern_show_table = FALSE,
     pattern_type = "ngram",
-    pattern_custom = "",
     pattern_len_min = 2,
     pattern_len_max = 5,
     pattern_gap_min = 1,
@@ -2158,7 +2148,6 @@ TNA <- function(
         sequences_tick = sequences_tick,
         pattern_show_table = pattern_show_table,
         pattern_type = pattern_type,
-        pattern_custom = pattern_custom,
         pattern_len_min = pattern_len_min,
         pattern_len_max = pattern_len_max,
         pattern_gap_min = pattern_gap_min,

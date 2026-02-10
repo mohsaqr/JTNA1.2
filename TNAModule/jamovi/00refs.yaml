@@ -14,7 +14,7 @@ refs:
     year: 2025
     title: 'tna: An R Package for Transition Network Analysis'
     publisher: 'Applied Psychological Measurement'
-    url: 'https://doi.org/10.1177/01466216251348840'
+    doi: '10.1177/01466216251348840'
 
   TNALAK:
     type: 'article'
@@ -22,5 +22,13 @@ refs:
     year: 2025
     title: 'Transition network analysis: A novel framework for modeling, visualizing, and identifying the temporal patterns of learners and learning processes'
     publisher: 'Proceedings of the 15th International Learning Analytics and Knowledge Conference (pp. 351-361)'
-    url: 'https://doi.org/10.1145/3706468.3706513'
+    doi: '10.1145/3706468.3706513'
+
+  CODYNA:
+    type: 'article'
+    author: Tikka, S., López-Pernas, S., & Saqr, M.
+    year: 2025
+    title: 'Analyzing Complex Dynamic Systems with the R package codyna'
+    publisher: 'ResearchGate'
+    doi: '10.13140/RG.2.2.19126.56646'
 ...

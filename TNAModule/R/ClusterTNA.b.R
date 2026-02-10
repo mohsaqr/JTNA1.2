@@ -160,7 +160,7 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Populate table
         if(!is.null(cent) && is.data.frame(cent) && nrow(cent) > 0) {
           for (i in 1:nrow(cent)) {
-            rowValues <- list(group = as.character(cent[i, "group"]), state = as.character(cent[i, "state"]))
+            rowValues <- list(group = as.character(cent$group[i]), state = as.character(cent$state[i]))
             for(measure in vectorCharacter) {
               if(measure %in% colnames(cent)) rowValues[[measure]] <- as.numeric(cent[i, measure])
             }
@@ -195,10 +195,15 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             row_key <- 1
             method_names <- NULL
 
-            for(cluster_name in names(coms)) {
+            cluster_names <- names(coms)
+            if(is.null(cluster_names) || length(cluster_names) == 0) {
+                cluster_names <- seq_along(coms)
+            }
+
+            for(cluster_name in cluster_names) {
                 cluster_coms <- coms[[cluster_name]]
                 if(!is.null(cluster_coms) && !is.null(cluster_coms$assignments)) {
-                    assignments <- cluster_coms$assignments
+                    assignments <- as.data.frame(cluster_coms$assignments)
 
                     # Add columns for each community detection method (only once)
                     if(is.null(method_names)) {
@@ -212,10 +217,10 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     for (i in 1:nrow(assignments)) {
                         rowValues <- list()
                         rowValues$cluster <- as.character(cluster_name)
-                        rowValues$state <- as.character(assignments[i, "state"])
+                        rowValues$state <- as.character(assignments$state[i])
 
                         for(method in method_names) {
-                            rowValues[[method]] <- as.integer(assignments[i, method])
+                            rowValues[[method]] <- as.integer(assignments[[method]][i])
                         }
 
                         self$results$communityTable$addRow(rowKey=row_key, values=rowValues)
@@ -289,7 +294,7 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 row <- summary_data[i,]
                 self$results$bootstrapTable$addRow(rowKey=row_key, values=list(
-                  group = group_name,
+                  cluster = group_name,
                   from = as.character(row$from),
                   to = as.character(row$to),
                   weight = as.numeric(row$weight),
@@ -342,7 +347,7 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Check row limit unless show_all is enabled
                 if (!show_all && row_key > max_rows) break
                 self$results$permutationContent$addRow(rowKey=row_key, values=list(
-                  group_comparison = comp_name,
+                  cluster_comparison = comp_name,
                   edge_name = as.character(stats_df[i, "edge_name"]),
                   diff_true = as.numeric(stats_df[i, "diff_true"]),
                   effect_size = as.numeric(stats_df[i, "effect_size"]),
@@ -456,8 +461,15 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Show instructions
         self$results$compareInstructions$setContent(
-          '<div style="border: 2px solid #d4edda; border-radius: 10px; padding: 10px; background-color: #d4edda; margin: 10px 0;">
-          <b>Compare Network Properties</b>: Compares general network properties between two clusters, including edge weight correlations, distances, and structural metrics like density and reciprocity.
+          '<div style="border: 2px solid #d4edda; border-radius: 10px; padding: 15px; background-color: #d4edda; margin: 10px 0;">
+          <b style="font-size: 14px;">Compare Network Properties</b>
+          <p style="margin: 8px 0 4px 0;">Compares transition network properties between two selected clusters to identify structural differences.</p>
+          <ul style="margin: 4px 0; padding-left: 20px;">
+            <li><b>Select two clusters</b> using the <em>Cluster i</em> and <em>Cluster j</em> options below.</li>
+            <li><b>Summary Metrics</b>: Shows density, reciprocity, and other global network properties side by side.</li>
+            <li><b>Network Comparison Table</b>: Shows edge-level differences including correlation and distance between edge weights.</li>
+            <li><b>Network Comparison Plot</b>: Visualizes the difference network highlighting stronger/weaker transitions.</li>
+          </ul>
           </div>'
         )
         self$results$compareInstructions$setVisible(TRUE)
@@ -776,22 +788,21 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     .showCommunityPlot = function(image, ...) {
       plotData <- self$results$community_plot$state
       if(is.null(plotData) || !self$options$community_show_plot) return(FALSE)
-      tryCatch({
-          if(length(plotData) == 1) {
-            par(mfrow = c(1, 1))
-          } else if(length(plotData) <= 4) {
-            par(mfrow = c(2, 2))
-          } else if(length(plotData) <= 6) {
-            par(mfrow = c(2, 3))
-          } else if(length(plotData) <= 9) {
-            par(mfrow = c(3, 3))
-          } else {
-            row <- ceiling(sqrt(length(plotData)))
-            column <- ceiling(length(plotData) / row)
-            par(mfrow = c(row, column))
-          }
-          plot(plotData)
-      }, error = function(e) { plot(1, type="n", main="Community Plot Error", sub=e$message) })
+      if(length(plotData) == 1) {
+        par(mfrow = c(1, 1))
+      } else if(length(plotData) <= 4) {
+        par(mfrow = c(2, 2))
+      } else if(length(plotData) <= 6) {
+        par(mfrow = c(2, 3))
+      } else if(length(plotData) <= 9) {
+        par(mfrow = c(3, 3))
+      } else {
+        row <- ceiling(sqrt(length(plotData)))
+        column <- ceiling(length(plotData) / row)
+        par(mfrow = c(row, column))
+      }
+      method <- self$options$community_methods
+      plot(x=plotData, method=method, bg="transparent")
       TRUE
     },
 
@@ -843,7 +854,7 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           } else {
             par(mfrow = c(ceiling(sqrt(length(plotData))), ceiling(sqrt(length(plotData)))))
           }
-          plot(x=plotData)
+          plot(x=plotData, cut=0.01)
       }, error = function(e) { plot(1, type="n", main="Permutation Plot Error", sub=e$message) })
       TRUE
     },

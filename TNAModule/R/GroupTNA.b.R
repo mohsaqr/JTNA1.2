@@ -267,8 +267,8 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                       rowValues <- list()
                       
                       # Extract values directly from data frame columns
-                      rowValues$group <- as.character(cent[i, "group"])
-                      rowValues$state <- as.character(cent[i, "state"])
+                      rowValues$group <- as.character(cent$group[i])
+                      rowValues$state <- as.character(cent$state[i])
 
                       if ("OutStrength" %in% vectorCharacter && "OutStrength" %in% colnames(cent)) {
                           rowValues$OutStrength <- as.numeric(cent[i, "OutStrength"])
@@ -350,10 +350,15 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             row_key <- 1
             method_names <- NULL
 
-            for(group_name in names(coms)) {
+            group_names <- names(coms)
+            if(is.null(group_names) || length(group_names) == 0) {
+                group_names <- seq_along(coms)
+            }
+
+            for(group_name in group_names) {
                 group_coms <- coms[[group_name]]
                 if(!is.null(group_coms) && !is.null(group_coms$assignments)) {
-                    assignments <- group_coms$assignments
+                    assignments <- as.data.frame(group_coms$assignments)
 
                     # Add columns for each community detection method (only once)
                     if(is.null(method_names)) {
@@ -367,10 +372,10 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     for (i in 1:nrow(assignments)) {
                         rowValues <- list()
                         rowValues$group <- as.character(group_name)
-                        rowValues$state <- as.character(assignments[i, "state"])
+                        rowValues$state <- as.character(assignments$state[i])
 
                         for(method in method_names) {
-                            rowValues[[method]] <- as.integer(assignments[i, method])
+                            rowValues[[method]] <- as.integer(assignments[[method]][i])
                         }
 
                         self$results$communityTable$addRow(rowKey=row_key, values=rowValues)
@@ -701,8 +706,15 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Show instructions
         self$results$compareInstructions$setContent(
-          '<div style="border: 2px solid #d4edda; border-radius: 10px; padding: 10px; background-color: #d4edda; margin: 10px 0;">
-          <b>Compare Network Properties</b>: Compares general network properties between two groups, including edge weight correlations, distances, and structural metrics like density and reciprocity.
+          '<div style="border: 2px solid #d4edda; border-radius: 10px; padding: 15px; background-color: #d4edda; margin: 10px 0;">
+          <b style="font-size: 14px;">Compare Network Properties</b>
+          <p style="margin: 8px 0 4px 0;">Compares transition network properties between two selected groups to identify structural differences.</p>
+          <ul style="margin: 4px 0; padding-left: 20px;">
+            <li><b>Select two groups</b> using the <em>Group i</em> and <em>Group j</em> options below.</li>
+            <li><b>Summary Metrics</b>: Shows density, reciprocity, and other global network properties side by side.</li>
+            <li><b>Network Comparison Table</b>: Shows edge-level differences including correlation and distance between edge weights.</li>
+            <li><b>Network Comparison Plot</b>: Visualizes the difference network highlighting stronger/weaker transitions.</li>
+          </ul>
           </div>'
         )
         self$results$compareInstructions$setVisible(TRUE)
@@ -1092,24 +1104,21 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       plotData <- self$results$community_plot$state
 
       if(!is.null(plotData) && self$options$community_show_plot)  {
-        tryCatch({
-            if(length(plotData) == 1) {
-              par(mfrow = c(1, 1))
-            } else if(length(plotData) <= 4) {
-              par(mfrow = c(2, 2))
-            } else if(length(plotData) <= 6) {
-              par(mfrow = c(2, 3))
-            } else if(length(plotData) <= 9) {
-              par(mfrow = c(3, 3))
-            } else {
-              row <- ceiling(sqrt(length(plotData)))
-              column <- ceiling(length(plotData) / row)
-              par(mfrow = c(row, column))
-            }
-            plot(plotData)
-        }, error = function(e) {
-            plot(1, type="n", main="Community Plot Error", sub=e$message)
-        })
+        if(length(plotData) == 1) {
+          par(mfrow = c(1, 1))
+        } else if(length(plotData) <= 4) {
+          par(mfrow = c(2, 2))
+        } else if(length(plotData) <= 6) {
+          par(mfrow = c(2, 3))
+        } else if(length(plotData) <= 9) {
+          par(mfrow = c(3, 3))
+        } else {
+          row <- ceiling(sqrt(length(plotData)))
+          column <- ceiling(length(plotData) / row)
+          par(mfrow = c(row, column))
+        }
+        method <- self$options$community_methods
+        plot(x=plotData, method=method, bg="transparent")
         TRUE
       }
       else {
@@ -1179,7 +1188,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               column <- ceiling(length(plotData) / row)
               par(mfrow = c(row, column))
             }
-            plot(x=plotData)
+            plot(x=plotData, cut=0.01)
         }, error = function(e) { plot(1, type="n", main="Permutation Plot Error", sub=e$message) })
         TRUE
       }

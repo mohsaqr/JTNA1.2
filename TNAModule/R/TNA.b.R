@@ -111,7 +111,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                         if(type == "attention") {
                             lambda <- self$options$buildModel_lambda
-                            model <- tna::build_model(x=dataForTNA, type=type, scaling=scaling, lambda=lambda)
+                            model <- tna::build_model(x=dataForTNA, type=type, scaling=scaling, params=list(lambda=lambda))
                         } else {
                             model <- tna::build_model(x=dataForTNA, type=type, scaling=scaling)
                         }
@@ -220,7 +220,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 } else {
                 for (i in 1:nrow(cent)) {
                     rowValues <- list()
-                    rowValues$state <- as.character(cent[i, "state"])
+                    rowValues$state <- as.character(cent$state[i])
                     for (measure in vectorCharacter) {
                         if (measure %in% colnames(cent)) {
                             rowValues[[measure]] <- as.numeric(cent[i, measure])
@@ -392,23 +392,23 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Populate communities table
                 if(!is.null(coms) && self$options$community_show_table) {
                     if(!is.null(coms$assignments)) {
-                        assignments <- coms$assignments
-                        
+                        assignments <- as.data.frame(coms$assignments)
+
                         # Add columns for each community detection method
-                        method_names <- colnames(assignments)[-1]  # Exclude 'state' column
+                        method_names <- colnames(assignments)[colnames(assignments) != "state"]
                         for(method in method_names) {
                             self$results$communityTable$addColumn(name=method, title=method, type="integer")
                         }
-                        
+
                         # Add rows with community assignments
                         for (i in 1:nrow(assignments)) {
                             rowValues <- list()
-                            rowValues$state <- as.character(assignments[i, "state"])
-                            
+                            rowValues$state <- as.character(assignments$state[i])
+
                             for(method in method_names) {
-                                rowValues[[method]] <- as.integer(assignments[i, method])
+                                rowValues[[method]] <- as.integer(assignments[[method]][i])
                             }
-                            
+
                             self$results$communityTable$addRow(rowKey=i, values=rowValues)
                         }
                     }
@@ -560,58 +560,28 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         self$results$patternTitle$setContent("ERROR: Could not prepare data")
                         return()
                     }
-                    if(is.null(dataForTNA$sequence_data)) {
-                        self$results$patternTitle$setContent(paste("ERROR: sequence_data is NULL. Names:", paste(names(dataForTNA), collapse=", ")))
+
+                    # Extract sequence data from tna_data object
+                    if(inherits(dataForTNA, "tna_data")) {
+                        seq_data <- as.data.frame(dataForTNA$sequence_data)
+                    } else if(is.data.frame(dataForTNA)) {
+                        seq_data <- dataForTNA
+                    } else {
+                        self$results$patternTitle$setContent(paste("ERROR: unexpected data class:", paste(class(dataForTNA), collapse=", ")))
                         return()
                     }
-
-                    # Get sequence data in wide format from prepared data
-                    seq_data <- dataForTNA$sequence_data
 
                     # Determine pattern type and parameters
                     pattern_type <- self$options$pattern_type
 
-                    # Build arguments for discover_patterns
-                    custom_pattern <- self$options$pattern_custom
-                    if(pattern_type == "custom" && !is.null(custom_pattern) && nchar(custom_pattern) > 0) {
-                        # Custom pattern search
-                        patterns <- codyna::discover_patterns(
-                            data = seq_data,
-                            pattern = self$options$pattern_custom,
-                            min_support = self$options$pattern_min_support,
-                            min_count = self$options$pattern_min_count
-                        )
-                    } else {
-                        # Type-based pattern discovery
-                        len_range <- self$options$pattern_len_min:self$options$pattern_len_max
-                        gap_range <- self$options$pattern_gap_min:self$options$pattern_gap_max
-
-                        patterns <- codyna::discover_patterns(
-                            data = seq_data,
-                            type = pattern_type,
-                            len = len_range,
-                            gap = gap_range,
-                            min_support = self$options$pattern_min_support,
-                            min_count = self$options$pattern_min_count
-                        )
-                    }
-
-                    # Apply optional filters (Level type returns NULL when not selected)
-                    if(!is.null(self$options$pattern_starts_with)) {
-                        patterns <- patterns[startsWith(patterns$pattern, self$options$pattern_starts_with), ]
-                    }
-                    if(!is.null(self$options$pattern_ends_with)) {
-                        patterns <- patterns[endsWith(patterns$pattern, self$options$pattern_ends_with), ]
-                    }
-                    # Contains filter supports multiple values (Levels type returns vector)
-                    if(!is.null(self$options$pattern_contains) && length(self$options$pattern_contains) > 0) {
-                        # Pattern must contain ALL selected values
-                        keep <- rep(TRUE, nrow(patterns))
-                        for(val in self$options$pattern_contains) {
-                            keep <- keep & grepl(val, patterns$pattern, fixed=TRUE)
-                        }
-                        patterns <- patterns[keep, ]
-                    }
+                    patterns <- codyna::discover_patterns(
+                        data = seq_data,
+                        type = pattern_type,
+                        len = self$options$pattern_len_min:self$options$pattern_len_max,
+                        gap = self$options$pattern_gap_min:self$options$pattern_gap_max,
+                        min_support = self$options$pattern_min_support,
+                        min_count = self$options$pattern_min_count
+                    )
 
                     # Populate table with row limit
                     if(!is.null(patterns) && nrow(patterns) > 0) {
@@ -641,6 +611,8 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         } else {
                             self$results$patternTitle$setContent(paste("Found", total_patterns, "patterns"))
                         }
+                    } else {
+                        self$results$patternTitle$setContent("No patterns found with the current settings")
                     }
 
                     self$results$patternTable$setVisible(TRUE)
