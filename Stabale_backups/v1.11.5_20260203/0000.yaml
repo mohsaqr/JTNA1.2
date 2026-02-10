@@ -1,0 +1,86 @@
+---
+title: Transition Network Analysis
+name: JTNA
+version: 1.11.5
+jms: '1.0'
+authors:
+  - Dylan GIRAULT
+  - Mohammed Saqr
+  - Santtu Tikka
+  - Sonsoles López-Pernas
+maintainer: Mohammed Saqr <saqr@saqr.me>
+date: '2025-05-09'
+type: R
+description: >-
+  Provides tools for performing Transition Network Analysis (TNA) to
+
+  study relational dynamics, including functions for building and plotting TNA
+
+  models, calculating centrality measures, and identifying dominant events and
+
+  patterns. TNA statistical techniques (e.g., bootstrapping and permutation
+
+  tests) ensure the reliability of observed insights and confirm that
+
+  identified dynamics are meaningful. <a
+  href="https://doi.org/10.1145/3706468.3706513" target="_blank">
+
+  See (Saqr et al., 2025)</a> for more details on TNA.
+analyses:
+  - title: Transition Network Analysis
+    name: TNA
+    ns: JTNA
+    menuGroup: JTNA
+    menuTitle: Transition Network Analysis
+    category: analyses
+  - title: Group Transition Network Analysis
+    name: GroupTNA
+    ns: JTNA
+    menuGroup: JTNA
+    menuTitle: Group Transition Network Analysis
+    category: analyses
+  - title: Cluster Transition Network Analysis
+    name: ClusterTNA
+    ns: JTNA
+    menuGroup: JTNA
+    menuTitle: Cluster Transition Network Analysis
+    category: analyses
+  - title: Co-occurrence Network Analysis
+    name: CoOccurrenceTNA
+    ns: JTNA
+    menuGroup: JTNA
+    menuTitle: Co-occurrence Network Analysis
+    category: analyses
+  - title: Group Co-occurrence Network Analysis
+    name: GroupCoOccurrenceTNA
+    ns: JTNA
+    menuGroup: JTNA
+    menuTitle: Group Co-occurrence Network Analysis
+    category: analyses
+  - title: One-Hot Co-occurrence Network Analysis
+    name: OneHotTNA
+    ns: JTNA
+    menuGroup: JTNA
+    menuTitle: One-Hot Co-occurrence Network Analysis
+    category: analyses
+  - title: Social Network Analysis
+    name: SNA
+    ns: JTNA
+    menuGroup: JTNA
+    menuTitle: Social Network Analysis
+    category: analyses
+usesNative: true
+minApp: 1.8.0
+datasets:
+  - name: Regulation_long
+    path: Regulation_long.csv
+    description: >-
+      Regulation data in long format. Contains Actor, Achievers, Group, Time,
+      and Action columns. Actions include: cohesion, consensus, discuss,
+      synthesis, and more.
+    tags:
+      - TNA
+      - regulation
+      - long format
+
+...

@@ -1,4 +1,4 @@
-title: Group TNA
+title: Group Transition Network Analysis
 name: GroupTNA
 jus: '3.0'
 compilerMode: tame
@@ -7,12 +7,6 @@ children:
     persistentItems: false
     stretchFactor: 1
     children:
-      - type: TargetLayoutBox
-        children:
-          - type: VariablesListBox
-            name: buildModel_variables_long_time
-            isTarget: true
-            maxItemCount: 1
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
@@ -25,6 +19,12 @@ children:
             name: buildModel_variables_long_actor
             maxItemCount: 1
             isTarget: true
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: buildModel_variables_long_time
+            isTarget: true
+            maxItemCount: 1
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
@@ -56,15 +56,19 @@ children:
                 optionName: buildModel_type
                 optionPart: frequency
               - type: RadioButton
-                name: buildModel_type_co_occurrence
+                name: buildModel_type_attention
                 optionName: buildModel_type
-                optionPart: co-occurrence
+                optionPart: attention
           - type: Label
             label: Basic Options
             children:
               - type: CheckBox
                 name: buildModel_show_matrix
                 label: Matrix
+              - type: TextBox
+                name: buildModel_lambda
+                format: number
+                enable: (buildModel_type_attention)
       - type: LayoutBox
         stretchFactor: 1
         children:
@@ -93,6 +97,12 @@ children:
               - type: TextBox
                 name: buildModel_threshold
                 format: number
+  # ── Network Analysis ──
+  - type: Label
+    label: "━━ 𝗡𝗲𝘁𝘄𝗼𝗿𝗸 𝗔𝗻𝗮𝗹𝘆𝘀𝗶𝘀 ━━"
+    style: list-inline
+    margin: large
+
   - type: CollapseBox
     label: Visualization Settings
     margin: large
@@ -231,6 +241,9 @@ children:
               - type: CheckBox
                 name: community_show_plot
                 label: Plot
+              - type: CheckBox
+                name: community_show_table
+                label: Table
       - type: LayoutBox
         stretchFactor: 1
         children:
@@ -285,9 +298,6 @@ children:
             label: Display Options
             children:
               - type: CheckBox
-                name: cliques_show_text
-                label: Table
-              - type: CheckBox
                 name: cliques_show_plot
                 label: Plot
       - type: LayoutBox
@@ -328,6 +338,12 @@ children:
               - type: ComboBox
                 name: cliques_plot_layout
                 enable: (cliques_show_plot)
+  # ── Confirmatory Testing ──
+  - type: Label
+    label: "━━ 𝗖𝗼𝗻𝗳𝗶𝗿𝗺𝗮𝘁𝗼𝗿𝘆 𝗧𝗲𝘀𝘁𝗶𝗻𝗴 ━━"
+    style: list-inline
+    margin: large
+
   - type: CollapseBox
     label: Bootstrap Analysis
     margin: large
@@ -411,7 +427,19 @@ children:
               - type: ComboBox
                 name: bootstrap_plot_layout
                 enable: (bootstrap_show_plot)
-
+          - type: Label
+            label: Table Options
+            children:
+              - type: TextBox
+                name: bootstrap_table_max_rows
+                format: number
+                enable: (bootstrap_show_table)
+              - type: CheckBox
+                name: bootstrap_table_show_all
+                enable: (bootstrap_show_table)
+              - type: CheckBox
+                name: bootstrap_table_significant_only
+                enable: (bootstrap_show_table)
   - type: CollapseBox
     label: Permutation Analysis
     margin: large
@@ -446,6 +474,142 @@ children:
               - type: CheckBox
                 name: permutation_paired
                 label: Paired test
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Table Options
+            children:
+              - type: TextBox
+                name: permutation_table_max_rows
+                format: number
+                enable: (permutation_show_text)
+              - type: CheckBox
+                name: permutation_table_show_all
+                enable: (permutation_show_text)
+  # ── Comparisons ──
+  - type: Label
+    label: "━━ 𝗖𝗼𝗺𝗽𝗮𝗿𝗶𝘀𝗼𝗻𝘀 ━━"
+    style: list-inline
+    margin: large
+
+  - type: CollapseBox
+    label: Network Difference Plot
+    collapsed: true
+    stretchFactor: 1
+    style: inline
+    children:
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: compare_show_network_diff_plot
+                label: Show Plot
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Plot Parameters
+            children:
+              - type: TextBox
+                name: compare_network_diff_plot_cut
+                format: number
+                enable: (compare_show_network_diff_plot)
+              - type: TextBox
+                name: compare_network_diff_plot_min_value
+                format: number
+                enable: (compare_show_network_diff_plot)
+              - type: TextBox
+                name: compare_network_diff_plot_edge_label_size
+                format: number
+                enable: (compare_show_network_diff_plot)
+              - type: TextBox
+                name: compare_network_diff_plot_node_size
+                format: number
+                enable: (compare_show_network_diff_plot)
+              - type: TextBox
+                name: compare_network_diff_plot_node_label_size
+                format: number
+                enable: (compare_show_network_diff_plot)
+              - type: ComboBox
+                name: compare_network_diff_plot_layout
+                enable: (compare_show_network_diff_plot)
+
+  - type: CollapseBox
+    label: Compare Network Properties
+    collapsed: true
+    children:
+      - type: LevelSelector
+        name: compare_group_i
+        variable: (buildModel_variables_long_group)
+        label: First Network
+      - type: LevelSelector
+        name: compare_group_j
+        variable: (buildModel_variables_long_group)
+        label: Second Network
+      - type: CheckBox
+        name: compare_show_summary
+        label: Summary Metrics Table
+      - type: CheckBox
+        name: compare_show_network
+        label: Network Properties Table
+      - type: CheckBox
+        name: compare_show_plot
+        label: Comparison Plot
+      - type: ComboBox
+        name: compare_plot_type
+        label: Plot Type
+        enable: (compare_show_plot)
+      - type: ComboBox
+        name: compare_scaling
+        label: Scaling Method
+
+  - type: CollapseBox
+    label: Compare Sequences
+    margin: large
+    stretchFactor: 1
+    style: inline
+    collapsed: true
+    children:
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: compare_sequences_show_table
+                label: Table
+              - type: CheckBox
+                name: compare_sequences_show_plot
+                label: Plot
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Parameters
+            children:
+              - type: TextBox
+                name: compare_sequences_sub_min
+                format: number
+              - type: TextBox
+                name: compare_sequences_sub_max
+                format: number
+              - type: TextBox
+                name: compare_sequences_min_freq
+                format: number
+              - type: ComboBox
+                name: compare_sequences_correction
+
+  # ── Sequence Analysis ──
+  - type: Label
+    label: "━━ 𝗦𝗲𝗾𝘂𝗲𝗻𝗰𝗲 𝗔𝗻𝗮𝗹𝘆𝘀𝗶𝘀 ━━"
+    style: list-inline
+    margin: large
+
   - type: CollapseBox
     label: Sequence Analysis
     margin: large
@@ -511,3 +675,40 @@ children:
                 name: sequences_tick
                 format: number
                 label: Tick Interval
+
+  - type: CollapseBox
+    label: Sequence Indices
+    collapsed: true
+    children:
+    - type: LayoutBox
+      margin: large
+      children:
+        - type: Label
+          label: Display Options
+          children:
+            - type: CheckBox
+              name: indices_show_table
+              label: Show indices table
+        - type: Label
+          label: Favorable State (optional)
+          children:
+            - type: LevelSelector
+              name: indices_favorable
+              variable: (buildModel_variables_long_action)
+    - type: LayoutBox
+      stretchFactor: 1
+      children:
+        - type: Label
+          label: Parameters
+          children:
+            - type: TextBox
+              name: indices_omega
+              format: number
+        - type: Label
+          label: Table Options
+          children:
+            - type: TextBox
+              name: indices_table_max_rows
+              format: number
+            - type: CheckBox
+              name: indices_table_show_all

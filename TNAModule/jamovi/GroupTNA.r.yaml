@@ -1,10 +1,17 @@
 ---
 name:  GroupTNA
-title: Group TNA
+title: Group Transition Network Analysis
 jrs:   '1.1'
 refs:
+  - JTNA
   - TNA
+  - TNALAK
 items:
+
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: True
 
     - name: errorText
       title: Error
@@ -32,6 +39,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
 
     - name: buildModel_plot
       type: Image
@@ -48,6 +56,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
         - buildModel_plot_cut
         - buildModel_plot_min_value
         - buildModel_plot_edge_label_size
@@ -70,6 +79,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
 
     - name: buildModel_frequencies
       type: Image
@@ -86,6 +96,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
 
     - name: buildModel_mosaic
       type: Image
@@ -102,6 +113,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
         - buildModel_digits
 
 
@@ -123,6 +135,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
         - centrality_loops
         - centrality_normalize
         - centrality_Betweenness
@@ -151,6 +164,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
         - centrality_loops
         - centrality_normalize
         - centrality_Betweenness
@@ -178,6 +192,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
         - centrality_loops
         - centrality_normalize
         - centrality_Betweenness
@@ -212,6 +227,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
         - community_methods
         - community_gamma
 
@@ -230,19 +246,21 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
         - community_methods
         - community_gamma
 
-    ### CLIQUE
-
-    - name:  cliquesTitle
-      type:  Preformatted
-      title: Cliques
+    - name: communityTable
+      type: Table
+      title: Community Assignments
       visible: False
-
-    - name:  cliquesContent
-      type:  Preformatted
-      visible: False
+      columns:
+        - name: group
+          title: Group
+          type: text
+        - name: state
+          title: State
+          type: text
       clearWith:
         - buildModel_variables_long_actor
         - buildModel_variables_long_time
@@ -252,8 +270,16 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-        - cliques_size
-        - cliques_threshold
+        - buildModel_lambda
+        - community_methods
+        - community_gamma
+
+    ### CLIQUE
+
+    - name:  cliquesTitle
+      type:  Preformatted
+      title: Cliques
+      visible: False
 
     - name: cliques_multiple_plot
       type: Group
@@ -268,6 +294,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
         - cliques_size
         - cliques_threshold
         - cliques_plot_cut
@@ -277,42 +304,12 @@ items:
         - cliques_plot_node_label_size
         - cliques_plot_layout
       items:
-      - name: cliques_plot1
+      - name: cliques_combined_plot
         type: Image
-        width: 1000
-        height: 800
+        width: 900
+        height: 700
         visible: True
-        renderFun: .showCliquesPlot1
-      - name: cliques_plot2
-        type: Image
-        width: 1000
-        height: 800
-        visible: True
-        renderFun: .showCliquesPlot2
-      - name: cliques_plot3
-        type: Image
-        width: 1000
-        height: 800
-        visible: True
-        renderFun: .showCliquesPlot3
-      - name: cliques_plot4
-        type: Image
-        width: 1000
-        height: 800
-        visible: True
-        renderFun: .showCliquesPlot4
-      - name: cliques_plot5
-        type: Image
-        width: 1000
-        height: 800
-        visible: True
-        renderFun: .showCliquesPlot5
-      - name: cliques_plot6
-        type: Image
-        width: 1000
-        height: 800
-        visible: True
-        renderFun: .showCliquesPlot6
+        renderFun: .showCliquesMultiPlot
     
     ### Bootstrap
 
@@ -365,6 +362,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
         - bootstrap_iteration
         - bootstrap_level
         - bootstrap_method
@@ -387,6 +385,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
         - bootstrap_iteration
         - bootstrap_level
         - bootstrap_method
@@ -433,6 +432,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
         - permutation_iter
         - permutation_paired
         - permutation_level
@@ -453,11 +453,178 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
         - permutation_iter
         - permutation_paired
         - permutation_level
 
-    ### Sequence Analysis
+    ### COMPARISONS
+
+    # Network Difference Plot (first in Comparisons section)
+    - name: compare_network_diff_plot
+      type: Image
+      title: Network Difference Plot
+      width: 1000
+      height: 800
+      visible: False
+      renderFun: .showCompareNetworkDiffPlot
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_variables_long_group
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - buildModel_lambda
+        - compare_network_diff_plot_cut
+        - compare_network_diff_plot_min_value
+        - compare_network_diff_plot_edge_label_size
+        - compare_network_diff_plot_node_size
+        - compare_network_diff_plot_node_label_size
+        - compare_network_diff_plot_layout
+
+    # Compare Network Properties (second in Comparisons section)
+    - name: compareInstructions
+      type: Html
+      visible: False
+
+    - name: compareTitle
+      type: Preformatted
+      title: Compare Network Properties
+      visible: False
+
+    - name: compare_plot
+      type: Image
+      title: Group Comparison Plot
+      width: 700
+      height: 500
+      visible: False
+      renderFun: .showComparePlot
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_variables_long_group
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - buildModel_lambda
+        - compare_group_i
+        - compare_group_j
+        - compare_scaling
+        - compare_plot_type
+
+    - name: compareSummaryTable
+      type: Table
+      title: Summary Metrics
+      visible: False
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_variables_long_group
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - buildModel_lambda
+        - compare_group_i
+        - compare_group_j
+        - compare_scaling
+
+    - name: compareNetworkTable
+      type: Table
+      title: Network Properties
+      visible: False
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: group_i
+          title: Group 1
+          type: number
+        - name: group_j
+          title: Group 2
+          type: number
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_variables_long_group
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - buildModel_lambda
+        - compare_group_i
+        - compare_group_j
+        - compare_scaling
+
+    # Compare Sequences (third in Comparisons section)
+    - name: compareSequencesTitle
+      type: Preformatted
+      title: Compare Sequences
+      visible: False
+
+    - name: compareSequences_plot
+      type: Image
+      title: Sequence Comparison Plot
+      width: 700
+      height: 500
+      visible: False
+      renderFun: .showCompareSequencesPlot
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_variables_long_group
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - buildModel_lambda
+        - compare_sequences_sub_min
+        - compare_sequences_sub_max
+        - compare_sequences_min_freq
+        - compare_sequences_correction
+
+    - name: compareSequencesTable
+      type: Table
+      title: Sequence Pattern Comparison
+      visible: False
+      columns:
+        - name: pattern
+          title: Pattern
+          type: text
+        - name: length
+          title: Length
+          type: integer
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_variables_long_group
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - buildModel_lambda
+        - compare_sequences_sub_min
+        - compare_sequences_sub_max
+        - compare_sequences_min_freq
+        - compare_sequences_correction
+
+    ### SEQUENCE ANALYSIS
 
     - name: sequences_plot
       type: Image
@@ -475,10 +642,78 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
         - sequences_type
         - sequences_scale
         - sequences_geom
         - sequences_include_na
         - sequences_tick
+
+    ### SEQUENCE INDICES
+
+    - name: indicesTitle
+      type: Preformatted
+      title: Sequence Indices
+      visible: False
+
+    - name: indicesTable
+      type: Table
+      title: Sequence Indices
+      visible: False
+      columns:
+        - name: sequence_id
+          title: Seq
+          type: integer
+        - name: actor
+          title: Actor
+          type: text
+        - name: group
+          title: Group
+          type: text
+        - name: valid_n
+          title: Valid N
+          type: integer
+        - name: unique_states
+          title: Unique
+          type: integer
+        - name: longitudinal_entropy
+          title: Entropy
+          type: number
+        - name: simpson_diversity
+          title: Simpson
+          type: number
+        - name: mean_spell_duration
+          title: Mean Spell
+          type: number
+        - name: self_loop_tendency
+          title: Self-Loop
+          type: number
+        - name: transition_rate
+          title: Trans Rate
+          type: number
+        - name: first_state
+          title: First
+          type: text
+        - name: last_state
+          title: Last
+          type: text
+        - name: dominant_state
+          title: Dominant
+          type: text
+        - name: complexity_index
+          title: Complexity
+          type: number
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_variables_long_group
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - buildModel_lambda
+        - indices_favorable
+        - indices_omega
 
 ...

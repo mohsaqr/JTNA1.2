@@ -2,39 +2,50 @@
 name:  TNA
 title: Transition Network Analysis
 menuGroup: JTNA
-version: '1.4.0'
+version: '1.12.0'
 jas: '1.2'
 
 options:
     - name: data
       type: Data
 
-    - name: buildModel_variables_long_actor
-      title: Actor (Optional)
-      type: Variable
-    - name: buildModel_variables_long_time
-      title: Time (Optional)
-      type: Variable
     - name: buildModel_variables_long_action
       title: Action
       type: Variable
+      description: The column containing the actions/states/events to analyze. Each unique value becomes a node in the network.
+    - name: buildModel_variables_long_actor
+      title: Actor (Optional)
+      type: Variable
+      description: The column identifying individuals/actors. Used to separate sequences by person. If omitted, all data is treated as one sequence.
+    - name: buildModel_variables_long_time
+      title: Time (Optional)
+      type: Variable
+      description: Timestamp column for ordering events chronologically. Use this OR Order, not both.
     - name: buildModel_variables_long_order
       title: Order (Optional)
       type: Variable
+      description: Numeric column indicating the sequence position of each event. Use this OR Time, not both.
 
     ### BUILD MODEL DATA
 
     - name: buildModel_type
-      title: Type 
+      title: Type
       type: List
       options:
         - title: Relative
           name:  relative
         - title: Frequency
           name:  frequency
-        - title: Co-occurrence
-          name:  co-occurrence
+        - title: Attention
+          name:  attention
       default: relative
+
+    - name: buildModel_lambda
+      title: Lambda (decay rate)
+      type: Number
+      default: 1
+      min: 0.01
+      max: 10
 
     - name: buildModel_scaling
       title: Scaling 
@@ -109,6 +120,30 @@ options:
           name: circle
         - title: Spring
           name: spring
+        - title: Kamada-Kawai
+          name: layout_with_kk
+        - title: Graphopt
+          name: layout_with_graphopt
+        - title: GEM
+          name: layout_with_gem
+        - title: DRL
+          name: layout_with_drl
+        - title: Star
+          name: layout_as_star
+        - title: Grid
+          name: layout_on_grid
+        - title: Nicely
+          name: layout_nicely
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
+        - title: Davidson-Harel
+          name: layout_with_dh
+        - title: LGL
+          name: layout_with_lgl
+        - title: Sugiyama
+          name: layout_with_sugiyama
+        - title: Random
+          name: layout_randomly
     
     - name: buildModel_show_histo
       title: Histogram
@@ -127,7 +162,6 @@ options:
       title: Digits
       type: Integer
       default: 1
-
 
     ### CENTRALITY DATA
 
@@ -197,6 +231,53 @@ options:
       type: Bool
       default: True
 
+    ### CENTRALITY STABILITY
+    - name: centrality_stability_show_table
+      title: Stability Table
+      type: Bool
+      default: False
+
+    - name: centrality_stability_show_plot
+      title: Stability Plot
+      type: Bool
+      default: False
+
+    - name: centrality_stability_InStrength
+      title: In Strength
+      type: Bool
+      default: True
+
+    - name: centrality_stability_OutStrength
+      title: Out Strength
+      type: Bool
+      default: True
+
+    - name: centrality_stability_Betweenness
+      title: Betweenness
+      type: Bool
+      default: True
+
+    - name: centrality_stability_iteration
+      title: Iterations
+      type: Integer
+      default: 100
+      min: 10
+      max: 10000
+
+    - name: centrality_stability_threshold
+      title: Threshold
+      type: Number
+      default: 0.7
+      min: 0
+      max: 1
+
+    - name: centrality_stability_certainty
+      title: Certainty
+      type: Number
+      default: 0.95
+      min: 0
+      max: 1
+
     ### EDGE BETWEENNESS
     ##### PLOT
     - name: edgeBetweenness_show_table
@@ -252,6 +333,30 @@ options:
           name: circle
         - title: Spring
           name: spring
+        - title: Kamada-Kawai
+          name: layout_with_kk
+        - title: Graphopt
+          name: layout_with_graphopt
+        - title: GEM
+          name: layout_with_gem
+        - title: DRL
+          name: layout_with_drl
+        - title: Star
+          name: layout_as_star
+        - title: Grid
+          name: layout_on_grid
+        - title: Nicely
+          name: layout_nicely
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
+        - title: Davidson-Harel
+          name: layout_with_dh
+        - title: LGL
+          name: layout_with_lgl
+        - title: Sugiyama
+          name: layout_with_sugiyama
+        - title: Random
+          name: layout_randomly
 
     ### COMMUNITY DATA
     - name: community_methods
@@ -308,11 +413,6 @@ options:
       min: 0
       max: 1
 
-    - name: cliques_show_text
-      title: Text
-      type: Bool
-      default: False
-
     ##### PLOT
 
     - name: cliques_show_plot
@@ -364,6 +464,30 @@ options:
           name: circle
         - title: Spring
           name: spring
+        - title: Kamada-Kawai
+          name: layout_with_kk
+        - title: Graphopt
+          name: layout_with_graphopt
+        - title: GEM
+          name: layout_with_gem
+        - title: DRL
+          name: layout_with_drl
+        - title: Star
+          name: layout_as_star
+        - title: Grid
+          name: layout_on_grid
+        - title: Nicely
+          name: layout_nicely
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
+        - title: Davidson-Harel
+          name: layout_with_dh
+        - title: LGL
+          name: layout_with_lgl
+        - title: Sugiyama
+          name: layout_with_sugiyama
+        - title: Random
+          name: layout_randomly
     
     ### BOOTSTRAP
 
@@ -423,6 +547,23 @@ options:
       type: Bool
       default: False
 
+    - name: bootstrap_table_max_rows
+      title: Max rows
+      type: Integer
+      default: 20
+      min: 1
+      max: 1000
+
+    - name: bootstrap_table_show_all
+      title: Show all rows
+      type: Bool
+      default: False
+
+    - name: bootstrap_table_significant_only
+      title: Significant only
+      type: Bool
+      default: False
+
     - name: bootstrap_plot_cut
       title: Cut value
       type: Number
@@ -466,8 +607,37 @@ options:
           name: circle
         - title: Spring
           name: spring
+        - title: Kamada-Kawai
+          name: layout_with_kk
+        - title: Graphopt
+          name: layout_with_graphopt
+        - title: GEM
+          name: layout_with_gem
+        - title: DRL
+          name: layout_with_drl
+        - title: Star
+          name: layout_as_star
+        - title: Grid
+          name: layout_on_grid
+        - title: Nicely
+          name: layout_nicely
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
+        - title: Davidson-Harel
+          name: layout_with_dh
+        - title: LGL
+          name: layout_with_lgl
+        - title: Sugiyama
+          name: layout_with_sugiyama
+        - title: Random
+          name: layout_randomly
 
     ### SEQUENCE ANALYSIS
+
+    - name: sequences_show_plot
+      title: Sequence Plot
+      type: Bool
+      default: False
 
     - name: sequences_type
       title: Type
@@ -502,9 +672,7 @@ options:
     - name: sequences_include_na
       title: Include missing values
       type: Bool
-      default: true
-
-
+      default: false
 
     - name: sequences_tick
       title: Tick
@@ -513,9 +681,132 @@ options:
       min: 1
       max: 20
 
-    - name: sequences_show_plot
-      title: Sequence Plot
+    ### PATTERN DISCOVERY
+
+    - name: pattern_show_table
+      title: Show Table
       type: Bool
-      default: false
+      default: False
+
+    - name: pattern_type
+      title: Type
+      type: List
+      default: ngram
+      options:
+        - title: N-gram
+          name: ngram
+        - title: Gapped
+          name: gapped
+        - title: Repeated
+          name: repeated
+        - title: Custom
+          name: custom
+
+    - name: pattern_custom
+      title: Custom Pattern
+      type: String
+      default: ""
+
+    - name: pattern_len_min
+      title: Min Length
+      type: Integer
+      default: 2
+      min: 2
+      max: 20
+
+    - name: pattern_len_max
+      title: Max Length
+      type: Integer
+      default: 5
+      min: 2
+      max: 20
+
+    - name: pattern_gap_min
+      title: Min Gap
+      type: Integer
+      default: 1
+      min: 1
+      max: 10
+
+    - name: pattern_gap_max
+      title: Max Gap
+      type: Integer
+      default: 3
+      min: 1
+      max: 10
+
+    - name: pattern_min_support
+      title: Min Support
+      type: Number
+      default: 0.01
+      min: 0
+      max: 1
+
+    - name: pattern_min_count
+      title: Min Count
+      type: Integer
+      default: 2
+      min: 1
+      max: 1000
+
+    - name: pattern_starts_with
+      title: Starts with
+      type: Level
+      variable: (buildModel_variables_long_action)
+
+    - name: pattern_ends_with
+      title: Ends with
+      type: Level
+      variable: (buildModel_variables_long_action)
+
+    - name: pattern_contains
+      title: Contains
+      type: Level
+      variable: (buildModel_variables_long_action)
+
+    - name: pattern_table_max_rows
+      title: Max rows
+      type: Integer
+      default: 20
+      min: 1
+      max: 1000
+
+    - name: pattern_table_show_all
+      title: Show all rows
+      type: Bool
+      default: False
+
+    ### SEQUENCE INDICES
+
+    - name: indices_show_table
+      title: Show Table
+      type: Bool
+      default: False
+
+    - name: indices_favorable
+      title: Favorable State
+      type: Level
+      variable: (buildModel_variables_long_action)
+      description: State considered favorable for computing integrative potential.
+
+    - name: indices_omega
+      title: Omega
+      type: Number
+      default: 1
+      min: 0.01
+      max: 10
+      description: Parameter for computing integrative potential.
+
+    - name: indices_table_max_rows
+      title: Max rows
+      type: Integer
+      default: 50
+      min: 1
+      max: 10000
+
+    - name: indices_table_show_all
+      title: Show all rows
+      type: Bool
+      default: False
 
 ...

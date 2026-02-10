@@ -1,43 +1,55 @@
 ---
 name:  GroupTNA
-title: Group TNA
+title: Group Transition Network Analysis
 menuGroup: JTNA
-version: '1.4.0'
+version: '1.12.0'
 jas: '1.2'
 
 options:
     - name: data
       type: Data
 
-    - name: buildModel_variables_long_actor
-      title: Actor
-      type: Variable
-    - name: buildModel_variables_long_time
-      title: Time (Optional)
-      type: Variable
     - name: buildModel_variables_long_action
       title: Action
       type: Variable
+      description: The column containing the actions/states/events to analyze. Each unique value becomes a node in the network.
+    - name: buildModel_variables_long_actor
+      title: Actor
+      type: Variable
+      description: The column identifying individuals/actors. Used to separate sequences by person.
+    - name: buildModel_variables_long_time
+      title: Time (Optional)
+      type: Variable
+      description: Timestamp column for ordering events chronologically. Use this OR Order, not both.
     - name: buildModel_variables_long_order
       title: Order (Optional)
       type: Variable
+      description: Numeric column indicating the sequence position of each event. Use this OR Time, not both.
     - name: buildModel_variables_long_group
       title: Group
       type: Variable
+      description: The column defining groups for comparison (e.g., treatment vs control). A separate network will be built for each group.
 
     ### BUILD MODEL DATA
 
     - name: buildModel_type
-      title: Type 
+      title: Type
       type: List
       options:
         - title: Relative
           name:  relative
         - title: Frequency
           name:  frequency
-        - title: Co-occurrence
-          name:  co-occurrence
+        - title: Attention
+          name:  attention
       default: relative
+
+    - name: buildModel_lambda
+      title: Lambda (decay rate)
+      type: Number
+      default: 1
+      min: 0.01
+      max: 10
 
     - name: buildModel_scaling
       title: Scaling 
@@ -72,7 +84,7 @@ options:
     - name: buildModel_plot_cut
       title: Cut value
       type: Number
-      default: 0
+      default: 0.1
       min: 0
       max: 1
 
@@ -112,6 +124,30 @@ options:
           name: circle
         - title: Spring
           name: spring
+        - title: Kamada-Kawai
+          name: layout_with_kk
+        - title: Graphopt
+          name: layout_with_graphopt
+        - title: GEM
+          name: layout_with_gem
+        - title: DRL
+          name: layout_with_drl
+        - title: Star
+          name: layout_as_star
+        - title: Grid
+          name: layout_on_grid
+        - title: Nicely
+          name: layout_nicely
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
+        - title: Davidson-Harel
+          name: layout_with_dh
+        - title: LGL
+          name: layout_with_lgl
+        - title: Sugiyama
+          name: layout_with_sugiyama
+        - title: Random
+          name: layout_randomly
     
     - name: buildModel_show_histo
       title: Histogram
@@ -232,6 +268,10 @@ options:
       title: Plot
       type: Bool
       default: False
+    - name: community_show_table
+      title: Table
+      type: Bool
+      default: False
 
     ### CLIQUES DATA
 
@@ -249,11 +289,6 @@ options:
       min: 0
       max: 1
 
-    - name: cliques_show_text
-      title: Text
-      type: Bool
-      default: False
-
     ##### PLOT
 
     - name: cliques_show_plot
@@ -264,7 +299,7 @@ options:
     - name: cliques_plot_cut
       title: Cut value
       type: Number
-      default: 0
+      default: 0.1
       min: 0
       max: 1
 
@@ -305,6 +340,30 @@ options:
           name: circle
         - title: Spring
           name: spring
+        - title: Kamada-Kawai
+          name: layout_with_kk
+        - title: Graphopt
+          name: layout_with_graphopt
+        - title: GEM
+          name: layout_with_gem
+        - title: DRL
+          name: layout_with_drl
+        - title: Star
+          name: layout_as_star
+        - title: Grid
+          name: layout_on_grid
+        - title: Nicely
+          name: layout_nicely
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
+        - title: Davidson-Harel
+          name: layout_with_dh
+        - title: LGL
+          name: layout_with_lgl
+        - title: Sugiyama
+          name: layout_with_sugiyama
+        - title: Random
+          name: layout_randomly
     
     ### BOOTSTRAP
 
@@ -358,7 +417,24 @@ options:
       title: Bootstrap Results Table
       type: Bool
       default: False
-    
+
+    - name: bootstrap_table_max_rows
+      title: Max rows
+      type: Integer
+      default: 20
+      min: 1
+      max: 1000
+
+    - name: bootstrap_table_show_all
+      title: Show all rows
+      type: Bool
+      default: False
+
+    - name: bootstrap_table_significant_only
+      title: Significant only
+      type: Bool
+      default: False
+
     - name: bootstrap_show_plot
       title: Plot
       type: Bool
@@ -367,7 +443,7 @@ options:
     - name: bootstrap_plot_cut
       title: Cut value
       type: Number
-      default: 0
+      default: 0.1
       min: 0
       max: 1
 
@@ -407,6 +483,30 @@ options:
           name: circle
         - title: Spring
           name: spring
+        - title: Kamada-Kawai
+          name: layout_with_kk
+        - title: Graphopt
+          name: layout_with_graphopt
+        - title: GEM
+          name: layout_with_gem
+        - title: DRL
+          name: layout_with_drl
+        - title: Star
+          name: layout_as_star
+        - title: Grid
+          name: layout_on_grid
+        - title: Nicely
+          name: layout_nicely
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
+        - title: Davidson-Harel
+          name: layout_with_dh
+        - title: LGL
+          name: layout_with_lgl
+        - title: Sugiyama
+          name: layout_with_sugiyama
+        - title: Random
+          name: layout_randomly
 
 
 
@@ -440,6 +540,18 @@ options:
       default: 0.05
       min: 0
       max: 1
+
+    - name: permutation_table_max_rows
+      title: Max rows
+      type: Integer
+      default: 20
+      min: 1
+      max: 1000
+
+    - name: permutation_table_show_all
+      title: Show all rows
+      type: Bool
+      default: False
 
     ### SEQUENCE ANALYSIS
 
@@ -491,5 +603,207 @@ options:
       title: Sequence Plot
       type: Bool
       default: false
+
+    ### COMPARE SEQUENCES
+
+    - name: compare_sequences_show_table
+      title: Table
+      type: Bool
+      default: false
+
+    - name: compare_sequences_show_plot
+      title: Plot
+      type: Bool
+      default: false
+
+    - name: compare_sequences_sub_min
+      title: Min Subsequence Length
+      type: Integer
+      default: 2
+      min: 2
+      max: 10
+
+    - name: compare_sequences_sub_max
+      title: Max Subsequence Length
+      type: Integer
+      default: 4
+      min: 2
+      max: 10
+
+    - name: compare_sequences_min_freq
+      title: Minimum Frequency
+      type: Integer
+      default: 20
+      min: 1
+      max: 100
+
+    - name: compare_sequences_correction
+      title: Correction Method
+      type: List
+      default: bonferroni
+      options:
+        - title: Bonferroni
+          name: bonferroni
+        - title: Holm
+          name: holm
+        - title: Hochberg
+          name: hochberg
+        - title: BH (FDR)
+          name: BH
+        - title: BY
+          name: BY
+        - title: None
+          name: none
+
+    ### COMPARE GROUPS
+
+    - name: compare_show_summary
+      title: Summary Table
+      type: Bool
+      default: False
+
+    - name: compare_show_network
+      title: Network Properties Table
+      type: Bool
+      default: False
+
+    - name: compare_show_plot
+      title: Plot
+      type: Bool
+      default: False
+
+    - name: compare_group_i
+      title: First Network
+      type: Level
+      variable: (buildModel_variables_long_group)
+      description: First group to compare
+
+    - name: compare_group_j
+      title: Second Network
+      type: Level
+      variable: (buildModel_variables_long_group)
+      description: Second group to compare
+
+    - name: compare_scaling
+      title: Scaling
+      type: List
+      default: none
+      options:
+        - title: None
+          name: none
+        - title: MinMax
+          name: minmax
+        - title: Max
+          name: max
+        - title: Rank
+          name: rank
+        - title: Z-Score
+          name: zscore
+        - title: Robust
+          name: robust
+        - title: Log
+          name: log
+        - title: Log1p
+          name: log1p
+        - title: Softmax
+          name: softmax
+        - title: Quantile
+          name: quantile
+
+    - name: compare_plot_type
+      title: Plot Type
+      type: List
+      default: heatmap
+      options:
+        - title: Heatmap
+          name: heatmap
+        - title: Scatterplot
+          name: scatterplot
+        - title: Weight Density
+          name: weight_density
+
+    - name: compare_show_network_diff_plot
+      title: Network Difference Plot
+      type: Bool
+      default: False
+
+    - name: compare_network_diff_plot_cut
+      title: Cut value
+      type: Number
+      default: 0.1
+      min: 0
+      max: 1
+
+    - name: compare_network_diff_plot_min_value
+      title: Minimum value
+      type: Number
+      default: 0.05
+      min: 0
+      max: 1
+
+    - name: compare_network_diff_plot_edge_label_size
+      title: Edge label size
+      type: Number
+      default: 1
+      min: 0
+      max: 10
+
+    - name: compare_network_diff_plot_node_size
+      title: Node size
+      type: Number
+      default: 1
+      min: 0
+      max: 2
+
+    - name: compare_network_diff_plot_node_label_size
+      title: Node label size
+      type: Number
+      default: 1
+      min: 0
+      max: 10
+
+    - name: compare_network_diff_plot_layout
+      title: Layout
+      type: List
+      default: circle
+      options:
+        - title: Circle
+          name: circle
+        - title: Spring
+          name: spring
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
+
+    ### SEQUENCE INDICES
+
+    - name: indices_show_table
+      title: Show Table
+      type: Bool
+      default: False
+
+    - name: indices_favorable
+      title: Favorable State
+      type: Level
+      variable: (buildModel_variables_long_action)
+      description: State considered favorable for computing integrative potential.
+
+    - name: indices_omega
+      title: Omega
+      type: Number
+      default: 1
+      min: 0.01
+      max: 10
+
+    - name: indices_table_max_rows
+      title: Max rows
+      type: Integer
+      default: 50
+      min: 1
+      max: 10000
+
+    - name: indices_table_show_all
+      title: Show all rows
+      type: Bool
+      default: False
 
 ...

@@ -7,6 +7,22 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .run = function() {
 
             library("tna")
+            library("codyna")
+
+            # Set instructions content
+            self$results$instructions$setContent(
+                '<div style="border: 2px solid #e6f4fe; border-radius: 15px; padding: 15px; background-color: #e6f4fe; margin-top: 10px;">
+                <div style="text-align:justify;">
+                <ul>
+                  <li>Data should be in <b>long format</b> with one row per event/action.</li>
+                  <li><b>Action</b>: Column containing the actions/states/events (required). Each unique value becomes a node.</li>
+                  <li><b>Actor</b>: Column identifying individuals (optional). Separates sequences by person.</li>
+                  <li><b>Time</b> or <b>Order</b>: For ordering events chronologically (optional, use one or the other).</li>
+                  <li>Learn more: <a href="https://lamethods.org/book2/chapters/ch15-tna/ch15-tna.html" target="_blank">TNA Chapter</a> | <a href="https://sonsoles.me/posts/tna-tutorial" target="_blank">Updated Tutorial</a></li>
+                </ul>
+                </div>
+                </div>'
+            )
 
             type <- self$options$buildModel_type
             scaling <- self$options$buildModel_scaling
@@ -32,6 +48,8 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$results$buildModelTitle$setVisible(FALSE)
             }
 
+            dataForTNA <- NULL
+
             if(self$results$buildModelContent$isFilled()) {
                 model <- self$results$buildModelContent$state
             }
@@ -39,7 +57,6 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 # Wrap data preparation in error handling
                 tryCatch({
-                    dataForTNA <- NULL
 
                     copyData <- self$data
                     copyData[[self$options$buildModel_variables_long_action]] <- as.character(copyData[[self$options$buildModel_variables_long_action]])
@@ -72,16 +89,6 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         actionColumn <- self$options$buildModel_variables_long_action
                         orderColumn <- self$options$buildModel_variables_long_order
 
-                        ##### TO REMOVE
-                        values_to_replace <- c("Applications", "Ethics", "General", "La_types", "Theory")
-                        new_value <- "Resources"
-                        longData[[self$options$buildModel_variables_long_action]] <- replace(
-                            longData[[self$options$buildModel_variables_long_action]], 
-                            longData[[self$options$buildModel_variables_long_action]] %in% values_to_replace, 
-                            new_value
-                        )
-                        ##### END TO REMOVE
-
                         args_prepare_data <- list(
                             data = longData,
                             actor = actorColumn,
@@ -93,7 +100,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                         args_prepare_data <- args_prepare_data[!sapply(args_prepare_data, is.null)]
 
-                        dataForTNA <- do.call(prepare_data, args_prepare_data)
+                        dataForTNA <- do.call(tna::prepare_data, args_prepare_data)
                     }
 
                     if(!is.null(dataForTNA)) {
@@ -102,7 +109,12 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             scaling = character(0L)
                         }
 
-                        model <- build_model(x=dataForTNA, type=type, scaling=scaling)     
+                        if(type == "attention") {
+                            lambda <- self$options$buildModel_lambda
+                            model <- tna::build_model(x=dataForTNA, type=type, scaling=scaling, lambda=lambda)
+                        } else {
+                            model <- tna::build_model(x=dataForTNA, type=type, scaling=scaling)
+                        }
                     }
                     
                 }, error = function(e) {
@@ -120,10 +132,19 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             if(!is.null(model)) {
-                    
+
                 if(!self$results$buildModelContent$isFilled()) {
                     self$results$buildModelContent$setContent(model)
                     self$results$buildModelContent$setState(model)
+                }
+
+                # Store dataForTNA for Pattern Discovery
+                if(!is.null(dataForTNA) && !self$results$patternTable$isFilled()) {
+                    self$results$patternTable$setState(dataForTNA)
+                }
+                # Retrieve dataForTNA if it was stored
+                if(is.null(dataForTNA) && !is.null(self$results$patternTable$state)) {
+                    dataForTNA <- self$results$patternTable$state
                 }
                 self$results$buildModelContent$setVisible(self$options$buildModel_show_matrix)
 
@@ -136,8 +157,6 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$results$buildModel_mosaic$setVisible(self$options$buildModel_show_mosaic) # plot
 
             }
-            
-
 
             ### Centrality
 
@@ -188,67 +207,96 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
                 cent <- self$results$centralityTable$state
-                if(length(vectorCharacter) > 0 && !is.null(model) && 
-                    (!self$results$centrality_plot$isFilled() || !fullTable)) 
+                if(length(vectorCharacter) > 0 && !is.null(model) &&
+                    (!self$results$centrality_plot$isFilled() || !fullTable))
                 {
-                    cent <- centralities(x=model, loops=centrality_loops, normalize=centrality_normalize, measures=vectorCharacter)
+                    cent <- tna::centralities(x=model, loops=centrality_loops, normalize=centrality_normalize, measures=vectorCharacter)
                     self$results$centralityTable$setState(cent)
                 }
 
-                for (i in 1:lengths(cent[1])) {
-                    index <- 1
+                # Check if cent is valid before iterating
+                if(is.null(cent) || !is.data.frame(cent) || nrow(cent) == 0) {
+                    self$results$centralityTitle$setVisible(FALSE)
+                } else {
+                for (i in 1:nrow(cent)) {
                     rowValues <- list()
-
-                    rowValues$state <- as.character(cent[i, index])
-
-                    if ("OutStrength" %in% vectorCharacter) {
-                        index <- index + 1
-                        rowValues$OutStrength <- as.numeric(cent[i, index])
-                    }
-                    if ("InStrength" %in% vectorCharacter) {
-                        index <- index + 1
-                        rowValues$InStrength <- as.numeric(cent[i, index])
-                    }
-                    if ("ClosenessIn" %in% vectorCharacter) {
-                        index <- index + 1
-                        rowValues$ClosenessIn <- as.numeric(cent[i, index])
-                    }
-                    if ("ClosenessOut" %in% vectorCharacter) {
-                        index <- index + 1
-                        rowValues$ClosenessOut <- as.numeric(cent[i, index])
-                    }
-                    if ("Closeness" %in% vectorCharacter) {
-                        index <- index + 1
-                        rowValues$Closeness <- as.numeric(cent[i, index])
-                    }
-                    if ("Betweenness" %in% vectorCharacter) {
-                        index <- index + 1
-                        rowValues$Betweenness <- as.numeric(cent[i, index])
-                    }
-                    if ("BetweennessRSP" %in% vectorCharacter) {
-                        index <- index + 1
-                        rowValues$BetweennessRSP <- as.numeric(cent[i, index])
-                    }
-                    if ("Diffusion" %in% vectorCharacter) {
-                        index <- index + 1
-                        rowValues$Diffusion <- as.numeric(cent[i, index])
-                    }
-                    if ("Clustering" %in% vectorCharacter) {
-                        index <- index + 1
-                        rowValues$Clustering <- as.numeric(cent[i, index])
+                    rowValues$state <- as.character(cent[i, "state"])
+                    for (measure in vectorCharacter) {
+                        if (measure %in% colnames(cent)) {
+                            rowValues[[measure]] <- as.numeric(cent[i, measure])
+                        }
                     }
                     self$results$centralityTable$addRow(rowKey=i, values=rowValues)
                 }
                 self$results$centralityTitle$setVisible(self$options$centrality_show_plot || self$options$centrality_show_table)
                 self$results$centrality_plot$setVisible(self$options$centrality_show_plot)
                 self$results$centralityTable$setVisible(self$options$centrality_show_table)
-                    
+                }
+
+            }
+
+            ### Centrality Stability
+
+            if(!is.null(model) && (self$options$centrality_stability_show_table || self$options$centrality_stability_show_plot)) {
+
+                # Build measures vector based on selected stability measures
+                stabilityMeasures <- character(0)
+                if(self$options$centrality_stability_InStrength) stabilityMeasures <- c(stabilityMeasures, "InStrength")
+                if(self$options$centrality_stability_OutStrength) stabilityMeasures <- c(stabilityMeasures, "OutStrength")
+                if(self$options$centrality_stability_Betweenness) stabilityMeasures <- c(stabilityMeasures, "Betweenness")
+
+                # Default to basic measures if none selected
+                if(length(stabilityMeasures) == 0) {
+                    stabilityMeasures <- c("InStrength", "OutStrength", "Betweenness")
+                }
+
+                # Check if we need to compute stability
+                csResult <- self$results$centrality_stability_plot$state
+                if(is.null(csResult)) {
+
+                    csResult <- tryCatch({
+                        tna::estimate_cs(
+                            x = model,
+                            loops = self$options$centrality_loops,
+                            normalize = self$options$centrality_normalize,
+                            measures = stabilityMeasures,
+                            iter = self$options$centrality_stability_iteration,
+                            threshold = self$options$centrality_stability_threshold,
+                            certainty = self$options$centrality_stability_certainty,
+                            progressbar = FALSE
+                        )
+                    }, error = function(e) {
+                        self$results$errorText$setContent(paste("Centrality stability error:", e$message))
+                        self$results$errorText$setVisible(TRUE)
+                        NULL
+                    })
+
+                    if(!is.null(csResult)) {
+                        self$results$centrality_stability_plot$setState(csResult)
+                    }
+                }
+
+                # Populate stability table with CS-coefficients
+                if(!is.null(csResult) && self$options$centrality_stability_show_table) {
+                    for(measure in names(csResult)) {
+                        if(!is.null(csResult[[measure]]$cs_coefficient)) {
+                            self$results$centralityStabilityTable$addRow(rowKey=measure, values=list(
+                                measure = measure,
+                                cs_coefficient = csResult[[measure]]$cs_coefficient
+                            ))
+                        }
+                    }
+                }
+
+                self$results$centralityStabilityTitle$setVisible(self$options$centrality_stability_show_table || self$options$centrality_stability_show_plot)
+                self$results$centralityStabilityTable$setVisible(self$options$centrality_stability_show_table)
+                self$results$centrality_stability_plot$setVisible(self$options$centrality_stability_show_plot)
             }
 
             ### Edge betweenness
 
             if(!is.null(model) && (self$options$edgeBetweenness_show_table || self$options$edgeBetweenness_show_plot)) {
-                edgeBetwenness <- betweenness_network(x=model)
+                edgeBetwenness <- tna::betweenness_network(x=model)
 
                 # Plot
                 if(!self$results$edgeBetweenness_plot$isFilled()) {
@@ -377,25 +425,18 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             cliques_size <- as.numeric(self$options$cliques_size)
             cliques_threshold <- as.numeric(self$options$cliques_threshold)
+            if (cliques_threshold == 0) {
+                cliques_threshold <- if (cliques_size <= 2) 0.1 else 0.01
+            }
 
-            if(!is.null(model) && ( self$options$cliques_show_text || self$options$cliques_show_plot) ) {
+            if(!is.null(model) && self$options$cliques_show_plot) {
 
-                if(!self$results$cliques_multiple_plot$isFilled() || !self$results$cliquesContent$isFilled()) {
-                    cliques <- cliques(x=model, size=cliques_size, threshold=cliques_threshold)
-
-                    if(!self$results$cliquesContent$isFilled()) {
-                        self$results$cliquesContent$setContent(cliques)
-                    }
-
-                    if(!self$results$cliques_multiple_plot$isFilled()) {
-                        self$results$cliques_multiple_plot$setState(cliques)
-                    }
+                if(!self$results$cliques_multiple_plot$isFilled()) {
+                    cliques <- tna::cliques(x=model, size=cliques_size, threshold=cliques_threshold)
+                    self$results$cliques_multiple_plot$setState(cliques)
                 }
-                self$results$cliques_multiple_plot$setVisible(self$options$cliques_show_plot)
-                self$results$cliquesContent$setVisible(self$options$cliques_show_text)
-                self$results$cliquesTitle$setVisible(self$options$cliques_show_text || self$options$cliques_show_plot)
-
-
+                self$results$cliques_multiple_plot$setVisible(TRUE)
+                self$results$cliquesTitle$setVisible(TRUE)
             }
 
                         ### Bootstrap
@@ -414,7 +455,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                     threshold <- self$options$bootstrap_threshold
 
-                    bs <- bootstrap(
+                    bs <- tna::bootstrap(
                                     x=model, 
                                     iter=iteration,
                                     level=level,
@@ -432,7 +473,20 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     if(nrow(all_edges) > 0) {
                         # Sort by significance (TRUE/significant first, then FALSE/non-significant)
                         all_edges <- all_edges[order(-all_edges$sig), ]
-                        
+
+                        # Filter for significant only if requested
+                        if (isTRUE(self$options$bootstrap_table_significant_only)) {
+                            all_edges <- all_edges[all_edges$sig == TRUE, ]
+                        }
+
+                        # Limit rows unless show all is enabled
+                        if (!isTRUE(self$options$bootstrap_table_show_all)) {
+                            max_rows <- self$options$bootstrap_table_max_rows
+                            if (nrow(all_edges) > max_rows) {
+                                all_edges <- all_edges[1:max_rows, ]
+                            }
+                        }
+
                         for (i in 1:nrow(all_edges)) {
                             self$results$bootstrapTable$addRow(rowKey=i, values=list(
                                 from=as.character(all_edges[i, "from"]),
@@ -457,39 +511,297 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             ### Sequence Analysis
 
-            if(self$options$sequences_show_plot) {
-                
+            if(!is.null(model) && self$options$sequences_show_plot) {
+                # Store model for plot rendering
+                if(!self$results$sequences_plot$isFilled()) {
+                    self$results$sequences_plot$setState(model)
+                }
                 self$results$sequences_plot$setVisible(TRUE)
-                
-            } else {
-                self$results$sequences_plot$setVisible(FALSE)
+            }
+
+            ### Pattern Discovery
+
+            if(self$options$pattern_show_table) {
+                # Always show title when checkbox is checked
+                self$results$patternTitle$setContent("Pattern Discovery Running...")
+                self$results$patternTitle$setVisible(TRUE)
+
+                tryCatch({
+                    # Re-prepare data if dataForTNA is NULL (e.g., when model is cached)
+                    if(is.null(dataForTNA) && !is.null(self$data) && ncol(self$data) >= 1) {
+                        copyData <- self$data
+                        copyData[[self$options$buildModel_variables_long_action]] <- as.character(copyData[[self$options$buildModel_variables_long_action]])
+
+                        if(!is.null(self$options$buildModel_variables_long_actor)) {
+                            copyData[[self$options$buildModel_variables_long_actor]] <- as.character(copyData[[self$options$buildModel_variables_long_actor]])
+                        }
+
+                        columnToUseLong <- c(
+                            self$options$buildModel_variables_long_time,
+                            self$options$buildModel_variables_long_actor,
+                            self$options$buildModel_variables_long_action,
+                            self$options$buildModel_variables_long_order
+                        )
+                        longData <- copyData[columnToUseLong]
+
+                        args_prepare_data <- list(
+                            data = longData,
+                            actor = self$options$buildModel_variables_long_actor,
+                            time = self$options$buildModel_variables_long_time,
+                            action = self$options$buildModel_variables_long_action,
+                            time_threshold = self$options$buildModel_threshold,
+                            order = self$options$buildModel_variables_long_order
+                        )
+                        args_prepare_data <- args_prepare_data[!sapply(args_prepare_data, is.null)]
+                        dataForTNA <- do.call(tna::prepare_data, args_prepare_data)
+                    }
+
+                    if(is.null(dataForTNA)) {
+                        self$results$patternTitle$setContent("ERROR: Could not prepare data")
+                        return()
+                    }
+                    if(is.null(dataForTNA$sequence_data)) {
+                        self$results$patternTitle$setContent(paste("ERROR: sequence_data is NULL. Names:", paste(names(dataForTNA), collapse=", ")))
+                        return()
+                    }
+
+                    # Get sequence data in wide format from prepared data
+                    seq_data <- dataForTNA$sequence_data
+
+                    # Determine pattern type and parameters
+                    pattern_type <- self$options$pattern_type
+
+                    # Build arguments for discover_patterns
+                    custom_pattern <- self$options$pattern_custom
+                    if(pattern_type == "custom" && !is.null(custom_pattern) && nchar(custom_pattern) > 0) {
+                        # Custom pattern search
+                        patterns <- codyna::discover_patterns(
+                            data = seq_data,
+                            pattern = self$options$pattern_custom,
+                            min_support = self$options$pattern_min_support,
+                            min_count = self$options$pattern_min_count
+                        )
+                    } else {
+                        # Type-based pattern discovery
+                        len_range <- self$options$pattern_len_min:self$options$pattern_len_max
+                        gap_range <- self$options$pattern_gap_min:self$options$pattern_gap_max
+
+                        patterns <- codyna::discover_patterns(
+                            data = seq_data,
+                            type = pattern_type,
+                            len = len_range,
+                            gap = gap_range,
+                            min_support = self$options$pattern_min_support,
+                            min_count = self$options$pattern_min_count
+                        )
+                    }
+
+                    # Apply optional filters (Level type returns NULL when not selected)
+                    if(!is.null(self$options$pattern_starts_with)) {
+                        patterns <- patterns[startsWith(patterns$pattern, self$options$pattern_starts_with), ]
+                    }
+                    if(!is.null(self$options$pattern_ends_with)) {
+                        patterns <- patterns[endsWith(patterns$pattern, self$options$pattern_ends_with), ]
+                    }
+                    # Contains filter supports multiple values (Levels type returns vector)
+                    if(!is.null(self$options$pattern_contains) && length(self$options$pattern_contains) > 0) {
+                        # Pattern must contain ALL selected values
+                        keep <- rep(TRUE, nrow(patterns))
+                        for(val in self$options$pattern_contains) {
+                            keep <- keep & grepl(val, patterns$pattern, fixed=TRUE)
+                        }
+                        patterns <- patterns[keep, ]
+                    }
+
+                    # Populate table with row limit
+                    if(!is.null(patterns) && nrow(patterns) > 0) {
+                        total_patterns <- nrow(patterns)
+
+                        # Apply row limit unless show_all is checked
+                        if (!isTRUE(self$options$pattern_table_show_all)) {
+                            max_rows <- self$options$pattern_table_max_rows
+                            if (nrow(patterns) > max_rows) {
+                                patterns <- patterns[1:max_rows, ]
+                            }
+                        }
+
+                        for(i in 1:nrow(patterns)) {
+                            self$results$patternTable$addRow(rowKey=i, values=list(
+                                pattern = as.character(patterns$pattern[i]),
+                                length = as.integer(patterns$length[i]),
+                                count = as.integer(patterns$count[i]),
+                                proportion = patterns$proportion[i],
+                                support = patterns$support[i]
+                            ))
+                        }
+
+                        # Show count in title
+                        if (nrow(patterns) < total_patterns) {
+                            self$results$patternTitle$setContent(paste("Showing", nrow(patterns), "of", total_patterns, "patterns"))
+                        } else {
+                            self$results$patternTitle$setContent(paste("Found", total_patterns, "patterns"))
+                        }
+                    }
+
+                    self$results$patternTable$setVisible(TRUE)
+
+                }, error = function(e) {
+                    self$results$patternTitle$setContent(paste("Pattern Discovery error:", e$message))
+                })
+            }
+
+            ### Sequence Indices
+            if(self$options$indices_show_table) {
+                self$results$indicesTitle$setContent("Step 1: Starting...")
+                self$results$indicesTitle$setVisible(TRUE)
+
+                tryCatch({
+                    self$results$indicesTitle$setContent("Step 2: Checking dataForTNA...")
+
+                    # Re-prepare data if dataForTNA is NULL (when model is cached)
+                    if(is.null(dataForTNA) && !is.null(self$data) && ncol(self$data) >= 1) {
+                        self$results$indicesTitle$setContent("Step 3: Preparing data...")
+                        action_col <- self$options$buildModel_variables_long_action
+                        actor_col <- self$options$buildModel_variables_long_actor
+                        time_col <- self$options$buildModel_variables_long_time
+                        order_col <- self$options$buildModel_variables_long_order
+
+                        # Check action_col is valid
+                        if(is.null(action_col) || length(action_col) == 0) {
+                            self$results$indicesTitle$setContent("Error: Action variable is required")
+                            return()
+                        }
+
+                        args_prepare_data <- list(
+                            data = self$data,
+                            action = action_col
+                        )
+                        if(!is.null(actor_col) && length(actor_col) > 0) {
+                            args_prepare_data$actor <- actor_col
+                        }
+                        if(!is.null(time_col) && length(time_col) > 0) {
+                            args_prepare_data$time <- time_col
+                        }
+                        if(!is.null(order_col) && length(order_col) > 0) {
+                            args_prepare_data$order <- order_col
+                        }
+
+                        self$results$indicesTitle$setContent("Step 4: Calling prepare_data...")
+                        dataForTNA <- do.call(tna::prepare_data, args_prepare_data)
+                    }
+
+                    if(is.null(dataForTNA)) {
+                        self$results$indicesTitle$setContent("Error: dataForTNA is NULL")
+                        return()
+                    }
+
+                    self$results$indicesTitle$setContent("Preparing sequence data...")
+                    seq_data <- dataForTNA$sequence_data
+
+                    # Convert all columns to character (codyna requires character data)
+                    seq_data <- as.data.frame(lapply(seq_data, as.character), stringsAsFactors = FALSE)
+
+                    self$results$indicesTitle$setContent("Calculating indices...")
+                    # Call sequence_indices
+                    indices <- codyna::sequence_indices(data = seq_data)
+
+                    # Add sequence ID
+                    indices$sequence_id <- 1:nrow(indices)
+
+                    # Add actor if provided
+                    actor_col <- self$options$buildModel_variables_long_actor
+                    if(!is.null(actor_col) && length(actor_col) > 0 && actor_col != "") {
+                        unique_actors <- unique(self$data[[actor_col]])
+                        if (length(unique_actors) == nrow(indices)) {
+                            indices$actor <- as.character(unique_actors)
+                        } else {
+                            indices$actor <- NA
+                        }
+                    } else {
+                        indices$actor <- NA
+                    }
+
+                    # Apply row limit
+                    total_rows <- nrow(indices)
+                    if (!isTRUE(self$options$indices_table_show_all)) {
+                        max_rows <- self$options$indices_table_max_rows
+                        if (total_rows > max_rows) {
+                            indices <- indices[1:max_rows, ]
+                        }
+                    }
+
+                    # Populate the table
+                    if(nrow(indices) > 0) {
+                        for(i in 1:nrow(indices)) {
+                            self$results$indicesTable$addRow(rowKey=i, values=list(
+                                sequence_id = indices$sequence_id[i],
+                                actor = if(is.na(indices$actor[i])) "" else as.character(indices$actor[i]),
+                                valid_n = as.integer(indices$valid_n[i]),
+                                unique_states = as.integer(indices$unique_states[i]),
+                                longitudinal_entropy = round(indices$longitudinal_entropy[i], 3),
+                                simpson_diversity = round(indices$simpson_diversity[i], 3),
+                                mean_spell_duration = round(indices$mean_spell_duration[i], 3),
+                                self_loop_tendency = round(indices$self_loop_tendency[i], 3),
+                                transition_rate = round(indices$transition_rate[i], 3),
+                                first_state = as.character(indices$first_state[i]),
+                                last_state = as.character(indices$last_state[i]),
+                                dominant_state = as.character(indices$dominant_state[i]),
+                                complexity_index = round(indices$complexity_index[i], 3)
+                            ))
+                        }
+
+                        # Show count in title
+                        if (nrow(indices) < total_rows) {
+                            self$results$indicesTitle$setContent(paste("Showing", nrow(indices), "of", total_rows, "sequences"))
+                        } else {
+                            self$results$indicesTitle$setContent(paste("Sequence Indices for", total_rows, "sequences"))
+                        }
+                    }
+
+                    self$results$indicesTable$setVisible(TRUE)
+
+                }, error = function(e) {
+                    self$results$indicesTitle$setContent(paste("Sequence Indices error:", e$message))
+                })
             }
 
         },
         .showBuildModelPlot=function(image, ...) {
             plotData <- self$results$buildModelContent$state
-            
+
             if(!is.null(plotData) && self$options$buildModel_show_plot)  {
-                plot(x=plotData, 
-                    cut=self$options$buildModel_plot_cut,
-                    minimum=self$options$buildModel_plot_min_value,
-                    edge.label.cex=self$options$buildModel_plot_edge_label_size,
-                    node.width=self$options$buildModel_plot_node_size,
-                    label.cex=self$options$buildModel_plot_node_label_size,
-                    layout=self$options$buildModel_plot_layout,
-                    bg="transparent"
-                )
-            }   
+                tryCatch({
+                    plot(x=plotData,
+                        cut=self$options$buildModel_plot_cut,
+                        minimum=self$options$buildModel_plot_min_value,
+                        edge.label.cex=self$options$buildModel_plot_edge_label_size,
+                        node.width=self$options$buildModel_plot_node_size,
+                        label.cex=self$options$buildModel_plot_node_label_size,
+                        layout=self$options$buildModel_plot_layout,
+                        bg="transparent"
+                    )
+                }, error = function(e) {
+                    layout_name <- self$options$buildModel_plot_layout
+                    self$results$errorText$setContent(paste0("Layout '", layout_name, "' is not available for this network. Please try a different layout."))
+                    self$results$errorText$setVisible(TRUE)
+                })
+            }
             TRUE
         },
         .showBuildModelHisto=function(image, ...) {
             plotData <- self$results$buildModelContent$state
             
             if(!is.null(plotData) && self$options$buildModel_show_histo)  {
-                par(mfrow = c(1, 1))
-                hist(x=plotData, main="Histogram of Edge Weights (Probabilities)", 
-                     xlab="Edge Weights (Probabilities)", ylab="Frequency")
-            }   
+                tryCatch({
+                    par(mfrow = c(1, 1))
+                    w <- c(plotData$weights)
+                    brks <- seq(0, max(1, max(w, na.rm = TRUE)) + 0.01, length.out = 20)
+                    hist(x=plotData, breaks=brks, main="Histogram of Edge Weights (Probabilities)",
+                         xlab="Edge Weights (Probabilities)", ylab="Frequency")
+                }, error = function(e) {
+                    plot(1, type="n", main="Histogram Error", sub=e$message)
+                })
+            }
             TRUE
         },
         .showBuildModelFrequencies=function(image, ...) {
@@ -502,7 +814,9 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         print(p)
                     }
                 }, error = function(e) {
-                    hist(x=plotData, main="Frequencies Plot", 
+                    w <- c(plotData$weights)
+                    brks <- seq(0, max(1, max(w, na.rm = TRUE)) + 0.01, length.out = 20)
+                    hist(x=plotData, breaks=brks, main="Frequencies Plot",
                          xlab="Edge Weights", ylab="Frequency")
                 })
             }   
@@ -510,37 +824,90 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         .showBuildModelMosaic=function(image, ...) {
             plotData <- self$results$buildModelContent$state
-            
+
             if(!is.null(plotData) && self$options$buildModel_show_mosaic && self$options$buildModel_type == "frequency")  {
-                p <- plot_mosaic(x=plotData, digits=self$options$buildModel_digits)
-                print(p)
-            }   
+                tryCatch({
+                    p <- plot_mosaic(x=plotData, digits=self$options$buildModel_digits)
+                    print(p)
+                }, error = function(e) {
+                    plot(1, type="n", main="Mosaic Plot Error", sub=e$message)
+                })
+            }
             TRUE
+        },
+        .showSequencesPlot=function(image, ...) {
+            plotData <- self$results$sequences_plot$state
+
+            if(is.null(plotData) || !self$options$sequences_show_plot) {
+                return(FALSE)
+            }
+
+            tryCatch({
+                p <- tna::plot_sequences(
+                    x = plotData,
+                    type = self$options$sequences_type,
+                    scale = self$options$sequences_scale,
+                    geom = self$options$sequences_geom,
+                    include_na = self$options$sequences_include_na,
+                    tick = self$options$sequences_tick
+                )
+                print(p)
+                TRUE
+            }, error = function(e) {
+                self$results$errorText$setContent(paste("Sequence plot error:", e$message))
+                self$results$errorText$setVisible(TRUE)
+                FALSE
+            })
         },
         .showCentralityPlot=function(image, ...) {
 
             plotData <- self$results$centralityTable$state
 
             if(!is.null(plotData) && self$options$centrality_show_plot)  {
-                centPlot <- plot(plotData) 
-                print(centPlot)
+                tryCatch({
+                    centPlot <- plot(plotData)
+                    print(centPlot)
+                }, error = function(e) {
+                    plot(1, type="n", main="Centrality Plot Error", sub=e$message)
+                })
             }
-            TRUE     
+            TRUE
+        },
+        .showCentralityStabilityPlot=function(image, ...) {
+            plotData <- self$results$centrality_stability_plot$state
+
+            if(is.null(plotData) || !self$options$centrality_stability_show_plot) {
+                return(FALSE)
+            }
+
+            tryCatch({
+                p <- plot(plotData)
+                print(p)
+                TRUE
+            }, error = function(e) {
+                self$results$errorText$setContent(paste("Centrality stability plot error:", e$message))
+                self$results$errorText$setVisible(TRUE)
+                FALSE
+            })
         },
         .showEdgeBetweennessPlot=function(image, ...) {
             plotData <- self$results$edgeBetweenness_plot$state
             
             if(!is.null(plotData) && self$options$edgeBetweenness_show_plot)  {
-                plot(
-                    x=plotData,
-                    cut=self$options$edgeBetweenness_plot_cut,
-                    minimum=self$options$edgeBetweenness_plot_min_value,
-                    edge.label.cex=self$options$edgeBetweenness_plot_edge_label_size,
-                    node.width=self$options$edgeBetweenness_plot_node_size,
-                    label.cex=self$options$edgeBetweenness_plot_node_label_size,
-                    layout=self$options$edgeBetweenness_plot_layout,
-                    bg="transparent"
-                )
+                tryCatch({
+                    plot(
+                        x=plotData,
+                        cut=self$options$edgeBetweenness_plot_cut,
+                        minimum=self$options$edgeBetweenness_plot_min_value,
+                        edge.label.cex=self$options$edgeBetweenness_plot_edge_label_size,
+                        node.width=self$options$edgeBetweenness_plot_node_size,
+                        label.cex=self$options$edgeBetweenness_plot_node_label_size,
+                        layout=self$options$edgeBetweenness_plot_layout,
+                        bg="transparent"
+                    )
+                }, error = function(e) {
+                    plot(1, type="n", main="Edge Betweenness Plot Error", sub=e$message)
+                })
                 TRUE
             } else {
                 FALSE
@@ -550,246 +917,48 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plotData <- self$results$community_plot$state
             
             if(!is.null(plotData) && self$options$community_show_plot)  {
-                methods <- self$options$community_methods
-                plot(x=plotData, method=methods, bg="transparent")
-            }   
+                tryCatch({
+                    methods <- self$options$community_methods
+                    plot(x=plotData, method=methods, bg="transparent")
+                }, error = function(e) {
+                    plot(1, type="n", main="Community Plot Error", sub=e$message)
+                })
+            }
             TRUE
         },
-        .showCliquesPlot1=function(image, ...) {
-            plotData <- self$results$cliques_multiple_plot$state
-
-            number_value <- lengths(plotData[1])
-            
-            if(!is.null(plotData) && self$options$cliques_show_plot && number_value > 0)  {
-                len <- length(plotData)
-                if (len == 0) return(FALSE)
-                column <- ceiling(sqrt(len))
-                row <- ceiling(len / column)
-
-                par(mfrow = c(row, column))
-                plot(x=plotData, 
-                    ask=FALSE, 
-                    first=1, 
-                    n=1,
-                    cut=self$options$cliques_plot_cut,
-                    minimum=self$options$cliques_plot_min_value,
-                    edge.label.cex=self$options$cliques_plot_edge_label_size,
-                    node.width=self$options$cliques_plot_node_size,
-                    label.cex=self$options$cliques_plot_node_label_size,
-                    layout=self$options$cliques_plot_layout,
-                    bg="transparent"
-                )
-                TRUE
-            }
-            else {
-                self$results$cliques_multiple_plot$cliques_plot1$setVisible(FALSE)
-                FALSE
-            } 
-        },
-        .showCliquesPlot2=function(image, ...) {
-            plotData <- self$results$cliques_multiple_plot$state
-            
-            number_value <- lengths(plotData[1])
-            
-            if(!is.null(plotData) && self$options$cliques_show_plot && number_value > 1)  {
-                len <- length(plotData)
-                if (len == 0) return(FALSE)
-                column <- ceiling(sqrt(len))
-                row <- ceiling(len / column)
-
-                par(mfrow = c(row, column))
-                plot(x=plotData, 
-                    ask=FALSE, 
-                    first=2, 
-                    n=1,
-                    cut=self$options$cliques_plot_cut,
-                    minimum=self$options$cliques_plot_min_value,
-                    edge.label.cex=self$options$cliques_plot_edge_label_size,
-                    node.width=self$options$cliques_plot_node_size,
-                    label.cex=self$options$cliques_plot_node_label_size,
-                    layout=self$options$cliques_plot_layout,
-                    bg="transparent"
-                )
-                TRUE
-            }   
-            else {
-                self$results$cliques_multiple_plot$cliques_plot2$setVisible(FALSE)
-                FALSE
-            } 
-        },
-        .showCliquesPlot3=function(image, ...) {
-            plotData <- self$results$cliques_multiple_plot$state
-            
-            number_value <- lengths(plotData[1])
-
-            if(!is.null(plotData) && self$options$cliques_show_plot && number_value > 2)  {
-                len <- length(plotData)
-                if (len == 0) return(FALSE)
-                column <- ceiling(sqrt(len))
-                row <- ceiling(len / column)
-
-                par(mfrow = c(row, column))
-                plot(x=plotData, 
-                    ask=FALSE, 
-                    first=3, 
-                    n=1,
-                    cut=self$options$cliques_plot_cut,
-                    minimum=self$options$cliques_plot_min_value,
-                    edge.label.cex=self$options$cliques_plot_edge_label_size,
-                    node.width=self$options$cliques_plot_node_size,
-                    label.cex=self$options$cliques_plot_node_label_size,
-                    layout=self$options$cliques_plot_layout,
-                    bg="transparent"
-                )
-                TRUE
-            }   
-            else {
-                self$results$cliques_multiple_plot$cliques_plot3$setVisible(FALSE)
-                FALSE
-            } 
-        },
-        .showCliquesPlot4=function(image, ...) {
-            plotData <- self$results$cliques_multiple_plot$state
-            
-            number_value <- lengths(plotData[1])
-
-            if(!is.null(plotData) && self$options$cliques_show_plot && number_value > 3)  {
-                len <- length(plotData)
-                if (len == 0) return(FALSE)
-                column <- ceiling(sqrt(len))
-                row <- ceiling(len / column)
-
-                par(mfrow = c(row, column))
-                plot(x=plotData, 
-                    ask=FALSE, 
-                    first=4, 
-                    n=1,
-                    cut=self$options$cliques_plot_cut,
-                    minimum=self$options$cliques_plot_min_value,
-                    edge.label.cex=self$options$cliques_plot_edge_label_size,
-                    node.width=self$options$cliques_plot_node_size,
-                    label.cex=self$options$cliques_plot_node_label_size,
-                    layout=self$options$cliques_plot_layout,
-                    bg="transparent"
-                )
-                TRUE
-            }   
-            else {
-                self$results$cliques_multiple_plot$cliques_plot4$setVisible(FALSE)
-                FALSE
-            } 
-        },
-        .showCliquesPlot5=function(image, ...) {
-            plotData <- self$results$cliques_multiple_plot$state
-            
-            number_value <- lengths(plotData[1])
-
-            if(!is.null(plotData) && self$options$cliques_show_plot && number_value > 4)  {
-                len <- length(plotData)
-                if (len == 0) return(FALSE)
-                column <- ceiling(sqrt(len))
-                row <- ceiling(len / column)
-
-                par(mfrow = c(row, column))
-                plot(x=plotData, 
-                    ask=FALSE, 
-                    first=5, 
-                    n=1,
-                    cut=self$options$cliques_plot_cut,
-                    minimum=self$options$cliques_plot_min_value,
-                    edge.label.cex=self$options$cliques_plot_edge_label_size,
-                    node.width=self$options$cliques_plot_node_size,
-                    label.cex=self$options$cliques_plot_node_label_size,
-                    layout=self$options$cliques_plot_layout,
-                    bg="transparent"
-                )
-                TRUE
-            }
-            else {
-                self$results$cliques_multiple_plot$cliques_plot5$setVisible(FALSE)
-                FALSE
-            } 
-        },
-        .showCliquesPlot6=function(image, ...) {
-            plotData <- self$results$cliques_multiple_plot$state
-            
-            number_value <- lengths(plotData[1])
-
-            if(!is.null(plotData) && self$options$cliques_show_plot && number_value > 5)  {
-                len <- length(plotData)
-                if (len == 0) return(FALSE)
-                column <- ceiling(sqrt(len))
-                row <- ceiling(len / column)
-
-                par(mfrow = c(row, column))
-                plot(x=plotData, 
-                    ask=FALSE, 
-                    first=6, 
-                    n=1,
-                    cut=self$options$cliques_plot_cut,
-                    minimum=self$options$cliques_plot_min_value,
-                    edge.label.cex=self$options$cliques_plot_edge_label_size,
-                    node.width=self$options$cliques_plot_node_size,
-                    label.cex=self$options$cliques_plot_node_label_size,
-                    layout=self$options$cliques_plot_layout,
-                    bg="transparent"
-                )
-                TRUE
-            }   
-            else {
-                self$results$cliques_multiple_plot$cliques_plot6$setVisible(FALSE)
-                FALSE
-            } 
-        },
         .showBootstrapPlot=function(image, ...) {
-
             plotData <- self$results$bootstrap_plot$state
-
             if(!is.null(plotData) && self$options$bootstrap_show_plot)  {
-                plot(x=plotData, cut = 0.01)
-            }
-            TRUE     
-        },
-        .showSequencesPlot=function(image, ...) {
-            
-            if(self$options$sequences_show_plot) {
-                
-                tna_data <- self$results$buildModelContent$state
-                
-                if(!is.null(tna_data)) {
-                    
-                    tryCatch({
-                        plot_result <- tna::plot_sequences(
-                            x = tna_data,
-                            type = self$options$sequences_type,
-                            scale = self$options$sequences_scale,
-                            geom = self$options$sequences_geom,
-                            include_na = self$options$sequences_include_na,
-                            tick = self$options$sequences_tick
-                        )
-                        
-                        print(plot_result)
-                    }, error = function(e) {
-                        plot(1, type="n", main="Sequence Analysis Error", 
-                             sub=paste("Error:", e$message))
-                    })
-                }
+                tryCatch({
+                    plot(x=plotData, cut = 0.1)
+                }, error = function(e) {
+                    plot(1, type="n", main="Bootstrap Plot Error", sub=e$message)
+                })
             }
             TRUE
         },
         .showCliquesMultiPlot=function(image, ...) {
             plotData <- self$results$cliques_multiple_plot$state
             if (!is.null(plotData) && self$options$cliques_show_plot) {
-                plot(x=plotData, 
-                    ask=FALSE,
-                    cut=self$options$cliques_plot_cut,
-                    minimum=self$options$cliques_plot_min_value,
-                    edge.label.cex=self$options$cliques_plot_edge_label_size,
-                    node.width=self$options$cliques_plot_node_size,
-                    label.cex=self$options$cliques_plot_node_label_size,
-                    layout=self$options$cliques_plot_layout,
-                    bg="transparent"
-                )
+                tryCatch({
+                    n <- lengths(plotData[1])
+                    if (n == 0) return(FALSE)
+                    nc <- ceiling(sqrt(n))
+                    nr <- ceiling(n / nc)
+                    par(mfrow = c(nr, nc))
+                    for (i in seq_len(n)) {
+                        plot(x=plotData, ask=FALSE, first=i, n=1,
+                            cut=self$options$cliques_plot_cut,
+                            minimum=self$options$cliques_plot_min_value,
+                            edge.label.cex=self$options$cliques_plot_edge_label_size,
+                            node.width=self$options$cliques_plot_node_size,
+                            label.cex=self$options$cliques_plot_node_label_size,
+                            layout=self$options$cliques_plot_layout,
+                            bg="transparent")
+                    }
+                }, error = function(e) {
+                    plot(1, type="n", main="Cliques Plot Error", sub=e$message)
+                })
                 TRUE
             } else {
                 FALSE

@@ -1,0 +1,838 @@
+---
+name:  ClusterTNA
+title: Cluster Transition Network Analysis
+menuGroup: JTNA
+version: '1.12.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: buildModel_variables_long_action
+      title: Action
+      type: Variable
+      description: The column containing the actions/states/events to analyze. Each unique value becomes a node in the network.
+    - name: buildModel_variables_long_actor
+      title: Actor
+      type: Variable
+      description: The column identifying individuals/actors. Actors will be clustered based on similarity of their transition patterns.
+    - name: buildModel_variables_long_time
+      title: Time (Optional)
+      type: Variable
+      description: Timestamp column for ordering events chronologically. Use this OR Order, not both.
+    - name: buildModel_variables_long_order
+      title: Order (Optional)
+      type: Variable
+      description: Numeric column indicating the sequence position of each event. Use this OR Time, not both.
+
+    ### CLUSTERING PARAMETERS
+
+    - name: clustering_k
+      title: Number of Clusters (k)
+      type: Integer
+      default: 2
+      min: 2
+      max: 20
+
+    - name: clustering_run
+      title: Run Clustering
+      type: Bool
+      default: false
+
+    - name: clustering_dissimilarity
+      title: Distance Measure
+      type: List
+      default: hamming
+      options:
+        - title: Hamming
+          name: hamming
+        - title: Optimal String Alignment (OSA)
+          name: osa
+        - title: Levenshtein
+          name: lv
+        - title: Longest Common Substring (LCS)
+          name: lcs
+        - title: Jaccard
+          name: jaccard
+        - title: Jaro-Winkler
+          name: jw
+
+    - name: clustering_method
+      title: Clustering Method
+      type: List
+      default: pam
+      options:
+        - title: PAM
+          name: pam
+        - title: Ward
+          name: ward.D2
+        - title: Complete
+          name: complete
+        - title: Average
+          name: average
+        - title: Single
+          name: single
+
+    ### BUILD MODEL DATA
+
+    - name: buildModel_type
+      title: Type
+      type: List
+      options:
+        - title: Relative
+          name:  relative
+        - title: Frequency
+          name:  frequency
+        - title: Co-occurrence
+          name:  co-occurrence
+        - title: Attention
+          name:  attention
+      default: relative
+
+    - name: buildModel_lambda
+      title: Lambda (decay rate)
+      type: Number
+      default: 1
+      min: 0.01
+      max: 10
+
+    - name: buildModel_scaling
+      title: Scaling
+      type: List
+      options:
+        - title: No scaling
+          name:  noScaling
+        - title: MinMax
+          name:  minmax
+        - title: Max
+          name:  max
+        - title: Rank
+          name:  rank
+      default: noScaling
+
+      ##### PLOT
+    - name: buildModel_show_matrix
+      title: Matrix
+      type: Bool
+      default: False
+
+    - name: buildModel_threshold
+      title: Threshold
+      type: Integer
+      default: 900
+
+    - name: buildModel_show_plot
+      title: Plot
+      type: Bool
+      default: True
+
+    - name: buildModel_plot_cut
+      title: Cut value
+      type: Number
+      default: 0.1
+      min: 0
+      max: 1
+
+    - name: buildModel_plot_min_value
+      title: Minimum value
+      type: Number
+      default: 0.05
+      min: 0
+      max: 1
+
+    - name: buildModel_plot_edge_label_size
+      title: Edge label size
+      type: Number
+      default: 1
+      min: 0
+      max: 10
+
+    - name: buildModel_plot_node_size
+      title: Node size
+      type: Number
+      default: 1
+      min: 0
+      max: 2
+
+    - name: buildModel_plot_node_label_size
+      title: Node label size
+      type: Number
+      default: 1
+      min: 0
+      max: 10
+
+    - name: buildModel_plot_layout
+      title: Layout
+      type: List
+      default: circle
+      options:
+        - title: Circle
+          name: circle
+        - title: Spring
+          name: spring
+        - title: Kamada-Kawai
+          name: layout_with_kk
+        - title: Graphopt
+          name: layout_with_graphopt
+        - title: GEM
+          name: layout_with_gem
+        - title: DRL
+          name: layout_with_drl
+        - title: Star
+          name: layout_as_star
+        - title: Grid
+          name: layout_on_grid
+        - title: Nicely
+          name: layout_nicely
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
+        - title: Davidson-Harel
+          name: layout_with_dh
+        - title: LGL
+          name: layout_with_lgl
+        - title: Sugiyama
+          name: layout_with_sugiyama
+        - title: Random
+          name: layout_randomly
+
+    - name: buildModel_show_histo
+      title: Histogram
+      type: Bool
+      default: False
+    - name: buildModel_show_frequencies
+      title: Frequencies plot
+      type: Bool
+      default: False
+    - name: buildModel_show_mosaic
+      title: Mosaic
+      type: Bool
+      default: False
+
+    - name: buildModel_digits
+      title: Digits
+      type: Integer
+      default: 1
+
+
+    ### CENTRALITY DATA
+
+    - name: centrality_loops
+      title: loops
+      type: Bool
+      default: False
+
+    - name: centrality_normalize
+      title: normalize
+      type: Bool
+      default: False
+
+    - name: centrality_show_table
+      title: Table
+      type: Bool
+      default: False
+
+    - name: centrality_show_plot
+      title: Plot
+      type: Bool
+      default: False
+
+    # Measures
+    - name: centrality_Betweenness
+      title: Betweenness
+      type: Bool
+      default: True
+
+    - name: centrality_BetweennessRSP
+      title: BetweennessRSP
+      type: Bool
+      default: False
+
+    - name: centrality_Closeness
+      title: Closeness
+      type: Bool
+      default: False
+
+    - name: centrality_ClosenessIn
+      title: ClosenessIn
+      type: Bool
+      default: False
+
+    - name: centrality_ClosenessOut
+      title: ClosenessOut
+      type: Bool
+      default: False
+
+    - name: centrality_Clustering
+      title: Clustering
+      type: Bool
+      default: False
+
+    - name: centrality_Diffusion
+      title: Diffusion
+      type: Bool
+      default: False
+
+    - name: centrality_InStrength
+      title: InStrength
+      type: Bool
+      default: True
+
+    - name: centrality_OutStrength
+      title: OutStrength
+      type: Bool
+      default: True
+
+    ### COMMUNITY DATA
+    - name: community_methods
+      title: Methods
+      type: List
+      default: spinglass
+      options:
+      - name: spinglass
+        title: Spinglass
+      - name: walktrap
+        title: Walktrap
+      - name: fast_greedy
+        title: Fast greedy
+      - name: label_prop
+        title: Label Prop
+      - name: infomap
+        title: Infomap
+      - name: edge_betweenness
+        title: Edge betweenness
+      - name: leading_eigen
+        title: Leading eigen
+
+
+    - name: community_gamma
+      title: Gamma
+      type: Integer
+      default: 1
+      min: 0
+      max: 100
+    - name: community_show_plot
+      title: Plot
+      type: Bool
+      default: False
+
+    ### CLIQUES DATA
+
+    - name: cliques_size
+      title: Size
+      type: Integer
+      default: 2
+      min: 2
+      max: 10
+
+    - name: cliques_threshold
+      title: Threshold
+      type: Number
+      default: 0
+      min: 0
+      max: 1
+
+    - name: cliques_show_text
+      title: Text
+      type: Bool
+      default: False
+
+    ##### PLOT
+
+    - name: cliques_show_plot
+      title: Plot
+      type: Bool
+      default: False
+
+    - name: cliques_plot_cut
+      title: Cut value
+      type: Number
+      default: 0.1
+      min: 0
+      max: 1
+
+    - name: cliques_plot_min_value
+      title: Minimum value
+      type: Number
+      default: 0
+      min: 0
+      max: 1
+
+    - name: cliques_plot_edge_label_size
+      title: Edge label size
+      type: Number
+      default: 1
+      min: 0
+      max: 10
+
+    - name: cliques_plot_node_size
+      title: Node size
+      type: Number
+      default: 1
+      min: 0
+      max: 2
+
+    - name: cliques_plot_node_label_size
+      title: Node label size
+      type: Number
+      default: 1
+      min: 0
+      max: 10
+
+    - name: cliques_plot_layout
+      title: Layout
+      type: List
+      default: circle
+      options:
+        - title: Circle
+          name: circle
+        - title: Spring
+          name: spring
+        - title: Kamada-Kawai
+          name: layout_with_kk
+        - title: Graphopt
+          name: layout_with_graphopt
+        - title: GEM
+          name: layout_with_gem
+        - title: DRL
+          name: layout_with_drl
+        - title: Star
+          name: layout_as_star
+        - title: Grid
+          name: layout_on_grid
+        - title: Nicely
+          name: layout_nicely
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
+        - title: Davidson-Harel
+          name: layout_with_dh
+        - title: LGL
+          name: layout_with_lgl
+        - title: Sugiyama
+          name: layout_with_sugiyama
+        - title: Random
+          name: layout_randomly
+
+    ### BOOTSTRAP
+
+    - name: bootstrap_iteration
+      title: Iteration
+      type: Integer
+      default: 1000
+      min: 0
+      max: 10000
+
+    - name: bootstrap_level
+      title: Level
+      type: Number
+      default: 0.05
+      min: 0
+      max: 1
+
+    - name: bootstrap_method
+      title: Method
+      type: List
+      default: stability
+      options:
+        - title: Stability
+          name: stability
+        - title: Threshold
+          name: threshold
+
+    - name: bootstrap_range_low
+      title: Lower
+      type: Number
+      default: 0.75
+      min: 0
+      max: 10
+
+    - name: bootstrap_range_up
+      title: Upper
+      type: Number
+      default: 1.25
+      min: 0
+      max: 10
+
+    - name: bootstrap_threshold
+      title: Threshold
+      type: Number
+      default: 0.1
+      min: 0
+      max: 1
+
+    ##### PLOT
+    - name: bootstrap_show_table
+      title: Bootstrap Results Table
+      type: Bool
+      default: False
+
+    - name: bootstrap_table_max_rows
+      title: Max rows
+      type: Integer
+      default: 20
+      min: 1
+      max: 1000
+
+    - name: bootstrap_table_show_all
+      title: Show all rows
+      type: Bool
+      default: False
+
+    - name: bootstrap_table_significant_only
+      title: Significant only
+      type: Bool
+      default: False
+
+    - name: bootstrap_show_plot
+      title: Plot
+      type: Bool
+      default: False
+
+    - name: bootstrap_plot_cut
+      title: Cut value
+      type: Number
+      default: 0.1
+      min: 0
+      max: 1
+
+    - name: bootstrap_plot_min_value
+      title: Minimum value
+      type: Number
+      default: 0.05
+      min: 0
+      max: 1
+
+    - name: bootstrap_plot_edge_label_size
+      title: Edge label size
+      type: Number
+      default: 1
+      min: 0
+      max: 10
+
+    - name: bootstrap_plot_node_size
+      title: Node size
+      type: Number
+      default: 1
+      min: 0
+      max: 2
+
+    - name: bootstrap_plot_node_label_size
+      title: Node label size
+      type: Number
+      default: 1
+      min: 0
+      max: 10
+
+    - name: bootstrap_plot_layout
+      title: Layout
+      type: List
+      default: circle
+      options:
+        - title: Circle
+          name: circle
+        - title: Spring
+          name: spring
+        - title: Kamada-Kawai
+          name: layout_with_kk
+        - title: Graphopt
+          name: layout_with_graphopt
+        - title: GEM
+          name: layout_with_gem
+        - title: DRL
+          name: layout_with_drl
+        - title: Star
+          name: layout_as_star
+        - title: Grid
+          name: layout_on_grid
+        - title: Nicely
+          name: layout_nicely
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
+        - title: Davidson-Harel
+          name: layout_with_dh
+        - title: LGL
+          name: layout_with_lgl
+        - title: Sugiyama
+          name: layout_with_sugiyama
+        - title: Random
+          name: layout_randomly
+
+
+
+
+    ### Permutation
+
+    - name: permutation_show_text
+      title: Text
+      type: Bool
+      default: False
+
+    - name: permutation_show_plot
+      title: Plot
+      type: Bool
+      default: False
+
+    - name: permutation_iter
+      title: Iter
+      type: Integer
+      default: 1000
+      min: 1
+
+    - name: permutation_paired
+      title: Paired
+      type: Bool
+      default: False
+
+    - name: permutation_level
+      title: Level
+      type: Number
+      default: 0.05
+      min: 0
+      max: 1
+
+    ### SEQUENCE ANALYSIS
+
+    - name: sequences_type
+      title: Type
+      type: List
+      default: index
+      options:
+        - title: Index
+          name: index
+        - title: Distribution
+          name: distribution
+
+    - name: sequences_scale
+      title: Scale
+      type: List
+      default: proportion
+      options:
+        - title: Proportion
+          name: proportion
+        - title: Count
+          name: count
+
+    - name: sequences_geom
+      title: Geometry
+      type: List
+      default: bar
+      options:
+        - title: Bar
+          name: bar
+        - title: Area
+          name: area
+
+    - name: sequences_include_na
+      title: Include missing values
+      type: Bool
+      default: true
+
+
+
+    - name: sequences_tick
+      title: Tick
+      type: Integer
+      default: 5
+      min: 1
+      max: 20
+
+    - name: sequences_show_plot
+      title: Sequence Plot
+      type: Bool
+      default: false
+
+    ### COMPARE SEQUENCES
+
+    - name: compare_sequences_show_table
+      title: Table
+      type: Bool
+      default: false
+
+    - name: compare_sequences_show_plot
+      title: Plot
+      type: Bool
+      default: false
+
+    - name: compare_sequences_sub_min
+      title: Min Subsequence Length
+      type: Integer
+      default: 2
+      min: 2
+      max: 10
+
+    - name: compare_sequences_sub_max
+      title: Max Subsequence Length
+      type: Integer
+      default: 4
+      min: 2
+      max: 10
+
+    - name: compare_sequences_min_freq
+      title: Minimum Frequency
+      type: Integer
+      default: 20
+      min: 1
+      max: 100
+
+    - name: compare_sequences_correction
+      title: Correction Method
+      type: List
+      default: bonferroni
+      options:
+        - title: Bonferroni
+          name: bonferroni
+        - title: Holm
+          name: holm
+        - title: Hochberg
+          name: hochberg
+        - title: BH (FDR)
+          name: BH
+        - title: BY
+          name: BY
+        - title: None
+          name: none
+
+    ### COMPARE CLUSTERS
+
+    - name: compare_show_summary
+      title: Summary Metrics Table
+      type: Bool
+      default: False
+
+    - name: compare_show_network
+      title: Network Properties Table
+      type: Bool
+      default: False
+
+    - name: compare_show_plot
+      title: Comparison Plot
+      type: Bool
+      default: False
+
+    - name: compare_cluster_i
+      title: First Network
+      type: Integer
+      default: 1
+      min: 1
+
+    - name: compare_cluster_j
+      title: Second Network
+      type: Integer
+      default: 2
+      min: 1
+
+    - name: compare_scaling
+      title: Scaling
+      type: List
+      default: none
+      options:
+        - title: None
+          name: none
+        - title: MinMax
+          name: minmax
+        - title: Max
+          name: max
+        - title: Rank
+          name: rank
+        - title: Z-Score
+          name: zscore
+        - title: Robust
+          name: robust
+
+    - name: compare_plot_type
+      title: Plot Type
+      type: List
+      default: heatmap
+      options:
+        - title: Heatmap
+          name: heatmap
+        - title: Scatterplot
+          name: scatterplot
+        - title: Weight Density
+          name: weight_density
+
+    - name: compare_show_network_diff_plot
+      title: Network Difference Plot
+      type: Bool
+      default: False
+
+    - name: compare_network_diff_plot_cut
+      title: Cut value
+      type: Number
+      default: 0.1
+      min: 0
+      max: 1
+
+    - name: compare_network_diff_plot_min_value
+      title: Minimum value
+      type: Number
+      default: 0.05
+      min: 0
+      max: 1
+
+    - name: compare_network_diff_plot_edge_label_size
+      title: Edge label size
+      type: Number
+      default: 1
+      min: 0
+      max: 10
+
+    - name: compare_network_diff_plot_node_size
+      title: Node size
+      type: Number
+      default: 1
+      min: 0
+      max: 2
+
+    - name: compare_network_diff_plot_node_label_size
+      title: Node label size
+      type: Number
+      default: 1
+      min: 0
+      max: 10
+
+    - name: compare_network_diff_plot_layout
+      title: Layout
+      type: List
+      default: circle
+      options:
+        - title: Circle
+          name: circle
+        - title: Spring
+          name: spring
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
+
+    ### SEQUENCE INDICES
+
+    - name: indices_show_table
+      title: Show Table
+      type: Bool
+      default: False
+
+    - name: indices_favorable
+      title: Favorable State
+      type: Level
+      variable: (buildModel_variables_long_action)
+      description: State considered favorable for computing integrative potential.
+
+    - name: indices_omega
+      title: Omega
+      type: Number
+      default: 1
+      min: 0.01
+      max: 10
+
+    - name: indices_table_max_rows
+      title: Max rows
+      type: Integer
+      default: 50
+      min: 1
+      max: 10000
+
+    - name: indices_table_show_all
+      title: Show all rows
+      type: Bool
+      default: False
+
+...

@@ -6,11 +6,12 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            buildModel_variables_long_action = NULL,
             buildModel_variables_long_actor = NULL,
             buildModel_variables_long_time = NULL,
-            buildModel_variables_long_action = NULL,
             buildModel_variables_long_order = NULL,
             buildModel_type = "relative",
+            buildModel_lambda = 1,
             buildModel_scaling = "noScaling",
             buildModel_show_matrix = FALSE,
             buildModel_threshold = 900,
@@ -38,6 +39,14 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             centrality_Diffusion = FALSE,
             centrality_InStrength = TRUE,
             centrality_OutStrength = TRUE,
+            centrality_stability_show_table = FALSE,
+            centrality_stability_show_plot = FALSE,
+            centrality_stability_InStrength = TRUE,
+            centrality_stability_OutStrength = TRUE,
+            centrality_stability_Betweenness = TRUE,
+            centrality_stability_iteration = 100,
+            centrality_stability_threshold = 0.7,
+            centrality_stability_certainty = 0.95,
             edgeBetweenness_show_table = FALSE,
             edgeBetweenness_show_plot = FALSE,
             edgeBetweenness_plot_cut = 0.1,
@@ -52,7 +61,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             community_show_plot = FALSE,
             cliques_size = 2,
             cliques_threshold = 0,
-            cliques_show_text = FALSE,
             cliques_show_plot = FALSE,
             cliques_plot_cut = 0.1,
             cliques_plot_min_value = 0,
@@ -68,18 +76,40 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bootstrap_threshold = 0.1,
             bootstrap_show_plot = FALSE,
             bootstrap_show_table = FALSE,
+            bootstrap_table_max_rows = 20,
+            bootstrap_table_show_all = FALSE,
+            bootstrap_table_significant_only = FALSE,
             bootstrap_plot_cut = 0.1,
             bootstrap_plot_min_value = 0.05,
             bootstrap_plot_edge_label_size = 1,
             bootstrap_plot_node_size = 1,
             bootstrap_plot_node_label_size = 1,
             bootstrap_plot_layout = NULL,
+            sequences_show_plot = FALSE,
             sequences_type = "index",
             sequences_scale = "proportion",
             sequences_geom = "bar",
-            sequences_include_na = TRUE,
+            sequences_include_na = FALSE,
             sequences_tick = 5,
-            sequences_show_plot = FALSE, ...) {
+            pattern_show_table = FALSE,
+            pattern_type = "ngram",
+            pattern_custom = "",
+            pattern_len_min = 2,
+            pattern_len_max = 5,
+            pattern_gap_min = 1,
+            pattern_gap_max = 3,
+            pattern_min_support = 0.01,
+            pattern_min_count = 2,
+            pattern_starts_with = NULL,
+            pattern_ends_with = NULL,
+            pattern_contains = NULL,
+            pattern_table_max_rows = 20,
+            pattern_table_show_all = FALSE,
+            indices_show_table = FALSE,
+            indices_favorable = NULL,
+            indices_omega = 1,
+            indices_table_max_rows = 50,
+            indices_table_show_all = FALSE, ...) {
 
             super$initialize(
                 package="JTNA",
@@ -87,15 +117,15 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
+            private$..buildModel_variables_long_action <- jmvcore::OptionVariable$new(
+                "buildModel_variables_long_action",
+                buildModel_variables_long_action)
             private$..buildModel_variables_long_actor <- jmvcore::OptionVariable$new(
                 "buildModel_variables_long_actor",
                 buildModel_variables_long_actor)
             private$..buildModel_variables_long_time <- jmvcore::OptionVariable$new(
                 "buildModel_variables_long_time",
                 buildModel_variables_long_time)
-            private$..buildModel_variables_long_action <- jmvcore::OptionVariable$new(
-                "buildModel_variables_long_action",
-                buildModel_variables_long_action)
             private$..buildModel_variables_long_order <- jmvcore::OptionVariable$new(
                 "buildModel_variables_long_order",
                 buildModel_variables_long_order)
@@ -105,8 +135,14 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "relative",
                     "frequency",
-                    "co-occurrence"),
+                    "attention"),
                 default="relative")
+            private$..buildModel_lambda <- jmvcore::OptionNumber$new(
+                "buildModel_lambda",
+                buildModel_lambda,
+                default=1,
+                min=0.01,
+                max=10)
             private$..buildModel_scaling <- jmvcore::OptionList$new(
                 "buildModel_scaling",
                 buildModel_scaling,
@@ -163,7 +199,19 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 buildModel_plot_layout,
                 options=list(
                     "circle",
-                    "spring"))
+                    "spring",
+                    "layout_with_kk",
+                    "layout_with_graphopt",
+                    "layout_with_gem",
+                    "layout_with_drl",
+                    "layout_as_star",
+                    "layout_on_grid",
+                    "layout_nicely",
+                    "layout_with_fr",
+                    "layout_with_dh",
+                    "layout_with_lgl",
+                    "layout_with_sugiyama",
+                    "layout_randomly"))
             private$..buildModel_show_histo <- jmvcore::OptionBool$new(
                 "buildModel_show_histo",
                 buildModel_show_histo,
@@ -232,6 +280,44 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "centrality_OutStrength",
                 centrality_OutStrength,
                 default=TRUE)
+            private$..centrality_stability_show_table <- jmvcore::OptionBool$new(
+                "centrality_stability_show_table",
+                centrality_stability_show_table,
+                default=FALSE)
+            private$..centrality_stability_show_plot <- jmvcore::OptionBool$new(
+                "centrality_stability_show_plot",
+                centrality_stability_show_plot,
+                default=FALSE)
+            private$..centrality_stability_InStrength <- jmvcore::OptionBool$new(
+                "centrality_stability_InStrength",
+                centrality_stability_InStrength,
+                default=TRUE)
+            private$..centrality_stability_OutStrength <- jmvcore::OptionBool$new(
+                "centrality_stability_OutStrength",
+                centrality_stability_OutStrength,
+                default=TRUE)
+            private$..centrality_stability_Betweenness <- jmvcore::OptionBool$new(
+                "centrality_stability_Betweenness",
+                centrality_stability_Betweenness,
+                default=TRUE)
+            private$..centrality_stability_iteration <- jmvcore::OptionInteger$new(
+                "centrality_stability_iteration",
+                centrality_stability_iteration,
+                default=100,
+                min=10,
+                max=10000)
+            private$..centrality_stability_threshold <- jmvcore::OptionNumber$new(
+                "centrality_stability_threshold",
+                centrality_stability_threshold,
+                default=0.7,
+                min=0,
+                max=1)
+            private$..centrality_stability_certainty <- jmvcore::OptionNumber$new(
+                "centrality_stability_certainty",
+                centrality_stability_certainty,
+                default=0.95,
+                min=0,
+                max=1)
             private$..edgeBetweenness_show_table <- jmvcore::OptionBool$new(
                 "edgeBetweenness_show_table",
                 edgeBetweenness_show_table,
@@ -275,7 +361,19 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 edgeBetweenness_plot_layout,
                 options=list(
                     "circle",
-                    "spring"))
+                    "spring",
+                    "layout_with_kk",
+                    "layout_with_graphopt",
+                    "layout_with_gem",
+                    "layout_with_drl",
+                    "layout_as_star",
+                    "layout_on_grid",
+                    "layout_nicely",
+                    "layout_with_fr",
+                    "layout_with_dh",
+                    "layout_with_lgl",
+                    "layout_with_sugiyama",
+                    "layout_randomly"))
             private$..community_methods <- jmvcore::OptionList$new(
                 "community_methods",
                 community_methods,
@@ -314,10 +412,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=0,
                 min=0,
                 max=1)
-            private$..cliques_show_text <- jmvcore::OptionBool$new(
-                "cliques_show_text",
-                cliques_show_text,
-                default=FALSE)
             private$..cliques_show_plot <- jmvcore::OptionBool$new(
                 "cliques_show_plot",
                 cliques_show_plot,
@@ -358,7 +452,19 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default="circle",
                 options=list(
                     "circle",
-                    "spring"))
+                    "spring",
+                    "layout_with_kk",
+                    "layout_with_graphopt",
+                    "layout_with_gem",
+                    "layout_with_drl",
+                    "layout_as_star",
+                    "layout_on_grid",
+                    "layout_nicely",
+                    "layout_with_fr",
+                    "layout_with_dh",
+                    "layout_with_lgl",
+                    "layout_with_sugiyama",
+                    "layout_randomly"))
             private$..bootstrap_iteration <- jmvcore::OptionInteger$new(
                 "bootstrap_iteration",
                 bootstrap_iteration,
@@ -404,6 +510,20 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "bootstrap_show_table",
                 bootstrap_show_table,
                 default=FALSE)
+            private$..bootstrap_table_max_rows <- jmvcore::OptionInteger$new(
+                "bootstrap_table_max_rows",
+                bootstrap_table_max_rows,
+                default=20,
+                min=1,
+                max=1000)
+            private$..bootstrap_table_show_all <- jmvcore::OptionBool$new(
+                "bootstrap_table_show_all",
+                bootstrap_table_show_all,
+                default=FALSE)
+            private$..bootstrap_table_significant_only <- jmvcore::OptionBool$new(
+                "bootstrap_table_significant_only",
+                bootstrap_table_significant_only,
+                default=FALSE)
             private$..bootstrap_plot_cut <- jmvcore::OptionNumber$new(
                 "bootstrap_plot_cut",
                 bootstrap_plot_cut,
@@ -439,7 +559,23 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 bootstrap_plot_layout,
                 options=list(
                     "circle",
-                    "spring"))
+                    "spring",
+                    "layout_with_kk",
+                    "layout_with_graphopt",
+                    "layout_with_gem",
+                    "layout_with_drl",
+                    "layout_as_star",
+                    "layout_on_grid",
+                    "layout_nicely",
+                    "layout_with_fr",
+                    "layout_with_dh",
+                    "layout_with_lgl",
+                    "layout_with_sugiyama",
+                    "layout_randomly"))
+            private$..sequences_show_plot <- jmvcore::OptionBool$new(
+                "sequences_show_plot",
+                sequences_show_plot,
+                default=FALSE)
             private$..sequences_type <- jmvcore::OptionList$new(
                 "sequences_type",
                 sequences_type,
@@ -464,23 +600,119 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..sequences_include_na <- jmvcore::OptionBool$new(
                 "sequences_include_na",
                 sequences_include_na,
-                default=TRUE)
+                default=FALSE)
             private$..sequences_tick <- jmvcore::OptionInteger$new(
                 "sequences_tick",
                 sequences_tick,
                 default=5,
                 min=1,
                 max=20)
-            private$..sequences_show_plot <- jmvcore::OptionBool$new(
-                "sequences_show_plot",
-                sequences_show_plot,
+            private$..pattern_show_table <- jmvcore::OptionBool$new(
+                "pattern_show_table",
+                pattern_show_table,
+                default=FALSE)
+            private$..pattern_type <- jmvcore::OptionList$new(
+                "pattern_type",
+                pattern_type,
+                default="ngram",
+                options=list(
+                    "ngram",
+                    "gapped",
+                    "repeated",
+                    "custom"))
+            private$..pattern_custom <- jmvcore::OptionString$new(
+                "pattern_custom",
+                pattern_custom,
+                default="")
+            private$..pattern_len_min <- jmvcore::OptionInteger$new(
+                "pattern_len_min",
+                pattern_len_min,
+                default=2,
+                min=2,
+                max=20)
+            private$..pattern_len_max <- jmvcore::OptionInteger$new(
+                "pattern_len_max",
+                pattern_len_max,
+                default=5,
+                min=2,
+                max=20)
+            private$..pattern_gap_min <- jmvcore::OptionInteger$new(
+                "pattern_gap_min",
+                pattern_gap_min,
+                default=1,
+                min=1,
+                max=10)
+            private$..pattern_gap_max <- jmvcore::OptionInteger$new(
+                "pattern_gap_max",
+                pattern_gap_max,
+                default=3,
+                min=1,
+                max=10)
+            private$..pattern_min_support <- jmvcore::OptionNumber$new(
+                "pattern_min_support",
+                pattern_min_support,
+                default=0.01,
+                min=0,
+                max=1)
+            private$..pattern_min_count <- jmvcore::OptionInteger$new(
+                "pattern_min_count",
+                pattern_min_count,
+                default=2,
+                min=1,
+                max=1000)
+            private$..pattern_starts_with <- jmvcore::OptionLevel$new(
+                "pattern_starts_with",
+                pattern_starts_with,
+                variable="(buildModel_variables_long_action)")
+            private$..pattern_ends_with <- jmvcore::OptionLevel$new(
+                "pattern_ends_with",
+                pattern_ends_with,
+                variable="(buildModel_variables_long_action)")
+            private$..pattern_contains <- jmvcore::OptionLevel$new(
+                "pattern_contains",
+                pattern_contains,
+                variable="(buildModel_variables_long_action)")
+            private$..pattern_table_max_rows <- jmvcore::OptionInteger$new(
+                "pattern_table_max_rows",
+                pattern_table_max_rows,
+                default=20,
+                min=1,
+                max=1000)
+            private$..pattern_table_show_all <- jmvcore::OptionBool$new(
+                "pattern_table_show_all",
+                pattern_table_show_all,
+                default=FALSE)
+            private$..indices_show_table <- jmvcore::OptionBool$new(
+                "indices_show_table",
+                indices_show_table,
+                default=FALSE)
+            private$..indices_favorable <- jmvcore::OptionLevel$new(
+                "indices_favorable",
+                indices_favorable,
+                variable="(buildModel_variables_long_action)")
+            private$..indices_omega <- jmvcore::OptionNumber$new(
+                "indices_omega",
+                indices_omega,
+                default=1,
+                min=0.01,
+                max=10)
+            private$..indices_table_max_rows <- jmvcore::OptionInteger$new(
+                "indices_table_max_rows",
+                indices_table_max_rows,
+                default=50,
+                min=1,
+                max=10000)
+            private$..indices_table_show_all <- jmvcore::OptionBool$new(
+                "indices_table_show_all",
+                indices_table_show_all,
                 default=FALSE)
 
+            self$.addOption(private$..buildModel_variables_long_action)
             self$.addOption(private$..buildModel_variables_long_actor)
             self$.addOption(private$..buildModel_variables_long_time)
-            self$.addOption(private$..buildModel_variables_long_action)
             self$.addOption(private$..buildModel_variables_long_order)
             self$.addOption(private$..buildModel_type)
+            self$.addOption(private$..buildModel_lambda)
             self$.addOption(private$..buildModel_scaling)
             self$.addOption(private$..buildModel_show_matrix)
             self$.addOption(private$..buildModel_threshold)
@@ -508,6 +740,14 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..centrality_Diffusion)
             self$.addOption(private$..centrality_InStrength)
             self$.addOption(private$..centrality_OutStrength)
+            self$.addOption(private$..centrality_stability_show_table)
+            self$.addOption(private$..centrality_stability_show_plot)
+            self$.addOption(private$..centrality_stability_InStrength)
+            self$.addOption(private$..centrality_stability_OutStrength)
+            self$.addOption(private$..centrality_stability_Betweenness)
+            self$.addOption(private$..centrality_stability_iteration)
+            self$.addOption(private$..centrality_stability_threshold)
+            self$.addOption(private$..centrality_stability_certainty)
             self$.addOption(private$..edgeBetweenness_show_table)
             self$.addOption(private$..edgeBetweenness_show_plot)
             self$.addOption(private$..edgeBetweenness_plot_cut)
@@ -522,7 +762,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..community_show_plot)
             self$.addOption(private$..cliques_size)
             self$.addOption(private$..cliques_threshold)
-            self$.addOption(private$..cliques_show_text)
             self$.addOption(private$..cliques_show_plot)
             self$.addOption(private$..cliques_plot_cut)
             self$.addOption(private$..cliques_plot_min_value)
@@ -538,25 +777,48 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..bootstrap_threshold)
             self$.addOption(private$..bootstrap_show_plot)
             self$.addOption(private$..bootstrap_show_table)
+            self$.addOption(private$..bootstrap_table_max_rows)
+            self$.addOption(private$..bootstrap_table_show_all)
+            self$.addOption(private$..bootstrap_table_significant_only)
             self$.addOption(private$..bootstrap_plot_cut)
             self$.addOption(private$..bootstrap_plot_min_value)
             self$.addOption(private$..bootstrap_plot_edge_label_size)
             self$.addOption(private$..bootstrap_plot_node_size)
             self$.addOption(private$..bootstrap_plot_node_label_size)
             self$.addOption(private$..bootstrap_plot_layout)
+            self$.addOption(private$..sequences_show_plot)
             self$.addOption(private$..sequences_type)
             self$.addOption(private$..sequences_scale)
             self$.addOption(private$..sequences_geom)
             self$.addOption(private$..sequences_include_na)
             self$.addOption(private$..sequences_tick)
-            self$.addOption(private$..sequences_show_plot)
+            self$.addOption(private$..pattern_show_table)
+            self$.addOption(private$..pattern_type)
+            self$.addOption(private$..pattern_custom)
+            self$.addOption(private$..pattern_len_min)
+            self$.addOption(private$..pattern_len_max)
+            self$.addOption(private$..pattern_gap_min)
+            self$.addOption(private$..pattern_gap_max)
+            self$.addOption(private$..pattern_min_support)
+            self$.addOption(private$..pattern_min_count)
+            self$.addOption(private$..pattern_starts_with)
+            self$.addOption(private$..pattern_ends_with)
+            self$.addOption(private$..pattern_contains)
+            self$.addOption(private$..pattern_table_max_rows)
+            self$.addOption(private$..pattern_table_show_all)
+            self$.addOption(private$..indices_show_table)
+            self$.addOption(private$..indices_favorable)
+            self$.addOption(private$..indices_omega)
+            self$.addOption(private$..indices_table_max_rows)
+            self$.addOption(private$..indices_table_show_all)
         }),
     active = list(
+        buildModel_variables_long_action = function() private$..buildModel_variables_long_action$value,
         buildModel_variables_long_actor = function() private$..buildModel_variables_long_actor$value,
         buildModel_variables_long_time = function() private$..buildModel_variables_long_time$value,
-        buildModel_variables_long_action = function() private$..buildModel_variables_long_action$value,
         buildModel_variables_long_order = function() private$..buildModel_variables_long_order$value,
         buildModel_type = function() private$..buildModel_type$value,
+        buildModel_lambda = function() private$..buildModel_lambda$value,
         buildModel_scaling = function() private$..buildModel_scaling$value,
         buildModel_show_matrix = function() private$..buildModel_show_matrix$value,
         buildModel_threshold = function() private$..buildModel_threshold$value,
@@ -584,6 +846,14 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         centrality_Diffusion = function() private$..centrality_Diffusion$value,
         centrality_InStrength = function() private$..centrality_InStrength$value,
         centrality_OutStrength = function() private$..centrality_OutStrength$value,
+        centrality_stability_show_table = function() private$..centrality_stability_show_table$value,
+        centrality_stability_show_plot = function() private$..centrality_stability_show_plot$value,
+        centrality_stability_InStrength = function() private$..centrality_stability_InStrength$value,
+        centrality_stability_OutStrength = function() private$..centrality_stability_OutStrength$value,
+        centrality_stability_Betweenness = function() private$..centrality_stability_Betweenness$value,
+        centrality_stability_iteration = function() private$..centrality_stability_iteration$value,
+        centrality_stability_threshold = function() private$..centrality_stability_threshold$value,
+        centrality_stability_certainty = function() private$..centrality_stability_certainty$value,
         edgeBetweenness_show_table = function() private$..edgeBetweenness_show_table$value,
         edgeBetweenness_show_plot = function() private$..edgeBetweenness_show_plot$value,
         edgeBetweenness_plot_cut = function() private$..edgeBetweenness_plot_cut$value,
@@ -598,7 +868,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         community_show_plot = function() private$..community_show_plot$value,
         cliques_size = function() private$..cliques_size$value,
         cliques_threshold = function() private$..cliques_threshold$value,
-        cliques_show_text = function() private$..cliques_show_text$value,
         cliques_show_plot = function() private$..cliques_show_plot$value,
         cliques_plot_cut = function() private$..cliques_plot_cut$value,
         cliques_plot_min_value = function() private$..cliques_plot_min_value$value,
@@ -614,24 +883,47 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         bootstrap_threshold = function() private$..bootstrap_threshold$value,
         bootstrap_show_plot = function() private$..bootstrap_show_plot$value,
         bootstrap_show_table = function() private$..bootstrap_show_table$value,
+        bootstrap_table_max_rows = function() private$..bootstrap_table_max_rows$value,
+        bootstrap_table_show_all = function() private$..bootstrap_table_show_all$value,
+        bootstrap_table_significant_only = function() private$..bootstrap_table_significant_only$value,
         bootstrap_plot_cut = function() private$..bootstrap_plot_cut$value,
         bootstrap_plot_min_value = function() private$..bootstrap_plot_min_value$value,
         bootstrap_plot_edge_label_size = function() private$..bootstrap_plot_edge_label_size$value,
         bootstrap_plot_node_size = function() private$..bootstrap_plot_node_size$value,
         bootstrap_plot_node_label_size = function() private$..bootstrap_plot_node_label_size$value,
         bootstrap_plot_layout = function() private$..bootstrap_plot_layout$value,
+        sequences_show_plot = function() private$..sequences_show_plot$value,
         sequences_type = function() private$..sequences_type$value,
         sequences_scale = function() private$..sequences_scale$value,
         sequences_geom = function() private$..sequences_geom$value,
         sequences_include_na = function() private$..sequences_include_na$value,
         sequences_tick = function() private$..sequences_tick$value,
-        sequences_show_plot = function() private$..sequences_show_plot$value),
+        pattern_show_table = function() private$..pattern_show_table$value,
+        pattern_type = function() private$..pattern_type$value,
+        pattern_custom = function() private$..pattern_custom$value,
+        pattern_len_min = function() private$..pattern_len_min$value,
+        pattern_len_max = function() private$..pattern_len_max$value,
+        pattern_gap_min = function() private$..pattern_gap_min$value,
+        pattern_gap_max = function() private$..pattern_gap_max$value,
+        pattern_min_support = function() private$..pattern_min_support$value,
+        pattern_min_count = function() private$..pattern_min_count$value,
+        pattern_starts_with = function() private$..pattern_starts_with$value,
+        pattern_ends_with = function() private$..pattern_ends_with$value,
+        pattern_contains = function() private$..pattern_contains$value,
+        pattern_table_max_rows = function() private$..pattern_table_max_rows$value,
+        pattern_table_show_all = function() private$..pattern_table_show_all$value,
+        indices_show_table = function() private$..indices_show_table$value,
+        indices_favorable = function() private$..indices_favorable$value,
+        indices_omega = function() private$..indices_omega$value,
+        indices_table_max_rows = function() private$..indices_table_max_rows$value,
+        indices_table_show_all = function() private$..indices_table_show_all$value),
     private = list(
+        ..buildModel_variables_long_action = NA,
         ..buildModel_variables_long_actor = NA,
         ..buildModel_variables_long_time = NA,
-        ..buildModel_variables_long_action = NA,
         ..buildModel_variables_long_order = NA,
         ..buildModel_type = NA,
+        ..buildModel_lambda = NA,
         ..buildModel_scaling = NA,
         ..buildModel_show_matrix = NA,
         ..buildModel_threshold = NA,
@@ -659,6 +951,14 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..centrality_Diffusion = NA,
         ..centrality_InStrength = NA,
         ..centrality_OutStrength = NA,
+        ..centrality_stability_show_table = NA,
+        ..centrality_stability_show_plot = NA,
+        ..centrality_stability_InStrength = NA,
+        ..centrality_stability_OutStrength = NA,
+        ..centrality_stability_Betweenness = NA,
+        ..centrality_stability_iteration = NA,
+        ..centrality_stability_threshold = NA,
+        ..centrality_stability_certainty = NA,
         ..edgeBetweenness_show_table = NA,
         ..edgeBetweenness_show_plot = NA,
         ..edgeBetweenness_plot_cut = NA,
@@ -673,7 +973,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..community_show_plot = NA,
         ..cliques_size = NA,
         ..cliques_threshold = NA,
-        ..cliques_show_text = NA,
         ..cliques_show_plot = NA,
         ..cliques_plot_cut = NA,
         ..cliques_plot_min_value = NA,
@@ -689,24 +988,47 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..bootstrap_threshold = NA,
         ..bootstrap_show_plot = NA,
         ..bootstrap_show_table = NA,
+        ..bootstrap_table_max_rows = NA,
+        ..bootstrap_table_show_all = NA,
+        ..bootstrap_table_significant_only = NA,
         ..bootstrap_plot_cut = NA,
         ..bootstrap_plot_min_value = NA,
         ..bootstrap_plot_edge_label_size = NA,
         ..bootstrap_plot_node_size = NA,
         ..bootstrap_plot_node_label_size = NA,
         ..bootstrap_plot_layout = NA,
+        ..sequences_show_plot = NA,
         ..sequences_type = NA,
         ..sequences_scale = NA,
         ..sequences_geom = NA,
         ..sequences_include_na = NA,
         ..sequences_tick = NA,
-        ..sequences_show_plot = NA)
+        ..pattern_show_table = NA,
+        ..pattern_type = NA,
+        ..pattern_custom = NA,
+        ..pattern_len_min = NA,
+        ..pattern_len_max = NA,
+        ..pattern_gap_min = NA,
+        ..pattern_gap_max = NA,
+        ..pattern_min_support = NA,
+        ..pattern_min_count = NA,
+        ..pattern_starts_with = NA,
+        ..pattern_ends_with = NA,
+        ..pattern_contains = NA,
+        ..pattern_table_max_rows = NA,
+        ..pattern_table_show_all = NA,
+        ..indices_show_table = NA,
+        ..indices_favorable = NA,
+        ..indices_omega = NA,
+        ..indices_table_max_rows = NA,
+        ..indices_table_show_all = NA)
 )
 
 TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "TNAResults",
     inherit = jmvcore::Group,
     active = list(
+        instructions = function() private$.items[["instructions"]],
         errorText = function() private$.items[["errorText"]],
         tnaTitle = function() private$.items[["tnaTitle"]],
         buildModelTitle = function() private$.items[["buildModelTitle"]],
@@ -719,6 +1041,9 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         centralityContent = function() private$.items[["centralityContent"]],
         centralityTable = function() private$.items[["centralityTable"]],
         centrality_plot = function() private$.items[["centrality_plot"]],
+        centralityStabilityTitle = function() private$.items[["centralityStabilityTitle"]],
+        centralityStabilityTable = function() private$.items[["centralityStabilityTable"]],
+        centrality_stability_plot = function() private$.items[["centrality_stability_plot"]],
         edgeBetweennessTitle = function() private$.items[["edgeBetweennessTitle"]],
         edgeBetweenness_plot = function() private$.items[["edgeBetweenness_plot"]],
         edgeBetweennessTable = function() private$.items[["edgeBetweennessTable"]],
@@ -728,13 +1053,16 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         community_plot = function() private$.items[["community_plot"]],
         communityTable = function() private$.items[["communityTable"]],
         cliquesTitle = function() private$.items[["cliquesTitle"]],
-        cliquesContent = function() private$.items[["cliquesContent"]],
         cliques_multiple_plot = function() private$.items[["cliques_multiple_plot"]],
         bootstrapTitle = function() private$.items[["bootstrapTitle"]],
         bootstrap_plot = function() private$.items[["bootstrap_plot"]],
         bootstrapTable = function() private$.items[["bootstrapTable"]],
         permutationTable = function() private$.items[["permutationTable"]],
-        sequences_plot = function() private$.items[["sequences_plot"]]),
+        sequences_plot = function() private$.items[["sequences_plot"]],
+        patternTitle = function() private$.items[["patternTitle"]],
+        patternTable = function() private$.items[["patternTable"]],
+        indicesTitle = function() private$.items[["indicesTitle"]],
+        indicesTable = function() private$.items[["indicesTable"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -743,7 +1071,14 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Transition Network Analysis",
                 refs=list(
-                    "TNA"))
+                    "JTNA",
+                    "TNA",
+                    "TNALAK"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="instructions",
+                title="Instructions",
+                visible=TRUE))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="errorText",
@@ -770,7 +1105,8 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_long_order",
                     "buildModel_type",
                     "buildModel_scaling",
-                    "buildModel_threshold")))
+                    "buildModel_threshold",
+                    "buildModel_lambda")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="buildModel_plot",
@@ -786,6 +1122,7 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "buildModel_plot_cut",
                     "buildModel_plot_min_value",
                     "buildModel_plot_edge_label_size",
@@ -806,7 +1143,8 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_long_order",
                     "buildModel_type",
                     "buildModel_scaling",
-                    "buildModel_threshold")))
+                    "buildModel_threshold",
+                    "buildModel_lambda")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="buildModel_frequencies",
@@ -821,7 +1159,8 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_long_order",
                     "buildModel_type",
                     "buildModel_scaling",
-                    "buildModel_threshold")))
+                    "buildModel_threshold",
+                    "buildModel_lambda")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="buildModel_mosaic",
@@ -837,6 +1176,7 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "buildModel_digits")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -855,6 +1195,7 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "centrality_loops",
                     "centrality_normalize",
                     "centrality_Betweenness",
@@ -883,6 +1224,7 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "centrality_loops",
                     "centrality_normalize",
                     "centrality_Betweenness",
@@ -909,6 +1251,7 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "centrality_loops",
                     "centrality_normalize",
                     "centrality_Betweenness",
@@ -920,6 +1263,66 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "centrality_Diffusion",
                     "centrality_InStrength",
                     "centrality_OutStrength")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="centralityStabilityTitle",
+                title="Centrality Stability",
+                visible=FALSE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="centralityStabilityTable",
+                title="Centrality Stability (CS-Coefficients)",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="measure", 
+                        `title`="Measure", 
+                        `type`="text"),
+                    list(
+                        `name`="cs_coefficient", 
+                        `title`="CS-Coefficient", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "buildModel_lambda",
+                    "centrality_loops",
+                    "centrality_normalize",
+                    "centrality_stability_iteration",
+                    "centrality_stability_threshold",
+                    "centrality_stability_certainty",
+                    "centrality_stability_InStrength",
+                    "centrality_stability_OutStrength",
+                    "centrality_stability_Betweenness")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="centrality_stability_plot",
+                width=600,
+                height=500,
+                visible=FALSE,
+                renderFun=".showCentralityStabilityPlot",
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "buildModel_lambda",
+                    "centrality_loops",
+                    "centrality_normalize",
+                    "centrality_stability_iteration",
+                    "centrality_stability_threshold",
+                    "centrality_stability_certainty",
+                    "centrality_stability_InStrength",
+                    "centrality_stability_OutStrength",
+                    "centrality_stability_Betweenness")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="edgeBetweennessTitle",
@@ -940,6 +1343,7 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "edgeBetweenness_plot_cut",
                     "edgeBetweenness_plot_min_value",
                     "edgeBetweenness_plot_edge_label_size",
@@ -971,7 +1375,8 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_long_order",
                     "buildModel_type",
                     "buildModel_scaling",
-                    "buildModel_threshold")))
+                    "buildModel_threshold",
+                    "buildModel_lambda")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="edgeBetweennessNoResultsNote",
@@ -983,7 +1388,8 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_variables_long_order",
                     "buildModel_type",
                     "buildModel_scaling",
-                    "buildModel_threshold")))
+                    "buildModel_threshold",
+                    "buildModel_lambda")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="communityTitle",
@@ -1001,6 +1407,7 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "community_methods",
                     "community_gamma")))
             self$add(jmvcore::Image$new(
@@ -1018,6 +1425,7 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "community_methods",
                     "community_gamma")))
             self$add(jmvcore::Table$new(
@@ -1038,6 +1446,7 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "community_methods",
                     "community_gamma")))
             self$add(jmvcore::Preformatted$new(
@@ -1045,29 +1454,10 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="cliquesTitle",
                 title="Cliques",
                 visible=FALSE))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="cliquesContent",
-                visible=FALSE,
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "cliques_size",
-                    "cliques_threshold")))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
-                    cliques_plot1 = function() private$.items[["cliques_plot1"]],
-                    cliques_plot2 = function() private$.items[["cliques_plot2"]],
-                    cliques_plot3 = function() private$.items[["cliques_plot3"]],
-                    cliques_plot4 = function() private$.items[["cliques_plot4"]],
-                    cliques_plot5 = function() private$.items[["cliques_plot5"]],
-                    cliques_plot6 = function() private$.items[["cliques_plot6"]]),
+                    cliques_combined_plot = function() private$.items[["cliques_combined_plot"]]),
                 private = list(),
                 public=list(
                     initialize=function(options) {
@@ -1083,6 +1473,7 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "cliques_size",
                     "cliques_threshold",
                     "cliques_plot_min_value",
@@ -1092,46 +1483,11 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "cliques_plot_layout"))
                         self$add(jmvcore::Image$new(
                             options=options,
-                            name="cliques_plot1",
-                            width=600,
-                            height=600,
+                            name="cliques_combined_plot",
+                            width=900,
+                            height=700,
                             visible=TRUE,
-                            renderFun=".showCliquesPlot1"))
-                        self$add(jmvcore::Image$new(
-                            options=options,
-                            name="cliques_plot2",
-                            width=600,
-                            height=600,
-                            visible=TRUE,
-                            renderFun=".showCliquesPlot2"))
-                        self$add(jmvcore::Image$new(
-                            options=options,
-                            name="cliques_plot3",
-                            width=600,
-                            height=600,
-                            visible=TRUE,
-                            renderFun=".showCliquesPlot3"))
-                        self$add(jmvcore::Image$new(
-                            options=options,
-                            name="cliques_plot4",
-                            width=600,
-                            height=600,
-                            visible=TRUE,
-                            renderFun=".showCliquesPlot4"))
-                        self$add(jmvcore::Image$new(
-                            options=options,
-                            name="cliques_plot5",
-                            width=600,
-                            height=600,
-                            visible=TRUE,
-                            renderFun=".showCliquesPlot5"))
-                        self$add(jmvcore::Image$new(
-                            options=options,
-                            name="cliques_plot6",
-                            width=600,
-                            height=600,
-                            visible=TRUE,
-                            renderFun=".showCliquesPlot6"))}))$new(options=options))
+                            renderFun=".showCliquesMultiPlot"))}))$new(options=options))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="bootstrapTitle",
@@ -1152,6 +1508,7 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "bootstrap_iteration",
                     "bootstrap_level",
                     "bootstrap_method",
@@ -1214,6 +1571,7 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "bootstrap_iteration",
                     "bootstrap_level",
                     "bootstrap_method",
@@ -1254,6 +1612,7 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "permutation_iter",
                     "permutation_paired",
                     "permutation_level")))
@@ -1262,7 +1621,7 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="sequences_plot",
                 title="Sequence Analysis Plot",
                 width=600,
-                height=600,
+                height=400,
                 visible=FALSE,
                 renderFun=".showSequencesPlot",
                 clearWith=list(
@@ -1273,11 +1632,138 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "buildModel_lambda",
                     "sequences_type",
                     "sequences_scale",
                     "sequences_geom",
                     "sequences_include_na",
-                    "sequences_tick")))}))
+                    "sequences_tick")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="patternTitle",
+                title="Pattern Discovery",
+                visible=FALSE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="patternTable",
+                title="Discovered Patterns",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="pattern", 
+                        `title`="Pattern", 
+                        `type`="text"),
+                    list(
+                        `name`="length", 
+                        `title`="Length", 
+                        `type`="integer"),
+                    list(
+                        `name`="count", 
+                        `title`="Count", 
+                        `type`="integer"),
+                    list(
+                        `name`="proportion", 
+                        `title`="Proportion", 
+                        `type`="number"),
+                    list(
+                        `name`="support", 
+                        `title`="Support", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "buildModel_lambda",
+                    "pattern_type",
+                    "pattern_custom",
+                    "pattern_len_min",
+                    "pattern_len_max",
+                    "pattern_gap_min",
+                    "pattern_gap_max",
+                    "pattern_min_support",
+                    "pattern_min_count",
+                    "pattern_starts_with",
+                    "pattern_ends_with",
+                    "pattern_contains")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="indicesTitle",
+                title="Sequence Indices",
+                visible=FALSE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="indicesTable",
+                title="Sequence Indices",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="sequence_id", 
+                        `title`="Seq", 
+                        `type`="integer"),
+                    list(
+                        `name`="actor", 
+                        `title`="Actor", 
+                        `type`="text"),
+                    list(
+                        `name`="valid_n", 
+                        `title`="Valid N", 
+                        `type`="integer"),
+                    list(
+                        `name`="unique_states", 
+                        `title`="Unique", 
+                        `type`="integer"),
+                    list(
+                        `name`="longitudinal_entropy", 
+                        `title`="Entropy", 
+                        `type`="number"),
+                    list(
+                        `name`="simpson_diversity", 
+                        `title`="Simpson", 
+                        `type`="number"),
+                    list(
+                        `name`="mean_spell_duration", 
+                        `title`="Mean Spell", 
+                        `type`="number"),
+                    list(
+                        `name`="self_loop_tendency", 
+                        `title`="Self-Loop", 
+                        `type`="number"),
+                    list(
+                        `name`="transition_rate", 
+                        `title`="Trans Rate", 
+                        `type`="number"),
+                    list(
+                        `name`="first_state", 
+                        `title`="First", 
+                        `type`="text"),
+                    list(
+                        `name`="last_state", 
+                        `title`="Last", 
+                        `type`="text"),
+                    list(
+                        `name`="dominant_state", 
+                        `title`="Dominant", 
+                        `type`="text"),
+                    list(
+                        `name`="complexity_index", 
+                        `title`="Complexity", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "buildModel_lambda",
+                    "indices_group",
+                    "indices_favorable",
+                    "indices_omega")))}))
 
 TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "TNABase",
@@ -1287,7 +1773,7 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "JTNA",
                 name = "TNA",
-                version = c(1,4,0),
+                version = c(1,12,0),
                 options = options,
                 results = TNAResults$new(options=options),
                 data = data,
@@ -1304,11 +1790,18 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' 
 #' @param data .
-#' @param buildModel_variables_long_actor .
-#' @param buildModel_variables_long_time .
-#' @param buildModel_variables_long_action .
-#' @param buildModel_variables_long_order .
+#' @param buildModel_variables_long_action The column containing the
+#'   actions/states/events to analyze. Each unique value becomes a node in the
+#'   network.
+#' @param buildModel_variables_long_actor The column identifying
+#'   individuals/actors. Used to separate sequences by person. If omitted, all
+#'   data is treated as one sequence.
+#' @param buildModel_variables_long_time Timestamp column for ordering events
+#'   chronologically. Use this OR Order, not both.
+#' @param buildModel_variables_long_order Numeric column indicating the
+#'   sequence position of each event. Use this OR Time, not both.
 #' @param buildModel_type .
+#' @param buildModel_lambda .
 #' @param buildModel_scaling .
 #' @param buildModel_show_matrix .
 #' @param buildModel_threshold .
@@ -1336,6 +1829,14 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param centrality_Diffusion .
 #' @param centrality_InStrength .
 #' @param centrality_OutStrength .
+#' @param centrality_stability_show_table .
+#' @param centrality_stability_show_plot .
+#' @param centrality_stability_InStrength .
+#' @param centrality_stability_OutStrength .
+#' @param centrality_stability_Betweenness .
+#' @param centrality_stability_iteration .
+#' @param centrality_stability_threshold .
+#' @param centrality_stability_certainty .
 #' @param edgeBetweenness_show_table .
 #' @param edgeBetweenness_show_plot .
 #' @param edgeBetweenness_plot_cut .
@@ -1350,7 +1851,6 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param community_show_plot .
 #' @param cliques_size .
 #' @param cliques_threshold .
-#' @param cliques_show_text .
 #' @param cliques_show_plot .
 #' @param cliques_plot_cut .
 #' @param cliques_plot_min_value .
@@ -1366,20 +1866,44 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param bootstrap_threshold .
 #' @param bootstrap_show_plot .
 #' @param bootstrap_show_table .
+#' @param bootstrap_table_max_rows .
+#' @param bootstrap_table_show_all .
+#' @param bootstrap_table_significant_only .
 #' @param bootstrap_plot_cut .
 #' @param bootstrap_plot_min_value .
 #' @param bootstrap_plot_edge_label_size .
 #' @param bootstrap_plot_node_size .
 #' @param bootstrap_plot_node_label_size .
 #' @param bootstrap_plot_layout .
+#' @param sequences_show_plot .
 #' @param sequences_type .
 #' @param sequences_scale .
 #' @param sequences_geom .
 #' @param sequences_include_na .
 #' @param sequences_tick .
-#' @param sequences_show_plot .
+#' @param pattern_show_table .
+#' @param pattern_type .
+#' @param pattern_custom .
+#' @param pattern_len_min .
+#' @param pattern_len_max .
+#' @param pattern_gap_min .
+#' @param pattern_gap_max .
+#' @param pattern_min_support .
+#' @param pattern_min_count .
+#' @param pattern_starts_with .
+#' @param pattern_ends_with .
+#' @param pattern_contains .
+#' @param pattern_table_max_rows .
+#' @param pattern_table_show_all .
+#' @param indices_show_table .
+#' @param indices_favorable State considered favorable for computing
+#'   integrative potential.
+#' @param indices_omega Parameter for computing integrative potential.
+#' @param indices_table_max_rows .
+#' @param indices_table_show_all .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$errorText} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$tnaTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$buildModelTitle} \tab \tab \tab \tab \tab a preformatted \cr
@@ -1392,6 +1916,9 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$centralityContent} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$centralityTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$centrality_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$centralityStabilityTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$centralityStabilityTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$centrality_stability_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$edgeBetweennessTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$edgeBetweenness_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$edgeBetweennessTable} \tab \tab \tab \tab \tab a table \cr
@@ -1401,18 +1928,16 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$community_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$communityTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cliquesTitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$cliquesContent} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$cliques_multiple_plot$cliques_plot1} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$cliques_multiple_plot$cliques_plot2} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$cliques_multiple_plot$cliques_plot3} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$cliques_multiple_plot$cliques_plot4} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$cliques_multiple_plot$cliques_plot5} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$cliques_multiple_plot$cliques_plot6} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$cliques_multiple_plot$cliques_combined_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$bootstrapTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$bootstrap_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$permutationTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$sequences_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$patternTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$patternTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$indicesTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$indicesTable} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -1424,11 +1949,12 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 TNA <- function(
     data,
+    buildModel_variables_long_action,
     buildModel_variables_long_actor,
     buildModel_variables_long_time,
-    buildModel_variables_long_action,
     buildModel_variables_long_order,
     buildModel_type = "relative",
+    buildModel_lambda = 1,
     buildModel_scaling = "noScaling",
     buildModel_show_matrix = FALSE,
     buildModel_threshold = 900,
@@ -1456,6 +1982,14 @@ TNA <- function(
     centrality_Diffusion = FALSE,
     centrality_InStrength = TRUE,
     centrality_OutStrength = TRUE,
+    centrality_stability_show_table = FALSE,
+    centrality_stability_show_plot = FALSE,
+    centrality_stability_InStrength = TRUE,
+    centrality_stability_OutStrength = TRUE,
+    centrality_stability_Betweenness = TRUE,
+    centrality_stability_iteration = 100,
+    centrality_stability_threshold = 0.7,
+    centrality_stability_certainty = 0.95,
     edgeBetweenness_show_table = FALSE,
     edgeBetweenness_show_plot = FALSE,
     edgeBetweenness_plot_cut = 0.1,
@@ -1470,7 +2004,6 @@ TNA <- function(
     community_show_plot = FALSE,
     cliques_size = 2,
     cliques_threshold = 0,
-    cliques_show_text = FALSE,
     cliques_show_plot = FALSE,
     cliques_plot_cut = 0.1,
     cliques_plot_min_value = 0,
@@ -1486,41 +2019,64 @@ TNA <- function(
     bootstrap_threshold = 0.1,
     bootstrap_show_plot = FALSE,
     bootstrap_show_table = FALSE,
+    bootstrap_table_max_rows = 20,
+    bootstrap_table_show_all = FALSE,
+    bootstrap_table_significant_only = FALSE,
     bootstrap_plot_cut = 0.1,
     bootstrap_plot_min_value = 0.05,
     bootstrap_plot_edge_label_size = 1,
     bootstrap_plot_node_size = 1,
     bootstrap_plot_node_label_size = 1,
     bootstrap_plot_layout,
+    sequences_show_plot = FALSE,
     sequences_type = "index",
     sequences_scale = "proportion",
     sequences_geom = "bar",
-    sequences_include_na = TRUE,
+    sequences_include_na = FALSE,
     sequences_tick = 5,
-    sequences_show_plot = FALSE) {
+    pattern_show_table = FALSE,
+    pattern_type = "ngram",
+    pattern_custom = "",
+    pattern_len_min = 2,
+    pattern_len_max = 5,
+    pattern_gap_min = 1,
+    pattern_gap_max = 3,
+    pattern_min_support = 0.01,
+    pattern_min_count = 2,
+    pattern_starts_with,
+    pattern_ends_with,
+    pattern_contains,
+    pattern_table_max_rows = 20,
+    pattern_table_show_all = FALSE,
+    indices_show_table = FALSE,
+    indices_favorable,
+    indices_omega = 1,
+    indices_table_max_rows = 50,
+    indices_table_show_all = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("TNA requires jmvcore to be installed (restart may be required)")
 
+    if ( ! missing(buildModel_variables_long_action)) buildModel_variables_long_action <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_action))
     if ( ! missing(buildModel_variables_long_actor)) buildModel_variables_long_actor <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_actor))
     if ( ! missing(buildModel_variables_long_time)) buildModel_variables_long_time <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_time))
-    if ( ! missing(buildModel_variables_long_action)) buildModel_variables_long_action <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_action))
     if ( ! missing(buildModel_variables_long_order)) buildModel_variables_long_order <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_order))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
+            `if`( ! missing(buildModel_variables_long_action), buildModel_variables_long_action, NULL),
             `if`( ! missing(buildModel_variables_long_actor), buildModel_variables_long_actor, NULL),
             `if`( ! missing(buildModel_variables_long_time), buildModel_variables_long_time, NULL),
-            `if`( ! missing(buildModel_variables_long_action), buildModel_variables_long_action, NULL),
             `if`( ! missing(buildModel_variables_long_order), buildModel_variables_long_order, NULL))
 
 
     options <- TNAOptions$new(
+        buildModel_variables_long_action = buildModel_variables_long_action,
         buildModel_variables_long_actor = buildModel_variables_long_actor,
         buildModel_variables_long_time = buildModel_variables_long_time,
-        buildModel_variables_long_action = buildModel_variables_long_action,
         buildModel_variables_long_order = buildModel_variables_long_order,
         buildModel_type = buildModel_type,
+        buildModel_lambda = buildModel_lambda,
         buildModel_scaling = buildModel_scaling,
         buildModel_show_matrix = buildModel_show_matrix,
         buildModel_threshold = buildModel_threshold,
@@ -1548,6 +2104,14 @@ TNA <- function(
         centrality_Diffusion = centrality_Diffusion,
         centrality_InStrength = centrality_InStrength,
         centrality_OutStrength = centrality_OutStrength,
+        centrality_stability_show_table = centrality_stability_show_table,
+        centrality_stability_show_plot = centrality_stability_show_plot,
+        centrality_stability_InStrength = centrality_stability_InStrength,
+        centrality_stability_OutStrength = centrality_stability_OutStrength,
+        centrality_stability_Betweenness = centrality_stability_Betweenness,
+        centrality_stability_iteration = centrality_stability_iteration,
+        centrality_stability_threshold = centrality_stability_threshold,
+        centrality_stability_certainty = centrality_stability_certainty,
         edgeBetweenness_show_table = edgeBetweenness_show_table,
         edgeBetweenness_show_plot = edgeBetweenness_show_plot,
         edgeBetweenness_plot_cut = edgeBetweenness_plot_cut,
@@ -1562,7 +2126,6 @@ TNA <- function(
         community_show_plot = community_show_plot,
         cliques_size = cliques_size,
         cliques_threshold = cliques_threshold,
-        cliques_show_text = cliques_show_text,
         cliques_show_plot = cliques_show_plot,
         cliques_plot_cut = cliques_plot_cut,
         cliques_plot_min_value = cliques_plot_min_value,
@@ -1578,18 +2141,40 @@ TNA <- function(
         bootstrap_threshold = bootstrap_threshold,
         bootstrap_show_plot = bootstrap_show_plot,
         bootstrap_show_table = bootstrap_show_table,
+        bootstrap_table_max_rows = bootstrap_table_max_rows,
+        bootstrap_table_show_all = bootstrap_table_show_all,
+        bootstrap_table_significant_only = bootstrap_table_significant_only,
         bootstrap_plot_cut = bootstrap_plot_cut,
         bootstrap_plot_min_value = bootstrap_plot_min_value,
         bootstrap_plot_edge_label_size = bootstrap_plot_edge_label_size,
         bootstrap_plot_node_size = bootstrap_plot_node_size,
         bootstrap_plot_node_label_size = bootstrap_plot_node_label_size,
         bootstrap_plot_layout = bootstrap_plot_layout,
+        sequences_show_plot = sequences_show_plot,
         sequences_type = sequences_type,
         sequences_scale = sequences_scale,
         sequences_geom = sequences_geom,
         sequences_include_na = sequences_include_na,
         sequences_tick = sequences_tick,
-        sequences_show_plot = sequences_show_plot)
+        pattern_show_table = pattern_show_table,
+        pattern_type = pattern_type,
+        pattern_custom = pattern_custom,
+        pattern_len_min = pattern_len_min,
+        pattern_len_max = pattern_len_max,
+        pattern_gap_min = pattern_gap_min,
+        pattern_gap_max = pattern_gap_max,
+        pattern_min_support = pattern_min_support,
+        pattern_min_count = pattern_min_count,
+        pattern_starts_with = pattern_starts_with,
+        pattern_ends_with = pattern_ends_with,
+        pattern_contains = pattern_contains,
+        pattern_table_max_rows = pattern_table_max_rows,
+        pattern_table_show_all = pattern_table_show_all,
+        indices_show_table = indices_show_table,
+        indices_favorable = indices_favorable,
+        indices_omega = indices_omega,
+        indices_table_max_rows = indices_table_max_rows,
+        indices_table_show_all = indices_table_show_all)
 
     analysis <- TNAClass$new(
         options = options,

@@ -3,8 +3,15 @@ name:  TNA
 title: Transition Network Analysis
 jrs:   '1.1'
 refs:
+  - JTNA
   - TNA
+  - TNALAK
 items:
+
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: True
 
     - name: errorText
       title: Error
@@ -32,6 +39,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
 
     - name: buildModel_plot
       type: Image
@@ -48,6 +56,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
 
         - buildModel_plot_cut
         - buildModel_plot_min_value
@@ -62,7 +71,7 @@ items:
       height: 600
       visible: False
       renderFun: .showBuildModelHisto
-      clearWith: 
+      clearWith:
         - buildModel_variables_long_actor
         - buildModel_variables_long_time
         - buildModel_variables_long_action
@@ -71,13 +80,14 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
     - name: buildModel_frequencies
       type: Image
       width: 600
       height: 600
       visible: False
       renderFun: .showBuildModelFrequencies
-      clearWith: 
+      clearWith:
         - buildModel_variables_long_actor
         - buildModel_variables_long_time
         - buildModel_variables_long_action
@@ -86,6 +96,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
     - name: buildModel_mosaic
       type: Image
       width: 400
@@ -101,9 +112,9 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
 
         - buildModel_digits
-
 
     ### CENTRALITY
     - name:  centralityTitle
@@ -122,6 +133,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
 
         - centrality_loops
         - centrality_normalize
@@ -151,6 +163,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
 
         - centrality_loops
         - centrality_normalize
@@ -177,6 +190,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
 
         - centrality_loops
         - centrality_normalize
@@ -189,6 +203,65 @@ items:
         - centrality_Diffusion
         - centrality_InStrength
         - centrality_OutStrength
+
+    ### CENTRALITY STABILITY
+    - name: centralityStabilityTitle
+      type: Preformatted
+      title: Centrality Stability
+      visible: False
+
+    - name: centralityStabilityTable
+      type: Table
+      title: Centrality Stability (CS-Coefficients)
+      visible: False
+      columns:
+        - name: measure
+          title: Measure
+          type: text
+        - name: cs_coefficient
+          title: CS-Coefficient
+          type: number
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - buildModel_lambda
+        - centrality_loops
+        - centrality_normalize
+        - centrality_stability_iteration
+        - centrality_stability_threshold
+        - centrality_stability_certainty
+        - centrality_stability_InStrength
+        - centrality_stability_OutStrength
+        - centrality_stability_Betweenness
+
+    - name: centrality_stability_plot
+      type: Image
+      width: 600
+      height: 500
+      visible: False
+      renderFun: .showCentralityStabilityPlot
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - buildModel_lambda
+        - centrality_loops
+        - centrality_normalize
+        - centrality_stability_iteration
+        - centrality_stability_threshold
+        - centrality_stability_certainty
+        - centrality_stability_InStrength
+        - centrality_stability_OutStrength
+        - centrality_stability_Betweenness
 
     ### Edge betweenness
 
@@ -211,6 +284,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
 
         - edgeBetweenness_plot_cut
         - edgeBetweenness_plot_min_value
@@ -241,6 +315,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
 
     - name: edgeBetweennessNoResultsNote
       type: Preformatted
@@ -253,6 +328,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
 
     ### COMMUNITY
     - name:  communityTitle
@@ -272,6 +348,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
 
         - community_methods
         - community_gamma
@@ -290,6 +367,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
 
         - community_methods
         - community_gamma
@@ -310,6 +388,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
 
         - community_methods
         - community_gamma
@@ -320,22 +399,6 @@ items:
       type:  Preformatted
       title: Cliques
       visible: False
-      
-
-    - name:  cliquesContent
-      type:  Preformatted
-      visible: False
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-
-        - cliques_size
-        - cliques_threshold
 
     - name: cliques_multiple_plot
       type: Group
@@ -349,6 +412,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
 
         - cliques_size
         - cliques_threshold
@@ -359,42 +423,12 @@ items:
         - cliques_plot_node_label_size
         - cliques_plot_layout
       items:
-      - name: cliques_plot1
+      - name: cliques_combined_plot
         type: Image
-        width: 600
-        height: 600
+        width: 900
+        height: 700
         visible: True
-        renderFun: .showCliquesPlot1
-      - name: cliques_plot2
-        type: Image
-        width: 600
-        height: 600
-        visible: True
-        renderFun: .showCliquesPlot2
-      - name: cliques_plot3
-        type: Image
-        width: 600
-        height: 600
-        visible: True
-        renderFun: .showCliquesPlot3
-      - name: cliques_plot4
-        type: Image
-        width: 600
-        height: 600
-        visible: True
-        renderFun: .showCliquesPlot4
-      - name: cliques_plot5
-        type: Image
-        width: 600
-        height: 600
-        visible: True
-        renderFun: .showCliquesPlot5
-      - name: cliques_plot6
-        type: Image
-        width: 600
-        height: 600
-        visible: True
-        renderFun: .showCliquesPlot6
+        renderFun: .showCliquesMultiPlot
     
     ### Bootstrap
 
@@ -419,6 +453,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
 
         - bootstrap_iteration
         - bootstrap_level
@@ -474,6 +509,7 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
         - bootstrap_iteration
         - bootstrap_level
         - bootstrap_method
@@ -509,17 +545,18 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
+        - buildModel_lambda
         - permutation_iter
         - permutation_paired
         - permutation_level
 
-    ### Sequence Analysis
+    ### SEQUENCE ANALYSIS
 
     - name: sequences_plot
       type: Image
       title: Sequence Analysis Plot
       width: 600
-      height: 600
+      height: 400
       visible: False
       renderFun: .showSequencesPlot
       clearWith:
@@ -530,12 +567,123 @@ items:
         - buildModel_type
         - buildModel_scaling
         - buildModel_threshold
-
+        - buildModel_lambda
         - sequences_type
         - sequences_scale
         - sequences_geom
         - sequences_include_na
-
         - sequences_tick
-        
+
+    ### PATTERN DISCOVERY
+
+    - name: patternTitle
+      type: Preformatted
+      title: Pattern Discovery
+      visible: False
+
+    - name: patternTable
+      type: Table
+      title: Discovered Patterns
+      visible: False
+      columns:
+        - name: pattern
+          title: Pattern
+          type: text
+        - name: length
+          title: Length
+          type: integer
+        - name: count
+          title: Count
+          type: integer
+        - name: proportion
+          title: Proportion
+          type: number
+        - name: support
+          title: Support
+          type: number
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - buildModel_lambda
+        - pattern_type
+        - pattern_custom
+        - pattern_len_min
+        - pattern_len_max
+        - pattern_gap_min
+        - pattern_gap_max
+        - pattern_min_support
+        - pattern_min_count
+        - pattern_starts_with
+        - pattern_ends_with
+        - pattern_contains
+
+    ### SEQUENCE INDICES
+
+    - name: indicesTitle
+      type: Preformatted
+      title: Sequence Indices
+      visible: False
+
+    - name: indicesTable
+      type: Table
+      title: Sequence Indices
+      visible: False
+      columns:
+        - name: sequence_id
+          title: Seq
+          type: integer
+        - name: actor
+          title: Actor
+          type: text
+        - name: valid_n
+          title: Valid N
+          type: integer
+        - name: unique_states
+          title: Unique
+          type: integer
+        - name: longitudinal_entropy
+          title: Entropy
+          type: number
+        - name: simpson_diversity
+          title: Simpson
+          type: number
+        - name: mean_spell_duration
+          title: Mean Spell
+          type: number
+        - name: self_loop_tendency
+          title: Self-Loop
+          type: number
+        - name: transition_rate
+          title: Trans Rate
+          type: number
+        - name: first_state
+          title: First
+          type: text
+        - name: last_state
+          title: Last
+          type: text
+        - name: dominant_state
+          title: Dominant
+          type: text
+        - name: complexity_index
+          title: Complexity
+          type: number
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - buildModel_lambda
+        - indices_group
+        - indices_favorable
+        - indices_omega
+
 ...
