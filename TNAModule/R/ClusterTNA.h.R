@@ -1872,7 +1872,7 @@ ClusterTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "JTNA",
                 name = "ClusterTNA",
-                version = c(1,12,0),
+                version = c(1,6,1),
                 options = options,
                 results = ClusterTNAResults$new(options=options),
                 data = data,

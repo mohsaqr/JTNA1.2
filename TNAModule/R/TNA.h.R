@@ -1773,7 +1773,7 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "JTNA",
                 name = "TNA",
-                version = c(1,12,0),
+                version = c(1,6,1),
                 options = options,
                 results = TNAResults$new(options=options),
                 data = data,

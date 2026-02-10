@@ -2,7 +2,7 @@
 name:  ClusterTNA
 title: Cluster Transition Network Analysis
 menuGroup: JTNA
-version: '1.12.0'
+version: '1.6.1'
 jas: '1.2'
 
 options:

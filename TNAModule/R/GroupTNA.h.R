@@ -1802,7 +1802,7 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "JTNA",
                 name = "GroupTNA",
-                version = c(1,12,0),
+                version = c(1,6,1),
                 options = options,
                 results = GroupTNAResults$new(options=options),
                 data = data,
