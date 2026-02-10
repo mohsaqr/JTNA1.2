@@ -1,0 +1,34 @@
+# Build artifacts
+*.jmo
+*.zip
+*.tar.gz
+TNAModule/build/
+TNAModule/build*/
+
+# R artifacts
+.Rhistory
+.Rapp.history
+.RData
+.Ruserdata
+.Renviron
+*-Ex.R
+*.Rcheck/
+Rplots*.pdf
+
+# R markdown
+*_cache/
+*.utf8.md
+*.knit.md
+
+# RStudio
+.Rproj.user/
+
+# jamovi
+TNAModule/jamovi/ui/*.options.js
+
+# OS files
+.DS_Store
+
+# Temp
+temp/
+npm-debug.log
