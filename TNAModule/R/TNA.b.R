@@ -574,14 +574,25 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     # Determine pattern type and parameters
                     pattern_type <- self$options$pattern_type
 
-                    patterns <- codyna::discover_patterns(
+                    pattern_args <- list(
                         data = seq_data,
                         type = pattern_type,
                         len = self$options$pattern_len_min:self$options$pattern_len_max,
                         gap = self$options$pattern_gap_min:self$options$pattern_gap_max,
                         min_support = self$options$pattern_min_support,
-                        min_count = self$options$pattern_min_count
+                        min_freq = self$options$pattern_min_count
                     )
+                    if (!is.null(self$options$pattern_starts_with) &&
+                        nzchar(self$options$pattern_starts_with))
+                        pattern_args$start <- self$options$pattern_starts_with
+                    if (!is.null(self$options$pattern_ends_with) &&
+                        nzchar(self$options$pattern_ends_with))
+                        pattern_args$end <- self$options$pattern_ends_with
+                    if (!is.null(self$options$pattern_contains) &&
+                        nzchar(self$options$pattern_contains))
+                        pattern_args$contain <- self$options$pattern_contains
+
+                    patterns <- do.call(codyna::discover_patterns, pattern_args)
 
                     # Populate table with row limit
                     if(!is.null(patterns) && nrow(patterns) > 0) {

@@ -99,9 +99,9 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             pattern_gap_max = 3,
             pattern_min_support = 0.01,
             pattern_min_count = 2,
-            pattern_starts_with = NULL,
-            pattern_ends_with = NULL,
-            pattern_contains = NULL,
+            pattern_starts_with = "",
+            pattern_ends_with = "",
+            pattern_contains = "",
             pattern_table_max_rows = 20,
             pattern_table_show_all = FALSE,
             indices_show_table = FALSE,
@@ -654,18 +654,18 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=2,
                 min=1,
                 max=1000)
-            private$..pattern_starts_with <- jmvcore::OptionLevel$new(
+            private$..pattern_starts_with <- jmvcore::OptionString$new(
                 "pattern_starts_with",
                 pattern_starts_with,
-                variable="(buildModel_variables_long_action)")
-            private$..pattern_ends_with <- jmvcore::OptionLevel$new(
+                default="")
+            private$..pattern_ends_with <- jmvcore::OptionString$new(
                 "pattern_ends_with",
                 pattern_ends_with,
-                variable="(buildModel_variables_long_action)")
-            private$..pattern_contains <- jmvcore::OptionLevel$new(
+                default="")
+            private$..pattern_contains <- jmvcore::OptionString$new(
                 "pattern_contains",
                 pattern_contains,
-                variable="(buildModel_variables_long_action)")
+                default="")
             private$..pattern_table_max_rows <- jmvcore::OptionInteger$new(
                 "pattern_table_max_rows",
                 pattern_table_max_rows,
@@ -2033,9 +2033,9 @@ TNA <- function(
     pattern_gap_max = 3,
     pattern_min_support = 0.01,
     pattern_min_count = 2,
-    pattern_starts_with,
-    pattern_ends_with,
-    pattern_contains,
+    pattern_starts_with = "",
+    pattern_ends_with = "",
+    pattern_contains = "",
     pattern_table_max_rows = 20,
     pattern_table_show_all = FALSE,
     indices_show_table = FALSE,

@@ -663,15 +663,15 @@ children:
           - type: Label
             label: Filters (optional)
             children:
-              - type: LevelSelector
+              - type: TextBox
                 name: pattern_starts_with
-                variable: (buildModel_variables_long_action)
-              - type: LevelSelector
+                format: string
+              - type: TextBox
                 name: pattern_ends_with
-                variable: (buildModel_variables_long_action)
-              - type: LevelSelector
+                format: string
+              - type: TextBox
                 name: pattern_contains
-                variable: (buildModel_variables_long_action)
+                format: string
           - type: Label
             label: Table Options
             children:

@@ -744,18 +744,18 @@ options:
 
     - name: pattern_starts_with
       title: Starts with
-      type: Level
-      variable: (buildModel_variables_long_action)
+      type: String
+      default: ""
 
     - name: pattern_ends_with
       title: Ends with
-      type: Level
-      variable: (buildModel_variables_long_action)
+      type: String
+      default: ""
 
     - name: pattern_contains
       title: Contains
-      type: Level
-      variable: (buildModel_variables_long_action)
+      type: String
+      default: ""
 
     - name: pattern_table_max_rows
       title: Max rows
