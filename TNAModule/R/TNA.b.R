@@ -574,14 +574,25 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     # Determine pattern type and parameters
                     pattern_type <- self$options$pattern_type
 
-                    patterns <- codyna::discover_patterns(
+                    pattern_args <- list(
                         data = seq_data,
                         type = pattern_type,
                         len = self$options$pattern_len_min:self$options$pattern_len_max,
                         gap = self$options$pattern_gap_min:self$options$pattern_gap_max,
                         min_support = self$options$pattern_min_support,
-                        min_count = self$options$pattern_min_count
+                        min_freq = self$options$pattern_min_count
                     )
+                    if (!is.null(self$options$pattern_starts_with) &&
+                        nzchar(self$options$pattern_starts_with))
+                        pattern_args$start <- self$options$pattern_starts_with
+                    if (!is.null(self$options$pattern_ends_with) &&
+                        nzchar(self$options$pattern_ends_with))
+                        pattern_args$end <- self$options$pattern_ends_with
+                    if (!is.null(self$options$pattern_contains) &&
+                        nzchar(self$options$pattern_contains))
+                        pattern_args$contain <- self$options$pattern_contains
+
+                    patterns <- do.call(codyna::discover_patterns, pattern_args)
 
                     # Populate table with row limit
                     if(!is.null(patterns) && nrow(patterns) > 0) {
@@ -619,6 +630,134 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 }, error = function(e) {
                     self$results$patternTitle$setContent(paste("Pattern Discovery error:", e$message))
+                })
+            }
+
+            ### Outcome Analysis
+            if(self$options$outcome_show_table) {
+                self$results$outcomeTitle$setContent("Outcome Analysis Running...")
+                self$results$outcomeTitle$setVisible(TRUE)
+
+                tryCatch({
+                    # Re-prepare data if needed (same pattern as Pattern Discovery)
+                    if(is.null(dataForTNA) && !is.null(self$data) && ncol(self$data) >= 1) {
+                        action_col <- self$options$buildModel_variables_long_action
+                        actor_col <- self$options$buildModel_variables_long_actor
+                        time_col <- self$options$buildModel_variables_long_time
+                        order_col <- self$options$buildModel_variables_long_order
+
+                        if(is.null(action_col) || length(action_col) == 0) {
+                            self$results$outcomeTitle$setContent("Error: Action variable is required")
+                            return()
+                        }
+
+                        args_prepare_data <- list(
+                            data = self$data,
+                            action = action_col
+                        )
+                        if(!is.null(actor_col) && length(actor_col) > 0) {
+                            args_prepare_data$actor <- actor_col
+                        }
+                        if(!is.null(time_col) && length(time_col) > 0) {
+                            args_prepare_data$time <- time_col
+                        }
+                        if(!is.null(order_col) && length(order_col) > 0) {
+                            args_prepare_data$order <- order_col
+                        }
+
+                        dataForTNA <- do.call(tna::prepare_data, args_prepare_data)
+                    }
+
+                    if(is.null(dataForTNA)) {
+                        self$results$outcomeTitle$setContent("ERROR: Could not prepare data")
+                        return()
+                    }
+
+                    # Extract sequence data
+                    if(inherits(dataForTNA, "tna_data")) {
+                        seq_data <- as.data.frame(dataForTNA$sequence_data)
+                    } else if(is.data.frame(dataForTNA)) {
+                        seq_data <- dataForTNA
+                    } else {
+                        self$results$outcomeTitle$setContent(
+                            paste("ERROR: unexpected data class:", paste(class(dataForTNA), collapse=", ")))
+                        return()
+                    }
+
+                    # Build outcome argument
+                    if (self$options$outcome_type == "custom" && !is.null(self$options$outcome_variable)) {
+                        outcome_raw <- as.character(self$data[[self$options$outcome_variable]])
+                        # Aggregate to one value per sequence (actor)
+                        actor_col <- self$options$buildModel_variables_long_actor
+                        if (!is.null(actor_col) && length(actor_col) > 0) {
+                            actors <- as.character(self$data[[actor_col]])
+                            # Take first outcome value per actor
+                            outcome_by_actor <- tapply(outcome_raw, actors, function(x) x[1])
+                            # Match to sequence order in seq_data
+                            seq_actors <- unique(actors)
+                            outcome_val <- as.character(outcome_by_actor[seq_actors])
+                        } else {
+                            # Single sequence: take first value
+                            outcome_val <- outcome_raw[1]
+                        }
+                    } else {
+                        outcome_val <- "last_obs"
+                    }
+
+                    # Build args list
+                    outcome_args <- list(
+                        data = seq_data,
+                        outcome = outcome_val,
+                        n = self$options$outcome_n,
+                        freq = self$options$outcome_freq,
+                        priority = self$options$outcome_priority,
+                        desc = self$options$outcome_desc,
+                        type = self$options$outcome_pattern_type,
+                        len = self$options$outcome_len_min:self$options$outcome_len_max,
+                        gap = self$options$outcome_gap,
+                        min_support = self$options$outcome_min_support,
+                        min_freq = self$options$outcome_min_freq
+                    )
+                    if (!is.null(self$options$outcome_reference) &&
+                        nchar(self$options$outcome_reference) > 0) {
+                        outcome_args$reference <- self$options$outcome_reference
+                    }
+
+                    fit <- do.call(codyna::analyze_outcome, outcome_args)
+
+                    # Extract coefficients
+                    coefs <- summary(fit)$coefficients
+
+                    if(!is.null(coefs) && nrow(coefs) > 0) {
+                        for(i in seq_len(nrow(coefs))) {
+                            pval <- coefs[i, 4]
+                            sig <- ifelse(pval < 0.001, "***",
+                                   ifelse(pval < 0.01, "**",
+                                   ifelse(pval < 0.05, "*",
+                                   ifelse(pval < 0.1, ".", ""))))
+                            self$results$outcomeTable$addRow(rowKey=i, values=list(
+                                term = rownames(coefs)[i],
+                                estimate = coefs[i, 1],
+                                std_error = coefs[i, 2],
+                                z_value = coefs[i, 3],
+                                p_value = coefs[i, 4],
+                                significance = sig
+                            ))
+                        }
+
+                        # Show model fit info in title
+                        aic_val <- AIC(fit)
+                        self$results$outcomeTitle$setContent(
+                            sprintf("Logistic Regression (AIC: %.1f, %d predictors)",
+                                    aic_val, nrow(coefs) - 1))
+                    } else {
+                        self$results$outcomeTitle$setContent("No coefficients returned")
+                    }
+
+                    self$results$outcomeTable$setVisible(TRUE)
+
+                }, error = function(e) {
+                    self$results$outcomeTitle$setContent(paste("Outcome Analysis error:", e$message))
                 })
             }
 

@@ -744,18 +744,18 @@ options:
 
     - name: pattern_starts_with
       title: Starts with
-      type: Level
-      variable: (buildModel_variables_long_action)
+      type: String
+      default: ""
 
     - name: pattern_ends_with
       title: Ends with
-      type: Level
-      variable: (buildModel_variables_long_action)
+      type: String
+      default: ""
 
     - name: pattern_contains
       title: Contains
-      type: Level
-      variable: (buildModel_variables_long_action)
+      type: String
+      default: ""
 
     - name: pattern_table_max_rows
       title: Max rows
@@ -801,5 +801,111 @@ options:
       title: Show all rows
       type: Bool
       default: False
+
+    ### OUTCOME ANALYSIS
+
+    - name: outcome_show_table
+      title: Show Table
+      type: Bool
+      default: False
+
+    - name: outcome_type
+      title: Outcome Type
+      type: List
+      default: last_obs
+      options:
+        - title: Last Observation
+          name: last_obs
+        - title: Custom Variable
+          name: custom
+
+    - name: outcome_variable
+      title: Outcome Variable
+      type: Variable
+
+    - name: outcome_reference
+      title: Reference Level
+      type: String
+      default: ""
+
+    - name: outcome_n
+      title: Max Patterns
+      type: Integer
+      default: 10
+      min: 1
+      max: 50
+
+    - name: outcome_freq
+      title: Use Frequency
+      type: Bool
+      default: False
+
+    - name: outcome_priority
+      title: Priority
+      type: List
+      default: chisq
+      options:
+        - title: Chi-squared
+          name: chisq
+        - title: Support
+          name: support
+        - title: Lift
+          name: lift
+        - title: Frequency
+          name: frequency
+        - title: Count
+          name: count
+
+    - name: outcome_desc
+      title: Descending
+      type: Bool
+      default: True
+
+    - name: outcome_pattern_type
+      title: Pattern Type
+      type: List
+      default: ngram
+      options:
+        - title: N-gram
+          name: ngram
+        - title: Gapped
+          name: gapped
+        - title: Repeated
+          name: repeated
+
+    - name: outcome_len_min
+      title: Min Length
+      type: Integer
+      default: 1
+      min: 1
+      max: 20
+
+    - name: outcome_len_max
+      title: Max Length
+      type: Integer
+      default: 2
+      min: 1
+      max: 20
+
+    - name: outcome_gap
+      title: Gap
+      type: Integer
+      default: 1
+      min: 1
+      max: 10
+
+    - name: outcome_min_support
+      title: Min Support
+      type: Number
+      default: 0.01
+      min: 0
+      max: 1
+
+    - name: outcome_min_freq
+      title: Min Frequency
+      type: Integer
+      default: 5
+      min: 1
+      max: 1000
 
 ...

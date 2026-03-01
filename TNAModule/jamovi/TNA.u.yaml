@@ -663,15 +663,15 @@ children:
           - type: Label
             label: Filters (optional)
             children:
-              - type: LevelSelector
+              - type: TextBox
                 name: pattern_starts_with
-                variable: (buildModel_variables_long_action)
-              - type: LevelSelector
+                format: string
+              - type: TextBox
                 name: pattern_ends_with
-                variable: (buildModel_variables_long_action)
-              - type: LevelSelector
+                format: string
+              - type: TextBox
                 name: pattern_contains
-                variable: (buildModel_variables_long_action)
+                format: string
           - type: Label
             label: Table Options
             children:
@@ -716,3 +716,71 @@ children:
                 format: number
               - type: CheckBox
                 name: indices_table_show_all
+  - type: CollapseBox
+    label: Outcome Analysis
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: outcome_show_table
+                label: Show outcome analysis table
+          - type: Label
+            label: Outcome Variable
+            children:
+              - type: RadioButton
+                name: outcome_type_last_obs
+                optionName: outcome_type
+                optionPart: last_obs
+              - type: RadioButton
+                name: outcome_type_custom
+                optionName: outcome_type
+                optionPart: custom
+              - type: VariablesListBox
+                name: outcome_variable
+                isTarget: true
+                maxItemCount: 1
+                enable: (outcome_type_custom)
+              - type: TextBox
+                name: outcome_reference
+                format: string
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Model Settings
+            children:
+              - type: TextBox
+                name: outcome_n
+                format: number
+              - type: CheckBox
+                name: outcome_freq
+              - type: ComboBox
+                name: outcome_priority
+              - type: CheckBox
+                name: outcome_desc
+          - type: Label
+            label: Pattern Settings
+            children:
+              - type: ComboBox
+                name: outcome_pattern_type
+              - type: TextBox
+                name: outcome_len_min
+                format: number
+              - type: TextBox
+                name: outcome_len_max
+                format: number
+              - type: TextBox
+                name: outcome_gap
+                format: number
+                enable: (outcome_pattern_type_gapped)
+              - type: TextBox
+                name: outcome_min_support
+                format: number
+              - type: TextBox
+                name: outcome_min_freq
+                format: number

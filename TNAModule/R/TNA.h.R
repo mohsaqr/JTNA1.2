@@ -99,16 +99,30 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             pattern_gap_max = 3,
             pattern_min_support = 0.01,
             pattern_min_count = 2,
-            pattern_starts_with = NULL,
-            pattern_ends_with = NULL,
-            pattern_contains = NULL,
+            pattern_starts_with = "",
+            pattern_ends_with = "",
+            pattern_contains = "",
             pattern_table_max_rows = 20,
             pattern_table_show_all = FALSE,
             indices_show_table = FALSE,
             indices_favorable = NULL,
             indices_omega = 1,
             indices_table_max_rows = 50,
-            indices_table_show_all = FALSE, ...) {
+            indices_table_show_all = FALSE,
+            outcome_show_table = FALSE,
+            outcome_type = "last_obs",
+            outcome_variable = NULL,
+            outcome_reference = "",
+            outcome_n = 10,
+            outcome_freq = FALSE,
+            outcome_priority = "chisq",
+            outcome_desc = TRUE,
+            outcome_pattern_type = "ngram",
+            outcome_len_min = 1,
+            outcome_len_max = 2,
+            outcome_gap = 1,
+            outcome_min_support = 0.01,
+            outcome_min_freq = 5, ...) {
 
             super$initialize(
                 package="JTNA",
@@ -654,18 +668,18 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=2,
                 min=1,
                 max=1000)
-            private$..pattern_starts_with <- jmvcore::OptionLevel$new(
+            private$..pattern_starts_with <- jmvcore::OptionString$new(
                 "pattern_starts_with",
                 pattern_starts_with,
-                variable="(buildModel_variables_long_action)")
-            private$..pattern_ends_with <- jmvcore::OptionLevel$new(
+                default="")
+            private$..pattern_ends_with <- jmvcore::OptionString$new(
                 "pattern_ends_with",
                 pattern_ends_with,
-                variable="(buildModel_variables_long_action)")
-            private$..pattern_contains <- jmvcore::OptionLevel$new(
+                default="")
+            private$..pattern_contains <- jmvcore::OptionString$new(
                 "pattern_contains",
                 pattern_contains,
-                variable="(buildModel_variables_long_action)")
+                default="")
             private$..pattern_table_max_rows <- jmvcore::OptionInteger$new(
                 "pattern_table_max_rows",
                 pattern_table_max_rows,
@@ -700,6 +714,86 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "indices_table_show_all",
                 indices_table_show_all,
                 default=FALSE)
+            private$..outcome_show_table <- jmvcore::OptionBool$new(
+                "outcome_show_table",
+                outcome_show_table,
+                default=FALSE)
+            private$..outcome_type <- jmvcore::OptionList$new(
+                "outcome_type",
+                outcome_type,
+                default="last_obs",
+                options=list(
+                    "last_obs",
+                    "custom"))
+            private$..outcome_variable <- jmvcore::OptionVariable$new(
+                "outcome_variable",
+                outcome_variable)
+            private$..outcome_reference <- jmvcore::OptionString$new(
+                "outcome_reference",
+                outcome_reference,
+                default="")
+            private$..outcome_n <- jmvcore::OptionInteger$new(
+                "outcome_n",
+                outcome_n,
+                default=10,
+                min=1,
+                max=50)
+            private$..outcome_freq <- jmvcore::OptionBool$new(
+                "outcome_freq",
+                outcome_freq,
+                default=FALSE)
+            private$..outcome_priority <- jmvcore::OptionList$new(
+                "outcome_priority",
+                outcome_priority,
+                default="chisq",
+                options=list(
+                    "chisq",
+                    "support",
+                    "lift",
+                    "frequency",
+                    "count"))
+            private$..outcome_desc <- jmvcore::OptionBool$new(
+                "outcome_desc",
+                outcome_desc,
+                default=TRUE)
+            private$..outcome_pattern_type <- jmvcore::OptionList$new(
+                "outcome_pattern_type",
+                outcome_pattern_type,
+                default="ngram",
+                options=list(
+                    "ngram",
+                    "gapped",
+                    "repeated"))
+            private$..outcome_len_min <- jmvcore::OptionInteger$new(
+                "outcome_len_min",
+                outcome_len_min,
+                default=1,
+                min=1,
+                max=20)
+            private$..outcome_len_max <- jmvcore::OptionInteger$new(
+                "outcome_len_max",
+                outcome_len_max,
+                default=2,
+                min=1,
+                max=20)
+            private$..outcome_gap <- jmvcore::OptionInteger$new(
+                "outcome_gap",
+                outcome_gap,
+                default=1,
+                min=1,
+                max=10)
+            private$..outcome_min_support <- jmvcore::OptionNumber$new(
+                "outcome_min_support",
+                outcome_min_support,
+                default=0.01,
+                min=0,
+                max=1)
+            private$..outcome_min_freq <- jmvcore::OptionInteger$new(
+                "outcome_min_freq",
+                outcome_min_freq,
+                default=5,
+                min=1,
+                max=1000)
 
             self$.addOption(private$..buildModel_variables_long_action)
             self$.addOption(private$..buildModel_variables_long_actor)
@@ -804,6 +898,20 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..indices_omega)
             self$.addOption(private$..indices_table_max_rows)
             self$.addOption(private$..indices_table_show_all)
+            self$.addOption(private$..outcome_show_table)
+            self$.addOption(private$..outcome_type)
+            self$.addOption(private$..outcome_variable)
+            self$.addOption(private$..outcome_reference)
+            self$.addOption(private$..outcome_n)
+            self$.addOption(private$..outcome_freq)
+            self$.addOption(private$..outcome_priority)
+            self$.addOption(private$..outcome_desc)
+            self$.addOption(private$..outcome_pattern_type)
+            self$.addOption(private$..outcome_len_min)
+            self$.addOption(private$..outcome_len_max)
+            self$.addOption(private$..outcome_gap)
+            self$.addOption(private$..outcome_min_support)
+            self$.addOption(private$..outcome_min_freq)
         }),
     active = list(
         buildModel_variables_long_action = function() private$..buildModel_variables_long_action$value,
@@ -908,7 +1016,21 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         indices_favorable = function() private$..indices_favorable$value,
         indices_omega = function() private$..indices_omega$value,
         indices_table_max_rows = function() private$..indices_table_max_rows$value,
-        indices_table_show_all = function() private$..indices_table_show_all$value),
+        indices_table_show_all = function() private$..indices_table_show_all$value,
+        outcome_show_table = function() private$..outcome_show_table$value,
+        outcome_type = function() private$..outcome_type$value,
+        outcome_variable = function() private$..outcome_variable$value,
+        outcome_reference = function() private$..outcome_reference$value,
+        outcome_n = function() private$..outcome_n$value,
+        outcome_freq = function() private$..outcome_freq$value,
+        outcome_priority = function() private$..outcome_priority$value,
+        outcome_desc = function() private$..outcome_desc$value,
+        outcome_pattern_type = function() private$..outcome_pattern_type$value,
+        outcome_len_min = function() private$..outcome_len_min$value,
+        outcome_len_max = function() private$..outcome_len_max$value,
+        outcome_gap = function() private$..outcome_gap$value,
+        outcome_min_support = function() private$..outcome_min_support$value,
+        outcome_min_freq = function() private$..outcome_min_freq$value),
     private = list(
         ..buildModel_variables_long_action = NA,
         ..buildModel_variables_long_actor = NA,
@@ -1012,7 +1134,21 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..indices_favorable = NA,
         ..indices_omega = NA,
         ..indices_table_max_rows = NA,
-        ..indices_table_show_all = NA)
+        ..indices_table_show_all = NA,
+        ..outcome_show_table = NA,
+        ..outcome_type = NA,
+        ..outcome_variable = NA,
+        ..outcome_reference = NA,
+        ..outcome_n = NA,
+        ..outcome_freq = NA,
+        ..outcome_priority = NA,
+        ..outcome_desc = NA,
+        ..outcome_pattern_type = NA,
+        ..outcome_len_min = NA,
+        ..outcome_len_max = NA,
+        ..outcome_gap = NA,
+        ..outcome_min_support = NA,
+        ..outcome_min_freq = NA)
 )
 
 TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -1053,7 +1189,9 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         patternTitle = function() private$.items[["patternTitle"]],
         patternTable = function() private$.items[["patternTable"]],
         indicesTitle = function() private$.items[["indicesTitle"]],
-        indicesTable = function() private$.items[["indicesTable"]]),
+        indicesTable = function() private$.items[["indicesTable"]],
+        outcomeTitle = function() private$.items[["outcomeTitle"]],
+        outcomeTable = function() private$.items[["outcomeTable"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -1755,7 +1893,64 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_lambda",
                     "indices_group",
                     "indices_favorable",
-                    "indices_omega")))}))
+                    "indices_omega")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="outcomeTitle",
+                title="Outcome Analysis",
+                visible=FALSE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="outcomeTable",
+                title="Outcome Analysis - Logistic Regression Coefficients",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="term", 
+                        `title`="Term", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number"),
+                    list(
+                        `name`="std_error", 
+                        `title`="Std. Error", 
+                        `type`="number"),
+                    list(
+                        `name`="z_value", 
+                        `title`="z value", 
+                        `type`="number"),
+                    list(
+                        `name`="p_value", 
+                        `title`="Pr(>|z|)", 
+                        `type`="number"),
+                    list(
+                        `name`="significance", 
+                        `title`="Sig.", 
+                        `type`="text")),
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "buildModel_lambda",
+                    "outcome_type",
+                    "outcome_variable",
+                    "outcome_reference",
+                    "outcome_n",
+                    "outcome_freq",
+                    "outcome_priority",
+                    "outcome_desc",
+                    "outcome_pattern_type",
+                    "outcome_len_min",
+                    "outcome_len_max",
+                    "outcome_gap",
+                    "outcome_min_support",
+                    "outcome_min_freq")))}))
 
 TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "TNABase",
@@ -1892,6 +2087,20 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param indices_omega Parameter for computing integrative potential.
 #' @param indices_table_max_rows .
 #' @param indices_table_show_all .
+#' @param outcome_show_table .
+#' @param outcome_type .
+#' @param outcome_variable .
+#' @param outcome_reference .
+#' @param outcome_n .
+#' @param outcome_freq .
+#' @param outcome_priority .
+#' @param outcome_desc .
+#' @param outcome_pattern_type .
+#' @param outcome_len_min .
+#' @param outcome_len_max .
+#' @param outcome_gap .
+#' @param outcome_min_support .
+#' @param outcome_min_freq .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -1929,6 +2138,8 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$patternTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$indicesTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$indicesTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$outcomeTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$outcomeTable} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -2033,16 +2244,30 @@ TNA <- function(
     pattern_gap_max = 3,
     pattern_min_support = 0.01,
     pattern_min_count = 2,
-    pattern_starts_with,
-    pattern_ends_with,
-    pattern_contains,
+    pattern_starts_with = "",
+    pattern_ends_with = "",
+    pattern_contains = "",
     pattern_table_max_rows = 20,
     pattern_table_show_all = FALSE,
     indices_show_table = FALSE,
     indices_favorable,
     indices_omega = 1,
     indices_table_max_rows = 50,
-    indices_table_show_all = FALSE) {
+    indices_table_show_all = FALSE,
+    outcome_show_table = FALSE,
+    outcome_type = "last_obs",
+    outcome_variable,
+    outcome_reference = "",
+    outcome_n = 10,
+    outcome_freq = FALSE,
+    outcome_priority = "chisq",
+    outcome_desc = TRUE,
+    outcome_pattern_type = "ngram",
+    outcome_len_min = 1,
+    outcome_len_max = 2,
+    outcome_gap = 1,
+    outcome_min_support = 0.01,
+    outcome_min_freq = 5) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("TNA requires jmvcore to be installed (restart may be required)")
@@ -2051,13 +2276,15 @@ TNA <- function(
     if ( ! missing(buildModel_variables_long_actor)) buildModel_variables_long_actor <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_actor))
     if ( ! missing(buildModel_variables_long_time)) buildModel_variables_long_time <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_time))
     if ( ! missing(buildModel_variables_long_order)) buildModel_variables_long_order <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_order))
+    if ( ! missing(outcome_variable)) outcome_variable <- jmvcore::resolveQuo(jmvcore::enquo(outcome_variable))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(buildModel_variables_long_action), buildModel_variables_long_action, NULL),
             `if`( ! missing(buildModel_variables_long_actor), buildModel_variables_long_actor, NULL),
             `if`( ! missing(buildModel_variables_long_time), buildModel_variables_long_time, NULL),
-            `if`( ! missing(buildModel_variables_long_order), buildModel_variables_long_order, NULL))
+            `if`( ! missing(buildModel_variables_long_order), buildModel_variables_long_order, NULL),
+            `if`( ! missing(outcome_variable), outcome_variable, NULL))
 
 
     options <- TNAOptions$new(
@@ -2163,7 +2390,21 @@ TNA <- function(
         indices_favorable = indices_favorable,
         indices_omega = indices_omega,
         indices_table_max_rows = indices_table_max_rows,
-        indices_table_show_all = indices_table_show_all)
+        indices_table_show_all = indices_table_show_all,
+        outcome_show_table = outcome_show_table,
+        outcome_type = outcome_type,
+        outcome_variable = outcome_variable,
+        outcome_reference = outcome_reference,
+        outcome_n = outcome_n,
+        outcome_freq = outcome_freq,
+        outcome_priority = outcome_priority,
+        outcome_desc = outcome_desc,
+        outcome_pattern_type = outcome_pattern_type,
+        outcome_len_min = outcome_len_min,
+        outcome_len_max = outcome_len_max,
+        outcome_gap = outcome_gap,
+        outcome_min_support = outcome_min_support,
+        outcome_min_freq = outcome_min_freq)
 
     analysis <- TNAClass$new(
         options = options,

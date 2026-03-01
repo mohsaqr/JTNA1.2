@@ -687,4 +687,57 @@ items:
         - indices_favorable
         - indices_omega
 
+    ### OUTCOME ANALYSIS
+
+    - name: outcomeTitle
+      type: Preformatted
+      title: Outcome Analysis
+      visible: False
+
+    - name: outcomeTable
+      type: Table
+      title: Outcome Analysis - Logistic Regression Coefficients
+      visible: False
+      columns:
+        - name: term
+          title: Term
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: std_error
+          title: Std. Error
+          type: number
+        - name: z_value
+          title: z value
+          type: number
+        - name: p_value
+          title: Pr(>|z|)
+          type: number
+        - name: significance
+          title: Sig.
+          type: text
+      clearWith:
+        - buildModel_variables_long_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_action
+        - buildModel_variables_long_order
+        - buildModel_type
+        - buildModel_scaling
+        - buildModel_threshold
+        - buildModel_lambda
+        - outcome_type
+        - outcome_variable
+        - outcome_reference
+        - outcome_n
+        - outcome_freq
+        - outcome_priority
+        - outcome_desc
+        - outcome_pattern_type
+        - outcome_len_min
+        - outcome_len_max
+        - outcome_gap
+        - outcome_min_support
+        - outcome_min_freq
+
 ...
