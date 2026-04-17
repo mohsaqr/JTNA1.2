@@ -1117,7 +1117,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           par(mfrow = c(row, column))
         }
         method <- self$options$community_methods
-        plot(x=plotData, method=method, background="transparent")
+        plot(x=plotData, method=method, layout=self$options$buildModel_plot_layout, background="transparent")
         TRUE
       }
       else {

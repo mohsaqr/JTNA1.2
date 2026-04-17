@@ -902,7 +902,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if(!is.null(plotData) && self$options$community_show_plot)  {
                 tryCatch({
                     methods <- self$options$community_methods
-                    plot(x=plotData, method=methods, background="transparent")
+                    plot(x=plotData, method=methods, layout=self$options$buildModel_plot_layout, background="transparent")
                 }, error = function(e) {
                     plot(1, type="n", main="Community Plot Error", sub=e$message)
                 })
