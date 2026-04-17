@@ -322,6 +322,36 @@ options:
       type: Bool
       default: False
 
+    - name: community_plot_layout
+      title: Layout
+      type: List
+      default: circle
+      options:
+        - title: Circle
+          name: circle
+        - title: Oval
+          name: oval
+        - title: Spring
+          name: spring
+        - title: Kamada-Kawai
+          name: layout_with_kk
+        - title: Graphopt
+          name: layout_with_graphopt
+        - title: DRL
+          name: layout_with_drl
+        - title: Star
+          name: layout_as_star
+        - title: Grid
+          name: layout_on_grid
+        - title: Nicely
+          name: layout_nicely
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
+        - title: LGL
+          name: layout_with_lgl
+        - title: Random
+          name: layout_randomly
+
     ### CLIQUES DATA
 
     - name: cliques_size
@@ -606,6 +636,36 @@ options:
       title: Show all rows
       type: Bool
       default: False
+
+    - name: permutation_plot_layout
+      title: Layout
+      type: List
+      default: circle
+      options:
+        - title: Circle
+          name: circle
+        - title: Oval
+          name: oval
+        - title: Spring
+          name: spring
+        - title: Kamada-Kawai
+          name: layout_with_kk
+        - title: Graphopt
+          name: layout_with_graphopt
+        - title: DRL
+          name: layout_with_drl
+        - title: Star
+          name: layout_as_star
+        - title: Grid
+          name: layout_on_grid
+        - title: Nicely
+          name: layout_nicely
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
+        - title: LGL
+          name: layout_with_lgl
+        - title: Random
+          name: layout_randomly
 
     ### SEQUENCE ANALYSIS
 

@@ -1117,7 +1117,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           par(mfrow = c(row, column))
         }
         method <- self$options$community_methods
-        plot(x=plotData, method=method, layout=self$options$buildModel_plot_layout, background="transparent")
+        plot(x=plotData, method=method, layout=self$options$community_plot_layout, background="transparent")
         TRUE
       }
       else {
@@ -1165,7 +1165,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                   column <- ceiling(length(plotData) / row)
                   par(mfrow = c(row, column))
                 }
-                plot(x=plotData, cut = 0.1)
+                plot(x=plotData, cut = 0.1, layout=self$options$bootstrap_plot_layout)
             }, error = function(e) { plot(1, type="n", main="Bootstrap Plot Error", sub=e$message) })
         }
         TRUE
@@ -1187,7 +1187,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               column <- ceiling(length(plotData) / row)
               par(mfrow = c(row, column))
             }
-            plot(x=plotData, cut=0.01)
+            plot(x=plotData, cut=0.01, layout=self$options$permutation_plot_layout)
         }, error = function(e) { plot(1, type="n", main="Permutation Plot Error", sub=e$message) })
         TRUE
       }

@@ -372,6 +372,7 @@ items:
 
         - community_methods
         - community_gamma
+        - community_plot_layout
 
     - name: communityTable
       type: Table

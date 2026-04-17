@@ -47,6 +47,7 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             community_gamma = 1,
             community_show_plot = FALSE,
             community_show_table = FALSE,
+            community_plot_layout = "circle",
             cliques_size = 2,
             cliques_threshold = 0,
             cliques_show_plot = FALSE,
@@ -80,6 +81,7 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             permutation_level = 0.05,
             permutation_table_max_rows = 20,
             permutation_table_show_all = FALSE,
+            permutation_plot_layout = "circle",
             sequences_type = "index",
             sequences_scale = "proportion",
             sequences_geom = "bar",
@@ -341,6 +343,23 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "community_show_table",
                 community_show_table,
                 default=FALSE)
+            private$..community_plot_layout <- jmvcore::OptionList$new(
+                "community_plot_layout",
+                community_plot_layout,
+                default="circle",
+                options=list(
+                    "circle",
+                    "oval",
+                    "spring",
+                    "layout_with_kk",
+                    "layout_with_graphopt",
+                    "layout_with_drl",
+                    "layout_as_star",
+                    "layout_on_grid",
+                    "layout_nicely",
+                    "layout_with_fr",
+                    "layout_with_lgl",
+                    "layout_randomly"))
             private$..cliques_size <- jmvcore::OptionInteger$new(
                 "cliques_size",
                 cliques_size,
@@ -549,6 +568,23 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "permutation_table_show_all",
                 permutation_table_show_all,
                 default=FALSE)
+            private$..permutation_plot_layout <- jmvcore::OptionList$new(
+                "permutation_plot_layout",
+                permutation_plot_layout,
+                default="circle",
+                options=list(
+                    "circle",
+                    "oval",
+                    "spring",
+                    "layout_with_kk",
+                    "layout_with_graphopt",
+                    "layout_with_drl",
+                    "layout_as_star",
+                    "layout_on_grid",
+                    "layout_nicely",
+                    "layout_with_fr",
+                    "layout_with_lgl",
+                    "layout_randomly"))
             private$..sequences_type <- jmvcore::OptionList$new(
                 "sequences_type",
                 sequences_type,
@@ -771,6 +807,7 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..community_gamma)
             self$.addOption(private$..community_show_plot)
             self$.addOption(private$..community_show_table)
+            self$.addOption(private$..community_plot_layout)
             self$.addOption(private$..cliques_size)
             self$.addOption(private$..cliques_threshold)
             self$.addOption(private$..cliques_show_plot)
@@ -804,6 +841,7 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..permutation_level)
             self$.addOption(private$..permutation_table_max_rows)
             self$.addOption(private$..permutation_table_show_all)
+            self$.addOption(private$..permutation_plot_layout)
             self$.addOption(private$..sequences_type)
             self$.addOption(private$..sequences_scale)
             self$.addOption(private$..sequences_geom)
@@ -878,6 +916,7 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         community_gamma = function() private$..community_gamma$value,
         community_show_plot = function() private$..community_show_plot$value,
         community_show_table = function() private$..community_show_table$value,
+        community_plot_layout = function() private$..community_plot_layout$value,
         cliques_size = function() private$..cliques_size$value,
         cliques_threshold = function() private$..cliques_threshold$value,
         cliques_show_plot = function() private$..cliques_show_plot$value,
@@ -911,6 +950,7 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         permutation_level = function() private$..permutation_level$value,
         permutation_table_max_rows = function() private$..permutation_table_max_rows$value,
         permutation_table_show_all = function() private$..permutation_table_show_all$value,
+        permutation_plot_layout = function() private$..permutation_plot_layout$value,
         sequences_type = function() private$..sequences_type$value,
         sequences_scale = function() private$..sequences_scale$value,
         sequences_geom = function() private$..sequences_geom$value,
@@ -984,6 +1024,7 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..community_gamma = NA,
         ..community_show_plot = NA,
         ..community_show_table = NA,
+        ..community_plot_layout = NA,
         ..cliques_size = NA,
         ..cliques_threshold = NA,
         ..cliques_show_plot = NA,
@@ -1017,6 +1058,7 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..permutation_level = NA,
         ..permutation_table_max_rows = NA,
         ..permutation_table_show_all = NA,
+        ..permutation_plot_layout = NA,
         ..sequences_type = NA,
         ..sequences_scale = NA,
         ..sequences_geom = NA,
@@ -1361,7 +1403,8 @@ ClusterTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "community_methods",
-                    "community_gamma")))
+                    "community_gamma",
+                    "community_plot_layout")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="communityTable",
@@ -1590,7 +1633,8 @@ ClusterTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_threshold",
                     "permutation_iter",
                     "permutation_paired",
-                    "permutation_level")))
+                    "permutation_level",
+                    "permutation_plot_layout")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="compare_network_diff_plot",
@@ -1941,6 +1985,7 @@ ClusterTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param community_gamma .
 #' @param community_show_plot .
 #' @param community_show_table .
+#' @param community_plot_layout .
 #' @param cliques_size .
 #' @param cliques_threshold .
 #' @param cliques_show_plot .
@@ -1974,6 +2019,7 @@ ClusterTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param permutation_level .
 #' @param permutation_table_max_rows .
 #' @param permutation_table_show_all .
+#' @param permutation_plot_layout .
 #' @param sequences_type .
 #' @param sequences_scale .
 #' @param sequences_geom .
@@ -2099,6 +2145,7 @@ ClusterTNA <- function(
     community_gamma = 1,
     community_show_plot = FALSE,
     community_show_table = FALSE,
+    community_plot_layout = "circle",
     cliques_size = 2,
     cliques_threshold = 0,
     cliques_show_plot = FALSE,
@@ -2132,6 +2179,7 @@ ClusterTNA <- function(
     permutation_level = 0.05,
     permutation_table_max_rows = 20,
     permutation_table_show_all = FALSE,
+    permutation_plot_layout = "circle",
     sequences_type = "index",
     sequences_scale = "proportion",
     sequences_geom = "bar",
@@ -2222,6 +2270,7 @@ ClusterTNA <- function(
         community_gamma = community_gamma,
         community_show_plot = community_show_plot,
         community_show_table = community_show_table,
+        community_plot_layout = community_plot_layout,
         cliques_size = cliques_size,
         cliques_threshold = cliques_threshold,
         cliques_show_plot = cliques_show_plot,
@@ -2255,6 +2304,7 @@ ClusterTNA <- function(
         permutation_level = permutation_level,
         permutation_table_max_rows = permutation_table_max_rows,
         permutation_table_show_all = permutation_table_show_all,
+        permutation_plot_layout = permutation_plot_layout,
         sequences_type = sequences_type,
         sequences_scale = sequences_scale,
         sequences_geom = sequences_geom,

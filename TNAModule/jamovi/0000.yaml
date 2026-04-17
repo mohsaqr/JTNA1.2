@@ -54,27 +54,29 @@ datasets:
       - TNA
       - regulation
       - long format
-  - name: AI
-    path: AI.csv
+  - name: human_AI_interaction
+    path: human_AI_interaction.csv
     description: >-
-      AI-assisted session data in long format. Contains message_id, project,
-      session_id, timestamp, session_date, code (action), cluster, code_order,
-      and order_in_session columns. Paired with the Human dataset for
-      AI-vs-human comparative TNA.
-    tags:
-      - TNA
-      - AI
-      - long format
-  - name: Human
-    path: Human.csv
-    description: >-
-      Human session data in long format. Contains message_id, project,
-      session_id, timestamp, session_date, code (action), cluster, code_order,
-      and order_in_session columns. Paired with the AI dataset for AI-vs-human
-      comparative TNA.
+      Human session data from human-AI interaction in long format. Contains
+      message_id, project, session, timestamp, session_date, code (action),
+      cluster, code_order, and order_in_session columns. Paired with
+      AI_human_interaction for comparative TNA.
     tags:
       - TNA
       - human
+      - interaction
+      - long format
+  - name: AI_human_interaction
+    path: AI_human_interaction.csv
+    description: >-
+      AI session data from human-AI interaction in long format. Contains
+      message_id, project, session, timestamp, session_date, code (action),
+      cluster, code_order, and order_in_session columns. Paired with
+      human_AI_interaction for comparative TNA.
+    tags:
+      - TNA
+      - AI
+      - interaction
       - long format
 
 ...

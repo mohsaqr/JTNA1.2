@@ -265,6 +265,7 @@ items:
         - buildModel_threshold
         - community_methods
         - community_gamma
+        - community_plot_layout
 
     - name: communityTable
       type: Table
@@ -479,6 +480,7 @@ items:
         - permutation_iter
         - permutation_paired
         - permutation_level
+        - permutation_plot_layout
 
     ### COMPARISONS
 

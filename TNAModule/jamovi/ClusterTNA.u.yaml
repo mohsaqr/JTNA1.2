@@ -262,6 +262,9 @@ children:
               - type: CheckBox
                 name: community_show_table
                 label: Table
+              - type: ComboBox
+                name: community_plot_layout
+                enable: (community_show_plot)
       - type: LayoutBox
         stretchFactor: 1
         children:
@@ -477,6 +480,9 @@ children:
               - type: CheckBox
                 name: permutation_show_plot
                 label: Plot
+              - type: ComboBox
+                name: permutation_plot_layout
+                enable: (permutation_show_plot)
       - type: LayoutBox
         stretchFactor: 1
         children:

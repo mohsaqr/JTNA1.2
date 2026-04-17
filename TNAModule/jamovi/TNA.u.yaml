@@ -286,6 +286,9 @@ children:
               - type: CheckBox
                 name: community_show_plot
                 label: Plot
+              - type: ComboBox
+                name: community_plot_layout
+                enable: (community_show_plot)
       - type: LayoutBox
         stretchFactor: 1
         children:
