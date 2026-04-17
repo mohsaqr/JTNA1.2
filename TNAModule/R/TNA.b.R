@@ -293,7 +293,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ### Edge betweenness
 
             if(!is.null(model) && (self$options$edgeBetweenness_show_table || self$options$edgeBetweenness_show_plot)) {
-                edgeBetwenness <- tna::betweenness_network(x=model)
+                edgeBetwenness <- tna::betweenness_network(x=model, directed=FALSE)
 
                 # Plot
                 if(!self$results$edgeBetweenness_plot$isFilled()) {
@@ -751,14 +751,14 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             if(!is.null(plotData) && self$options$buildModel_show_plot)  {
                 tryCatch({
-                    plot(x=plotData,
+                    cograph::splot(x=plotData,
                         cut=self$options$buildModel_plot_cut,
                         minimum=self$options$buildModel_plot_min_value,
                         edge.label.cex=self$options$buildModel_plot_edge_label_size,
-                        node.width=self$options$buildModel_plot_node_size,
+                        node_size=self$options$buildModel_plot_node_size,
                         label.cex=self$options$buildModel_plot_node_label_size,
                         layout=self$options$buildModel_plot_layout,
-                        bg="transparent"
+                        background="transparent"
                     )
                 }, error = function(e) {
                     layout_name <- self$options$buildModel_plot_layout
@@ -875,15 +875,18 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             if(!is.null(plotData) && self$options$edgeBetweenness_show_plot)  {
                 tryCatch({
-                    plot(
+                    cograph::splot(
                         x=plotData,
                         cut=self$options$edgeBetweenness_plot_cut,
                         minimum=self$options$edgeBetweenness_plot_min_value,
                         edge.label.cex=self$options$edgeBetweenness_plot_edge_label_size,
-                        node.width=self$options$edgeBetweenness_plot_node_size,
+                        node_size=self$options$edgeBetweenness_plot_node_size,
                         label.cex=self$options$edgeBetweenness_plot_node_label_size,
                         layout=self$options$edgeBetweenness_plot_layout,
-                        bg="transparent"
+                        directed=FALSE,
+                        edge_style=1,
+                        weight_digits=0,
+                        background="transparent"
                     )
                 }, error = function(e) {
                     plot(1, type="n", main="Edge Betweenness Plot Error", sub=e$message)
@@ -899,7 +902,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if(!is.null(plotData) && self$options$community_show_plot)  {
                 tryCatch({
                     methods <- self$options$community_methods
-                    plot(x=plotData, method=methods, bg="transparent")
+                    plot(x=plotData, method=methods, background="transparent")
                 }, error = function(e) {
                     plot(1, type="n", main="Community Plot Error", sub=e$message)
                 })
@@ -931,10 +934,10 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             cut=self$options$cliques_plot_cut,
                             minimum=self$options$cliques_plot_min_value,
                             edge.label.cex=self$options$cliques_plot_edge_label_size,
-                            node.width=self$options$cliques_plot_node_size,
+                            node_size=self$options$cliques_plot_node_size,
                             label.cex=self$options$cliques_plot_node_label_size,
                             layout=self$options$cliques_plot_layout,
-                            bg="transparent")
+                            background="transparent")
                     }
                 }, error = function(e) {
                     plot(1, type="n", main="Cliques Plot Error", sub=e$message)

@@ -151,9 +151,9 @@ options:
     - name: buildModel_plot_node_size
       title: Node size
       type: Number
-      default: 1
+      default: 8
       min: 0
-      max: 2
+      max: 20
 
     - name: buildModel_plot_node_label_size
       title: Node label size
@@ -169,6 +169,8 @@ options:
       options:
         - title: Circle
           name: circle
+        - title: Oval
+          name: oval
         - title: Spring
           name: spring
         - title: Kamada-Kawai
@@ -367,9 +369,9 @@ options:
     - name: cliques_plot_node_size
       title: Node size
       type: Number
-      default: 1
+      default: 8
       min: 0
-      max: 2
+      max: 20
 
     - name: cliques_plot_node_label_size
       title: Node label size
@@ -385,6 +387,8 @@ options:
       options:
         - title: Circle
           name: circle
+        - title: Oval
+          name: oval
         - title: Spring
           name: spring
         - title: Kamada-Kawai
@@ -511,9 +515,9 @@ options:
     - name: bootstrap_plot_node_size
       title: Node size
       type: Number
-      default: 1
+      default: 8
       min: 0
-      max: 2
+      max: 20
 
     - name: bootstrap_plot_node_label_size
       title: Node label size
@@ -529,6 +533,8 @@ options:
       options:
         - title: Circle
           name: circle
+        - title: Oval
+          name: oval
         - title: Spring
           name: spring
         - title: Kamada-Kawai
@@ -791,9 +797,9 @@ options:
     - name: compare_network_diff_plot_node_size
       title: Node size
       type: Number
-      default: 1
+      default: 8
       min: 0
-      max: 2
+      max: 20
 
     - name: compare_network_diff_plot_node_label_size
       title: Node label size
@@ -809,6 +815,8 @@ options:
       options:
         - title: Circle
           name: circle
+        - title: Oval
+          name: oval
         - title: Spring
           name: spring
         - title: Fruchterman-Reingold

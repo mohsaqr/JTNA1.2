@@ -977,11 +977,11 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           par(mfrow = c(row, column))
         }
         tryCatch({
-          plot(x=plotData,
+          cograph::splot(x=plotData,
             cut=0.1, # Default cut level set to 0.1
             minimum=self$options$buildModel_plot_min_value,
             edge.label.cex=self$options$buildModel_plot_edge_label_size,
-            node.width=self$options$buildModel_plot_node_size,
+            node_size=self$options$buildModel_plot_node_size,
             label.cex=self$options$buildModel_plot_node_label_size,
             layout=self$options$buildModel_plot_layout
           )
@@ -1117,7 +1117,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           par(mfrow = c(row, column))
         }
         method <- self$options$community_methods
-        plot(x=plotData, method=method, bg="transparent")
+        plot(x=plotData, method=method, background="transparent")
         TRUE
       }
       else {
@@ -1139,7 +1139,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     cut=self$options$cliques_plot_cut,
                     minimum=self$options$cliques_plot_min_value,
                     edge.label.cex=self$options$cliques_plot_edge_label_size,
-                    node.width=self$options$cliques_plot_node_size,
+                    node_size=self$options$cliques_plot_node_size,
                     label.cex=self$options$cliques_plot_node_label_size,
                     layout=self$options$cliques_plot_layout)
             }, error = function(e) { plot(1, type="n", main="Cliques Plot Error", sub=e$message) })
@@ -1311,7 +1311,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               cut = self$options$compare_network_diff_plot_cut,
               minimum = self$options$compare_network_diff_plot_min_value,
               edge.label.cex = self$options$compare_network_diff_plot_edge_label_size,
-              node.width = self$options$compare_network_diff_plot_node_size,
+              node_size=self$options$compare_network_diff_plot_node_size,
               label.cex = self$options$compare_network_diff_plot_node_label_size,
               layout = self$options$compare_network_diff_plot_layout,
               title = plot_title

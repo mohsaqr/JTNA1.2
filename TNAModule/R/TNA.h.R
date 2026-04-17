@@ -19,9 +19,9 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             buildModel_plot_cut = 0.1,
             buildModel_plot_min_value = 0.05,
             buildModel_plot_edge_label_size = 1,
-            buildModel_plot_node_size = 1,
+            buildModel_plot_node_size = 8,
             buildModel_plot_node_label_size = 1,
-            buildModel_plot_layout = NULL,
+            buildModel_plot_layout = "circle",
             buildModel_show_histo = FALSE,
             buildModel_show_frequencies = FALSE,
             buildModel_show_mosaic = FALSE,
@@ -52,9 +52,9 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             edgeBetweenness_plot_cut = 0.1,
             edgeBetweenness_plot_min_value = 0.05,
             edgeBetweenness_plot_edge_label_size = 1,
-            edgeBetweenness_plot_node_size = 1,
+            edgeBetweenness_plot_node_size = 8,
             edgeBetweenness_plot_node_label_size = 1,
-            edgeBetweenness_plot_layout = NULL,
+            edgeBetweenness_plot_layout = "circle",
             community_methods = "spinglass",
             community_gamma = 1,
             community_show_table = FALSE,
@@ -65,7 +65,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             cliques_plot_cut = 0.1,
             cliques_plot_min_value = 0,
             cliques_plot_edge_label_size = 1,
-            cliques_plot_node_size = 1,
+            cliques_plot_node_size = 8,
             cliques_plot_node_label_size = 1,
             cliques_plot_layout = "circle",
             bootstrap_iteration = 1000,
@@ -82,9 +82,9 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bootstrap_plot_cut = 0.1,
             bootstrap_plot_min_value = 0.05,
             bootstrap_plot_edge_label_size = 1,
-            bootstrap_plot_node_size = 1,
+            bootstrap_plot_node_size = 8,
             bootstrap_plot_node_label_size = 1,
-            bootstrap_plot_layout = NULL,
+            bootstrap_plot_layout = "circle",
             sequences_show_plot = FALSE,
             sequences_type = "index",
             sequences_scale = "proportion",
@@ -184,9 +184,9 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..buildModel_plot_node_size <- jmvcore::OptionNumber$new(
                 "buildModel_plot_node_size",
                 buildModel_plot_node_size,
-                default=1,
+                default=8,
                 min=0,
-                max=2)
+                max=20)
             private$..buildModel_plot_node_label_size <- jmvcore::OptionNumber$new(
                 "buildModel_plot_node_label_size",
                 buildModel_plot_node_label_size,
@@ -196,8 +196,10 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..buildModel_plot_layout <- jmvcore::OptionList$new(
                 "buildModel_plot_layout",
                 buildModel_plot_layout,
+                default="circle",
                 options=list(
                     "circle",
+                    "oval",
                     "spring",
                     "layout_with_kk",
                     "layout_with_graphopt",
@@ -346,9 +348,9 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..edgeBetweenness_plot_node_size <- jmvcore::OptionNumber$new(
                 "edgeBetweenness_plot_node_size",
                 edgeBetweenness_plot_node_size,
-                default=1,
+                default=8,
                 min=0,
-                max=2)
+                max=20)
             private$..edgeBetweenness_plot_node_label_size <- jmvcore::OptionNumber$new(
                 "edgeBetweenness_plot_node_label_size",
                 edgeBetweenness_plot_node_label_size,
@@ -358,8 +360,10 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..edgeBetweenness_plot_layout <- jmvcore::OptionList$new(
                 "edgeBetweenness_plot_layout",
                 edgeBetweenness_plot_layout,
+                default="circle",
                 options=list(
                     "circle",
+                    "oval",
                     "spring",
                     "layout_with_kk",
                     "layout_with_graphopt",
@@ -436,9 +440,9 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..cliques_plot_node_size <- jmvcore::OptionNumber$new(
                 "cliques_plot_node_size",
                 cliques_plot_node_size,
-                default=1,
+                default=8,
                 min=0,
-                max=2)
+                max=20)
             private$..cliques_plot_node_label_size <- jmvcore::OptionNumber$new(
                 "cliques_plot_node_label_size",
                 cliques_plot_node_label_size,
@@ -451,6 +455,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default="circle",
                 options=list(
                     "circle",
+                    "oval",
                     "spring",
                     "layout_with_kk",
                     "layout_with_graphopt",
@@ -544,9 +549,9 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..bootstrap_plot_node_size <- jmvcore::OptionNumber$new(
                 "bootstrap_plot_node_size",
                 bootstrap_plot_node_size,
-                default=1,
+                default=8,
                 min=0,
-                max=2)
+                max=20)
             private$..bootstrap_plot_node_label_size <- jmvcore::OptionNumber$new(
                 "bootstrap_plot_node_label_size",
                 bootstrap_plot_node_label_size,
@@ -556,8 +561,10 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..bootstrap_plot_layout <- jmvcore::OptionList$new(
                 "bootstrap_plot_layout",
                 bootstrap_plot_layout,
+                default="circle",
                 options=list(
                     "circle",
+                    "oval",
                     "spring",
                     "layout_with_kk",
                     "layout_with_graphopt",
@@ -1953,9 +1960,9 @@ TNA <- function(
     buildModel_plot_cut = 0.1,
     buildModel_plot_min_value = 0.05,
     buildModel_plot_edge_label_size = 1,
-    buildModel_plot_node_size = 1,
+    buildModel_plot_node_size = 8,
     buildModel_plot_node_label_size = 1,
-    buildModel_plot_layout,
+    buildModel_plot_layout = "circle",
     buildModel_show_histo = FALSE,
     buildModel_show_frequencies = FALSE,
     buildModel_show_mosaic = FALSE,
@@ -1986,9 +1993,9 @@ TNA <- function(
     edgeBetweenness_plot_cut = 0.1,
     edgeBetweenness_plot_min_value = 0.05,
     edgeBetweenness_plot_edge_label_size = 1,
-    edgeBetweenness_plot_node_size = 1,
+    edgeBetweenness_plot_node_size = 8,
     edgeBetweenness_plot_node_label_size = 1,
-    edgeBetweenness_plot_layout,
+    edgeBetweenness_plot_layout = "circle",
     community_methods = "spinglass",
     community_gamma = 1,
     community_show_table = FALSE,
@@ -1999,7 +2006,7 @@ TNA <- function(
     cliques_plot_cut = 0.1,
     cliques_plot_min_value = 0,
     cliques_plot_edge_label_size = 1,
-    cliques_plot_node_size = 1,
+    cliques_plot_node_size = 8,
     cliques_plot_node_label_size = 1,
     cliques_plot_layout = "circle",
     bootstrap_iteration = 1000,
@@ -2016,9 +2023,9 @@ TNA <- function(
     bootstrap_plot_cut = 0.1,
     bootstrap_plot_min_value = 0.05,
     bootstrap_plot_edge_label_size = 1,
-    bootstrap_plot_node_size = 1,
+    bootstrap_plot_node_size = 8,
     bootstrap_plot_node_label_size = 1,
-    bootstrap_plot_layout,
+    bootstrap_plot_layout = "circle",
     sequences_show_plot = FALSE,
     sequences_type = "index",
     sequences_scale = "proportion",
