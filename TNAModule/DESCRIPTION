@@ -25,9 +25,8 @@ RoxygenNote: 7.3.2
 Imports:
     jmvcore (>= 0.8.5),
     R6,
-    ggplot2,
-    cograph,
-    codyna
+    ggplot2
 Remotes:
+    sonsoleslp/cograph,
     sonsoleslp/tna@main,
     santikka/codyna
