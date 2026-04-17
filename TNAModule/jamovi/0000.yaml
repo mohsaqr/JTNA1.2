@@ -1,7 +1,7 @@
 ---
 title: Transition Network Analysis
 name: JTNA
-version: 1.6.1
+version: 1.6.5
 jms: '1.0'
 authors:
   - Dylan Girault
@@ -53,6 +53,28 @@ datasets:
     tags:
       - TNA
       - regulation
+      - long format
+  - name: AI
+    path: AI.csv
+    description: >-
+      AI-assisted session data in long format. Contains message_id, project,
+      session_id, timestamp, session_date, code (action), cluster, code_order,
+      and order_in_session columns. Paired with the Human dataset for
+      AI-vs-human comparative TNA.
+    tags:
+      - TNA
+      - AI
+      - long format
+  - name: Human
+    path: Human.csv
+    description: >-
+      Human session data in long format. Contains message_id, project,
+      session_id, timestamp, session_date, code (action), cluster, code_order,
+      and order_in_session columns. Paired with the AI dataset for AI-vs-human
+      comparative TNA.
+    tags:
+      - TNA
+      - human
       - long format
 
 ...

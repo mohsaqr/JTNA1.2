@@ -6,9 +6,6 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     private = list(
         .run = function() {
 
-            library("tna")
-            library("codyna")
-
             # Set instructions content
             self$results$instructions$setContent(
                 '<div style="border: 2px solid #e6f4fe; border-radius: 15px; padding: 15px; background-color: #e6f4fe; margin-top: 10px;">

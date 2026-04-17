@@ -5,7 +5,6 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
   inherit = ClusterTNABase,
   private = list(
     .run = function() {
-      library("tna")
 
       # Set instructions content
       self$results$instructions$setContent(
