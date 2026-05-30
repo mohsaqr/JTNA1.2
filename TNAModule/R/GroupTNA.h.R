@@ -13,7 +13,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             buildModel_variables_long_group = NULL,
             buildModel_type = "relative",
             buildModel_lambda = 1,
-            buildModel_attention_run = FALSE,
             buildModel_scaling = "noScaling",
             buildModel_show_matrix = FALSE,
             buildModel_threshold = 900,
@@ -163,10 +162,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=1,
                 min=0.01,
                 max=10)
-            private$..buildModel_attention_run <- jmvcore::OptionBool$new(
-                "buildModel_attention_run",
-                buildModel_attention_run,
-                default=FALSE)
             private$..buildModel_scaling <- jmvcore::OptionList$new(
                 "buildModel_scaling",
                 buildModel_scaling,
@@ -846,7 +841,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..buildModel_variables_long_group)
             self$.addOption(private$..buildModel_type)
             self$.addOption(private$..buildModel_lambda)
-            self$.addOption(private$..buildModel_attention_run)
             self$.addOption(private$..buildModel_scaling)
             self$.addOption(private$..buildModel_show_matrix)
             self$.addOption(private$..buildModel_threshold)
@@ -969,7 +963,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         buildModel_variables_long_group = function() private$..buildModel_variables_long_group$value,
         buildModel_type = function() private$..buildModel_type$value,
         buildModel_lambda = function() private$..buildModel_lambda$value,
-        buildModel_attention_run = function() private$..buildModel_attention_run$value,
         buildModel_scaling = function() private$..buildModel_scaling$value,
         buildModel_show_matrix = function() private$..buildModel_show_matrix$value,
         buildModel_threshold = function() private$..buildModel_threshold$value,
@@ -1091,7 +1084,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..buildModel_variables_long_group = NA,
         ..buildModel_type = NA,
         ..buildModel_lambda = NA,
-        ..buildModel_attention_run = NA,
         ..buildModel_scaling = NA,
         ..buildModel_show_matrix = NA,
         ..buildModel_threshold = NA,
@@ -1296,8 +1288,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
-                    "buildModel_lambda",
-                    "buildModel_attention_run")))
+                    "buildModel_lambda")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="buildModel_plot",
@@ -1315,7 +1306,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "buildModel_plot_cut",
                     "buildModel_plot_min_value",
                     "buildModel_plot_edge_label_size",
@@ -1338,8 +1328,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
-                    "buildModel_lambda",
-                    "buildModel_attention_run")))
+                    "buildModel_lambda")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="buildModel_frequencies",
@@ -1356,8 +1345,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
-                    "buildModel_lambda",
-                    "buildModel_attention_run")))
+                    "buildModel_lambda")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="buildModel_mosaic",
@@ -1375,7 +1363,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "buildModel_digits")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -1396,7 +1383,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "centrality_loops",
                     "centrality_normalize",
                     "centrality_Betweenness",
@@ -1427,7 +1413,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "centrality_loops",
                     "centrality_normalize",
                     "centrality_Betweenness",
@@ -1456,7 +1441,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "centrality_loops",
                     "centrality_normalize",
                     "centrality_Betweenness",
@@ -1492,7 +1476,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "community_methods",
                     "community_gamma")))
             self$add(jmvcore::Image$new(
@@ -1512,7 +1495,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "community_methods",
                     "community_gamma",
                     "community_plot_layout")))
@@ -1540,7 +1522,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "community_methods",
                     "community_gamma")))
             self$add(jmvcore::Preformatted$new(
@@ -1569,7 +1550,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "cliques_size",
                     "cliques_threshold",
                     "cliques_plot_cut",
@@ -1646,7 +1626,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "bootstrap_iteration",
                     "bootstrap_level",
                     "bootstrap_method",
@@ -1670,7 +1649,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "bootstrap_iteration",
                     "bootstrap_level",
                     "bootstrap_method",
@@ -1720,7 +1698,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "permutation_iter",
                     "permutation_paired",
                     "permutation_level")))
@@ -1741,7 +1718,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "permutation_iter",
                     "permutation_paired",
                     "permutation_level",
@@ -1764,7 +1740,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "compare_network_diff_plot_cut",
                     "compare_network_diff_plot_min_value",
                     "compare_network_diff_plot_edge_label_size",
@@ -1798,7 +1773,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "compare_group_i",
                     "compare_group_j",
                     "compare_scaling",
@@ -1827,7 +1801,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "compare_group_i",
                     "compare_group_j",
                     "compare_scaling")))
@@ -1859,7 +1832,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "compare_group_i",
                     "compare_group_j",
                     "compare_scaling")))
@@ -1886,7 +1858,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "compare_sequences_sub_min",
                     "compare_sequences_sub_max",
                     "compare_sequences_min_freq",
@@ -1915,7 +1886,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "compare_sequences_sub_min",
                     "compare_sequences_sub_max",
                     "compare_sequences_min_freq",
@@ -1938,7 +1908,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "sequences_type",
                     "sequences_scale",
                     "sequences_geom",
@@ -2002,7 +1971,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "pattern_type",
                     "pattern_len_min",
                     "pattern_len_max",
@@ -2141,7 +2109,6 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda",
-                    "buildModel_attention_run",
                     "indices_favorable",
                     "indices_omega")))}))
 
@@ -2184,7 +2151,6 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   for each group.
 #' @param buildModel_type .
 #' @param buildModel_lambda .
-#' @param buildModel_attention_run .
 #' @param buildModel_scaling .
 #' @param buildModel_show_matrix .
 #' @param buildModel_threshold .
@@ -2359,7 +2325,6 @@ GroupTNA <- function(
     buildModel_variables_long_group,
     buildModel_type = "relative",
     buildModel_lambda = 1,
-    buildModel_attention_run = FALSE,
     buildModel_scaling = "noScaling",
     buildModel_show_matrix = FALSE,
     buildModel_threshold = 900,
@@ -2500,7 +2465,6 @@ GroupTNA <- function(
         buildModel_variables_long_group = buildModel_variables_long_group,
         buildModel_type = buildModel_type,
         buildModel_lambda = buildModel_lambda,
-        buildModel_attention_run = buildModel_attention_run,
         buildModel_scaling = buildModel_scaling,
         buildModel_show_matrix = buildModel_show_matrix,
         buildModel_threshold = buildModel_threshold,

@@ -125,15 +125,12 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
               group <- dataForTNA$long_data[!duplicated(dataForTNA$long_data$.session_id),]
 
-              # Attention models scale ~O(L^2) with sequence length and can be
-              # slow; gate the build behind an opt-in checkbox (like the
-              # clustering "Run" gate) instead of building automatically.
-              if(type == "attention" && !isTRUE(self$options$buildModel_attention_run)) {
-                  self$results$errorText$setContent(
-                    "Attention models can be slow on long sequences. Check 'Run Attention Model' to build it.")
-                  self$results$errorText$setVisible(TRUE)
-                  model <- NULL
-              } else if(type == "attention") {
+              if(type == "attention") {
+                  # Attention weights every event by its full decayed history, so
+                  # the build can be slow on long sequences. Show a heads-up.
+                  self$results$buildModelTitle$setContent(
+                    "Attention model: this can take longer on long sequences, please wait…")
+                  self$results$buildModelTitle$setVisible(TRUE)
                   lambda <- self$options$buildModel_lambda
                   model <- tna::group_model(x=dataForTNA, group=group[[groupColumn]], type=type, scaling=scaling, lambda=lambda)
               } else {

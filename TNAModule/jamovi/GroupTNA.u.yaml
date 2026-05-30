@@ -69,10 +69,6 @@ children:
                 name: buildModel_lambda
                 format: number
                 enable: (buildModel_type_attention)
-              - type: CheckBox
-                name: buildModel_attention_run
-                label: Run Attention Model
-                enable: (buildModel_type_attention)
       - type: LayoutBox
         stretchFactor: 1
         children:
