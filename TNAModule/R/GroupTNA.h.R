@@ -19,7 +19,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             buildModel_show_plot = TRUE,
             buildModel_plot_cut = 0.1,
             buildModel_plot_min_value = 0.05,
-            buildModel_plot_edge_label_size = 0.6,
+            buildModel_plot_edge_label_size = 0.7,
             buildModel_plot_node_size = 8,
             buildModel_plot_node_label_size = 1,
             buildModel_plot_layout = "circle",
@@ -50,7 +50,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             cliques_show_plot = FALSE,
             cliques_plot_cut = 0.1,
             cliques_plot_min_value = 0,
-            cliques_plot_edge_label_size = 0.6,
+            cliques_plot_edge_label_size = 0.7,
             cliques_plot_node_size = 8,
             cliques_plot_node_label_size = 1,
             cliques_plot_layout = "circle",
@@ -67,7 +67,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bootstrap_show_plot = FALSE,
             bootstrap_plot_cut = 0.1,
             bootstrap_plot_min_value = 0.05,
-            bootstrap_plot_edge_label_size = 0.6,
+            bootstrap_plot_edge_label_size = 0.7,
             bootstrap_plot_node_size = 8,
             bootstrap_plot_node_label_size = 1,
             bootstrap_plot_layout = "circle",
@@ -101,7 +101,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             compare_show_network_diff_plot = FALSE,
             compare_network_diff_plot_cut = 0.1,
             compare_network_diff_plot_min_value = 0.05,
-            compare_network_diff_plot_edge_label_size = 0.6,
+            compare_network_diff_plot_edge_label_size = 0.7,
             compare_network_diff_plot_node_size = 8,
             compare_network_diff_plot_node_label_size = 1,
             compare_network_diff_plot_layout = "circle",
@@ -198,7 +198,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..buildModel_plot_edge_label_size <- jmvcore::OptionNumber$new(
                 "buildModel_plot_edge_label_size",
                 buildModel_plot_edge_label_size,
-                default=0.6,
+                default=0.7,
                 min=0,
                 max=10)
             private$..buildModel_plot_node_size <- jmvcore::OptionNumber$new(
@@ -375,7 +375,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..cliques_plot_edge_label_size <- jmvcore::OptionNumber$new(
                 "cliques_plot_edge_label_size",
                 cliques_plot_edge_label_size,
-                default=0.6,
+                default=0.7,
                 min=0,
                 max=10)
             private$..cliques_plot_node_size <- jmvcore::OptionNumber$new(
@@ -484,7 +484,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..bootstrap_plot_edge_label_size <- jmvcore::OptionNumber$new(
                 "bootstrap_plot_edge_label_size",
                 bootstrap_plot_edge_label_size,
-                default=0.6,
+                default=0.7,
                 min=0,
                 max=10)
             private$..bootstrap_plot_node_size <- jmvcore::OptionNumber$new(
@@ -703,7 +703,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..compare_network_diff_plot_edge_label_size <- jmvcore::OptionNumber$new(
                 "compare_network_diff_plot_edge_label_size",
                 compare_network_diff_plot_edge_label_size,
-                default=0.6,
+                default=0.7,
                 min=0,
                 max=10)
             private$..compare_network_diff_plot_node_size <- jmvcore::OptionNumber$new(
@@ -2331,7 +2331,7 @@ GroupTNA <- function(
     buildModel_show_plot = TRUE,
     buildModel_plot_cut = 0.1,
     buildModel_plot_min_value = 0.05,
-    buildModel_plot_edge_label_size = 0.6,
+    buildModel_plot_edge_label_size = 0.7,
     buildModel_plot_node_size = 8,
     buildModel_plot_node_label_size = 1,
     buildModel_plot_layout = "circle",
@@ -2362,7 +2362,7 @@ GroupTNA <- function(
     cliques_show_plot = FALSE,
     cliques_plot_cut = 0.1,
     cliques_plot_min_value = 0,
-    cliques_plot_edge_label_size = 0.6,
+    cliques_plot_edge_label_size = 0.7,
     cliques_plot_node_size = 8,
     cliques_plot_node_label_size = 1,
     cliques_plot_layout = "circle",
@@ -2379,7 +2379,7 @@ GroupTNA <- function(
     bootstrap_show_plot = FALSE,
     bootstrap_plot_cut = 0.1,
     bootstrap_plot_min_value = 0.05,
-    bootstrap_plot_edge_label_size = 0.6,
+    bootstrap_plot_edge_label_size = 0.7,
     bootstrap_plot_node_size = 8,
     bootstrap_plot_node_label_size = 1,
     bootstrap_plot_layout = "circle",
@@ -2413,7 +2413,7 @@ GroupTNA <- function(
     compare_show_network_diff_plot = FALSE,
     compare_network_diff_plot_cut = 0.1,
     compare_network_diff_plot_min_value = 0.05,
-    compare_network_diff_plot_edge_label_size = 0.6,
+    compare_network_diff_plot_edge_label_size = 0.7,
     compare_network_diff_plot_node_size = 8,
     compare_network_diff_plot_node_label_size = 1,
     compare_network_diff_plot_layout = "circle",

@@ -18,7 +18,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             buildModel_show_plot = TRUE,
             buildModel_plot_cut = 0.1,
             buildModel_plot_min_value = 0.05,
-            buildModel_plot_edge_label_size = 0.6,
+            buildModel_plot_edge_label_size = 0.7,
             buildModel_plot_node_size = 8,
             buildModel_plot_node_label_size = 1,
             buildModel_plot_layout = "circle",
@@ -51,7 +51,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             edgeBetweenness_show_plot = FALSE,
             edgeBetweenness_plot_cut = 0.1,
             edgeBetweenness_plot_min_value = 0.05,
-            edgeBetweenness_plot_edge_label_size = 0.6,
+            edgeBetweenness_plot_edge_label_size = 0.7,
             edgeBetweenness_plot_node_size = 8,
             edgeBetweenness_plot_node_label_size = 1,
             edgeBetweenness_plot_layout = "circle",
@@ -65,7 +65,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             cliques_show_plot = FALSE,
             cliques_plot_cut = 0.1,
             cliques_plot_min_value = 0,
-            cliques_plot_edge_label_size = 0.6,
+            cliques_plot_edge_label_size = 0.7,
             cliques_plot_node_size = 8,
             cliques_plot_node_label_size = 1,
             cliques_plot_layout = "circle",
@@ -82,7 +82,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bootstrap_table_significant_only = FALSE,
             bootstrap_plot_cut = 0.1,
             bootstrap_plot_min_value = 0.05,
-            bootstrap_plot_edge_label_size = 0.6,
+            bootstrap_plot_edge_label_size = 0.7,
             bootstrap_plot_node_size = 8,
             bootstrap_plot_node_label_size = 1,
             bootstrap_plot_layout = "circle",
@@ -182,7 +182,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..buildModel_plot_edge_label_size <- jmvcore::OptionNumber$new(
                 "buildModel_plot_edge_label_size",
                 buildModel_plot_edge_label_size,
-                default=0.6,
+                default=0.7,
                 min=0,
                 max=10)
             private$..buildModel_plot_node_size <- jmvcore::OptionNumber$new(
@@ -346,7 +346,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..edgeBetweenness_plot_edge_label_size <- jmvcore::OptionNumber$new(
                 "edgeBetweenness_plot_edge_label_size",
                 edgeBetweenness_plot_edge_label_size,
-                default=0.6,
+                default=0.7,
                 min=0,
                 max=10)
             private$..edgeBetweenness_plot_node_size <- jmvcore::OptionNumber$new(
@@ -455,7 +455,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..cliques_plot_edge_label_size <- jmvcore::OptionNumber$new(
                 "cliques_plot_edge_label_size",
                 cliques_plot_edge_label_size,
-                default=0.6,
+                default=0.7,
                 min=0,
                 max=10)
             private$..cliques_plot_node_size <- jmvcore::OptionNumber$new(
@@ -564,7 +564,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..bootstrap_plot_edge_label_size <- jmvcore::OptionNumber$new(
                 "bootstrap_plot_edge_label_size",
                 bootstrap_plot_edge_label_size,
-                default=0.6,
+                default=0.7,
                 min=0,
                 max=10)
             private$..bootstrap_plot_node_size <- jmvcore::OptionNumber$new(
@@ -2068,7 +2068,7 @@ TNA <- function(
     buildModel_show_plot = TRUE,
     buildModel_plot_cut = 0.1,
     buildModel_plot_min_value = 0.05,
-    buildModel_plot_edge_label_size = 0.6,
+    buildModel_plot_edge_label_size = 0.7,
     buildModel_plot_node_size = 8,
     buildModel_plot_node_label_size = 1,
     buildModel_plot_layout = "circle",
@@ -2101,7 +2101,7 @@ TNA <- function(
     edgeBetweenness_show_plot = FALSE,
     edgeBetweenness_plot_cut = 0.1,
     edgeBetweenness_plot_min_value = 0.05,
-    edgeBetweenness_plot_edge_label_size = 0.6,
+    edgeBetweenness_plot_edge_label_size = 0.7,
     edgeBetweenness_plot_node_size = 8,
     edgeBetweenness_plot_node_label_size = 1,
     edgeBetweenness_plot_layout = "circle",
@@ -2115,7 +2115,7 @@ TNA <- function(
     cliques_show_plot = FALSE,
     cliques_plot_cut = 0.1,
     cliques_plot_min_value = 0,
-    cliques_plot_edge_label_size = 0.6,
+    cliques_plot_edge_label_size = 0.7,
     cliques_plot_node_size = 8,
     cliques_plot_node_label_size = 1,
     cliques_plot_layout = "circle",
@@ -2132,7 +2132,7 @@ TNA <- function(
     bootstrap_table_significant_only = FALSE,
     bootstrap_plot_cut = 0.1,
     bootstrap_plot_min_value = 0.05,
-    bootstrap_plot_edge_label_size = 0.6,
+    bootstrap_plot_edge_label_size = 0.7,
     bootstrap_plot_node_size = 8,
     bootstrap_plot_node_label_size = 1,
     bootstrap_plot_layout = "circle",

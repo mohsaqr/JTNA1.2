@@ -144,7 +144,7 @@ options:
     - name: buildModel_plot_edge_label_size
       title: Edge label size
       type: Number
-      default: 0.6
+      default: 0.7
       min: 0
       max: 10
 
@@ -392,7 +392,7 @@ options:
     - name: cliques_plot_edge_label_size
       title: Edge label size
       type: Number
-      default: 0.6
+      default: 0.7
       min: 0
       max: 10
 
@@ -538,7 +538,7 @@ options:
     - name: bootstrap_plot_edge_label_size
       title: Edge label size
       type: Number
-      default: 0.6
+      default: 0.7
       min: 0
       max: 10
 
@@ -850,7 +850,7 @@ options:
     - name: compare_network_diff_plot_edge_label_size
       title: Edge label size
       type: Number
-      default: 0.6
+      default: 0.7
       min: 0
       max: 10
 
