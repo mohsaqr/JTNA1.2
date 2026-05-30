@@ -1,10 +1,21 @@
 # JTNA - Jamovi Transition Network Analysis Module
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version: 1.6.1](https://img.shields.io/badge/Version-1.6.1-blue.svg)]()
+[![Version: 1.8.4](https://img.shields.io/badge/Version-1.8.4-blue.svg)]()
 [![Jamovi](https://img.shields.io/badge/Jamovi-Compatible-green.svg)](https://www.jamovi.org/)
 
 A comprehensive **jamovi module** for performing **Transition Network Analysis (TNA)** to study relational dynamics and behavioral patterns in sequential data. JTNA provides an intuitive point-and-click interface for advanced network analysis techniques -- no coding required.
+
+## What's New in 1.8
+
+- **Pattern discovery in groups & clusters** — Group/Cluster TNA pattern tables now show a per-group breakdown with χ² and p-value (previously dropped whenever a Time threshold split actors into sessions).
+- **Scaled models now permute** — permutation tests run correctly on scaled grouped models (computed on an unscaled rebuild).
+- **Correct event ordering** — the Order column is treated numerically, so sequences longer than 9 events are no longer mis-sorted; Cluster TNA now honours Order and the session Threshold too.
+- **Attention models** build directly with a heads-up that they can be slower on long sequences.
+- Default **edge label size** is now **0.7** for cleaner plots.
+- Backed by a `testthat` regression + cross-checked equivalence suite, run in CI on every push.
+
+See the [Releases](https://github.com/mohsaqr/JTNA1.2/releases) page for full release notes.
 
 ## Analysis Modules
 
@@ -18,7 +29,7 @@ A comprehensive **jamovi module** for performing **Transition Network Analysis (
 
 ### Model Building
 - Build transition networks from sequential behavioral data in **long format**
-- Support for **relative**, **frequency**, **co-occurrence**, and **attention** model types
+- Support for **relative**, **frequency**, and **attention** model types
 - Configurable scaling (MinMax, Max, Rank) and threshold parameters
 - **Attention model** with lambda decay parameter for temporal weighting
 - Transition matrix, network plot, histogram, frequency plot, and mosaic plot outputs
@@ -53,12 +64,13 @@ A comprehensive **jamovi module** for performing **Transition Network Analysis (
 
 ### Pattern Discovery (via codyna)
 - Discover recurring sequential patterns using the [codyna](https://github.com/santikka/codyna) package
-- Support for **ordered**, **unordered**, and **custom** pattern types
-- Filter by pattern length range, gap range, minimum support, and minimum count
-- Constrain patterns by starting, ending, or containing specific states
+- Support for **N-gram**, **gapped**, and **repeated** pattern types
+- Filter by pattern length range, gap range, minimum support, and minimum frequency
+- Constrain patterns by starting, ending, or containing specific states (checkbox-gated level pickers)
+- In **Group TNA** / **Cluster TNA**, patterns include a per-group/cluster breakdown with χ² and p-value of pattern × group association
 
 ### Sequence Indices
-- Compute per-sequence **complexity**, **entropy**, and **turbulence** indices
+- Compute 20+ per-sequence indices via [codyna](https://github.com/santikka/codyna) — complexity, longitudinal entropy, Simpson diversity, spell durations, transition rate/complexity, self-loop tendency, and initial/dominant/emergent-state metrics
 - Define favorable states and omega parameter for fine-tuning
 - Sortable table with pagination
 
