@@ -71,7 +71,15 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             copyData[[self$options$buildModel_variables_long_actor]] <- as.character(copyData[[self$options$buildModel_variables_long_actor]])
           }
           if(!is.null(self$options$buildModel_variables_long_order)) {
-            copyData[[self$options$buildModel_variables_long_order]] <- as.character(copyData[[self$options$buildModel_variables_long_order]])
+            # Order is a sequence position: keep it numeric so prepare_data
+            # sorts events numerically. Forcing character makes prepare_data
+            # sort lexicographically ("10" < "2"), scrambling any sequence
+            # longer than 9 events. Only coerce when fully numeric.
+            ord_col <- self$options$buildModel_variables_long_order
+            ord_num <- suppressWarnings(as.numeric(as.character(copyData[[ord_col]])))
+            if(!anyNA(ord_num)) {
+              copyData[[ord_col]] <- ord_num
+            }
           }
 
           
@@ -117,7 +125,25 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
               group <- dataForTNA$long_data[!duplicated(dataForTNA$long_data$.session_id),]
 
-              if(type == "attention") {
+              # Attention models scale ~O(L^2) with sequence length; guard against
+              # very long sequences (e.g. no Time column) to avoid a multi-minute
+              # hang. See TNA.b.R for the rationale.
+              attention_seq_limit <- 2000
+              max_seq_len <- if(inherits(dataForTNA, "tna_data") &&
+                                !is.null(dataForTNA$sequence_data))
+                  ncol(dataForTNA$sequence_data) else NA_integer_
+
+              if(type == "attention" && !is.na(max_seq_len) &&
+                 max_seq_len > attention_seq_limit) {
+                  self$results$errorText$setContent(sprintf(
+                    paste0("Attention models scale quadratically with sequence length, ",
+                           "and your longest sequence has %d events — building this would ",
+                           "take a very long time. Add a Time column to split the data into ",
+                           "sessions, use a finer Actor variable, or switch Type to Relative ",
+                           "or Frequency."), max_seq_len))
+                  self$results$errorText$setVisible(TRUE)
+                  model <- NULL
+              } else if(type == "attention") {
                   lambda <- self$options$buildModel_lambda
                   model <- tna::group_model(x=dataForTNA, group=group[[groupColumn]], type=type, scaling=scaling, lambda=lambda)
               } else {
@@ -521,15 +547,51 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Use state to avoid recalculating expensive permutation test, but allow recalculation when needed
         permutationTest <- self$results$permutation_plot$state
         if(is.null(permutationTest)) {
-          permutationTest <- tna::permutation_test(
-            x=model, 
-            iter=self$options$permutation_iter, 
-            paired=self$options$permutation_paired,
-            level=self$options$permutation_level
-          )
+          # tna refuses to permute grouped models with globally scaled edge
+          # weights. Scaling is a display transform, so run the permutation test
+          # on an UNSCALED rebuild of the model (same type / lambda).
+          perm_model <- model
+          if(!is.null(self$options$buildModel_scaling) &&
+             self$options$buildModel_scaling != "noScaling") {
+            perm_model <- tryCatch({
+              pp_args <- list(data = self$data,
+                              action = self$options$buildModel_variables_long_action)
+              ac <- self$options$buildModel_variables_long_actor
+              tc <- self$options$buildModel_variables_long_time
+              oc <- self$options$buildModel_variables_long_order
+              gc <- self$options$buildModel_variables_long_group
+              if(!is.null(ac) && length(ac) > 0 && nzchar(ac)) pp_args$actor <- ac
+              if(!is.null(tc) && length(tc) > 0 && nzchar(tc)) pp_args$time <- tc
+              if(!is.null(oc) && length(oc) > 0 && nzchar(oc)) pp_args$order <- oc
+              if(!is.null(self$options$buildModel_threshold))
+                pp_args$time_threshold <- self$options$buildModel_threshold
+              pdp <- do.call(tna::prepare_data, pp_args)
+              gvec <- pdp$long_data[!duplicated(pdp$long_data$.session_id), ][[gc]]
+              if(type == "attention") {
+                tna::group_model(x=pdp, group=gvec, type=type,
+                                 scaling=character(0L), lambda=self$options$buildModel_lambda)
+              } else {
+                tna::group_model(x=pdp, group=gvec, type=type, scaling=character(0L))
+              }
+            }, error = function(e) model)
+          }
+
+          permutationTest <- tryCatch(
+            tna::permutation_test(
+              x=perm_model,
+              iter=self$options$permutation_iter,
+              paired=self$options$permutation_paired,
+              level=self$options$permutation_level
+            ),
+            error = function(e) {
+              self$results$permutationTitle$setContent(
+                paste("Permutation test error:", conditionMessage(e)))
+              self$results$permutationTitle$setVisible(TRUE)
+              NULL
+            })
 
           # Store state to avoid recalculation
-          self$results$permutation_plot$setState(permutationTest)
+          if(!is.null(permutationTest)) self$results$permutation_plot$setState(permutationTest)
         }
 
         # Populate table if we have data and table option is enabled
@@ -827,6 +889,119 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         self$results$compare_network_diff_plot$setVisible(TRUE)
       }
 
+      ### Pattern Discovery
+      if(self$options$pattern_show_table) {
+        self$results$patternTitle$setContent("Pattern Discovery Running...")
+        self$results$patternTitle$setVisible(TRUE)
+
+        tryCatch({
+          action_col <- self$options$buildModel_variables_long_action
+          actor_col <- self$options$buildModel_variables_long_actor
+          time_col <- self$options$buildModel_variables_long_time
+          order_col <- self$options$buildModel_variables_long_order
+          group_col <- self$options$buildModel_variables_long_group
+
+          args_prepare_data <- list(data = self$data, action = action_col)
+          if(!is.null(actor_col) && length(actor_col) > 0 && actor_col != "") args_prepare_data$actor <- actor_col
+          if(!is.null(time_col) && length(time_col) > 0 && time_col != "") args_prepare_data$time <- time_col
+          if(!is.null(order_col) && length(order_col) > 0 && order_col != "") args_prepare_data$order <- order_col
+          if(!is.null(self$options$buildModel_threshold)) args_prepare_data$time_threshold <- self$options$buildModel_threshold
+
+          dataForPattern <- do.call(tna::prepare_data, args_prepare_data)
+
+          if(is.null(dataForPattern)) {
+            self$results$patternTitle$setContent("ERROR: Could not prepare data")
+          } else {
+            seq_data <- if(inherits(dataForPattern, "tna_data")) {
+              as.data.frame(dataForPattern$sequence_data)
+            } else dataForPattern
+            seq_data <- as.data.frame(lapply(seq_data, as.character), stringsAsFactors = FALSE)
+
+            # Align the group outcome to SESSIONS (one row per .session_id),
+            # not to unique actors. A time threshold splits each actor into
+            # multiple sessions, so seq_data has one row per session; deriving
+            # the outcome per actor mismatches nrow(seq_data) and silently
+            # drops the group breakdown / chisq / p_value.
+            outcome_vec <- NULL
+            if(!is.null(group_col) && length(group_col) > 0 && nzchar(group_col) &&
+               inherits(dataForPattern, "tna_data") &&
+               !is.null(dataForPattern$long_data) &&
+               all(c(".session_id", group_col) %in% names(dataForPattern$long_data))) {
+              ld <- dataForPattern$long_data
+              sess <- ld[!duplicated(ld$.session_id), , drop = FALSE]
+              if(nrow(sess) == nrow(seq_data)) {
+                outcome_vec <- as.character(sess[[group_col]])
+              }
+            }
+
+            pattern_args <- list(
+              data = seq_data,
+              type = self$options$pattern_type,
+              len = self$options$pattern_len_min:self$options$pattern_len_max,
+              gap = self$options$pattern_gap_min:self$options$pattern_gap_max,
+              min_support = self$options$pattern_min_support,
+              min_freq = self$options$pattern_min_count
+            )
+            if(!is.null(outcome_vec)) pattern_args$outcome <- outcome_vec
+            if(isTRUE(self$options$pattern_starts_with_use) &&
+               !is.null(self$options$pattern_starts_with) && nzchar(self$options$pattern_starts_with))
+              pattern_args$start <- self$options$pattern_starts_with
+            if(isTRUE(self$options$pattern_ends_with_use) &&
+               !is.null(self$options$pattern_ends_with) && nzchar(self$options$pattern_ends_with))
+              pattern_args$end <- self$options$pattern_ends_with
+            if(isTRUE(self$options$pattern_contains_use) &&
+               !is.null(self$options$pattern_contains) && nzchar(self$options$pattern_contains))
+              pattern_args$contain <- self$options$pattern_contains
+
+            patterns <- do.call(codyna::discover_patterns, pattern_args)
+
+            if(!is.null(patterns) && nrow(patterns) > 0) {
+              total_patterns <- nrow(patterns)
+              if(!isTRUE(self$options$pattern_table_show_all)) {
+                max_rows <- self$options$pattern_table_max_rows
+                if(nrow(patterns) > max_rows) patterns <- patterns[1:max_rows, ]
+              }
+
+              static_cols <- c("pattern","length","frequency","proportion","count","support","lift","chisq","p_value")
+              extra_cols <- setdiff(names(patterns), static_cols)
+              for(col in extra_cols) {
+                self$results$patternTable$addColumn(
+                  name = col,
+                  title = sub("^count_", "n ", col),
+                  type = "integer"
+                )
+              }
+
+              for(i in 1:nrow(patterns)) {
+                vals <- list(
+                  pattern = as.character(patterns$pattern[i]),
+                  length = as.integer(patterns$length[i]),
+                  count = as.integer(patterns$count[i]),
+                  frequency = if(!is.null(patterns$frequency)) patterns$frequency[i] else NA,
+                  proportion = patterns$proportion[i],
+                  support = patterns$support[i],
+                  lift = if(!is.null(patterns$lift)) patterns$lift[i] else NA,
+                  chisq = if(!is.null(patterns$chisq)) patterns$chisq[i] else NA,
+                  p_value = if(!is.null(patterns$p_value)) patterns$p_value[i] else NA
+                )
+                for(col in extra_cols) vals[[col]] <- as.integer(patterns[[col]][i])
+                self$results$patternTable$addRow(rowKey=i, values=vals)
+              }
+              if(nrow(patterns) < total_patterns) {
+                self$results$patternTitle$setContent(paste("Showing", nrow(patterns), "of", total_patterns, "patterns"))
+              } else {
+                self$results$patternTitle$setContent(paste("Found", total_patterns, "patterns"))
+              }
+            } else {
+              self$results$patternTitle$setContent("No patterns found with the current settings")
+            }
+            self$results$patternTable$setVisible(TRUE)
+          }
+        }, error = function(e) {
+          self$results$patternTitle$setContent(paste("Pattern Discovery error:", e$message))
+        })
+      }
+
       ### Sequence Indices
       if(self$options$indices_show_table) {
         self$results$indicesTitle$setContent("Calculating Sequence Indices...")
@@ -883,33 +1058,30 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Add sequence ID
             indices$sequence_id <- 1:nrow(indices)
 
+            # Sequence indices are per SESSION (one row per .session_id), so the
+            # actor and group labels must be taken per session from long_data.
+            # Mapping per unique actor breaks whenever a time threshold splits an
+            # actor into several sessions (nrow(indices) > n actors).
+            sess_attr <- NULL
+            if(inherits(dataForIndices, "tna_data") && !is.null(dataForIndices$long_data) &&
+               ".session_id" %in% names(dataForIndices$long_data)) {
+              ld <- dataForIndices$long_data
+              sess_attr <- ld[!duplicated(ld$.session_id), , drop = FALSE]
+              if(nrow(sess_attr) != nrow(indices)) sess_attr <- NULL
+            }
+
             # Add actor if provided
-            if(!is.null(actor_col) && length(actor_col) > 0 && actor_col != "") {
-              unique_actors <- unique(self$data[[actor_col]])
-              if (length(unique_actors) == nrow(indices)) {
-                indices$actor <- as.character(unique_actors)
-              } else {
-                indices$actor <- NA
-              }
+            if(!is.null(sess_attr) && !is.null(actor_col) && length(actor_col) > 0 &&
+               actor_col != "" && actor_col %in% names(sess_attr)) {
+              indices$actor <- as.character(sess_attr[[actor_col]])
             } else {
               indices$actor <- NA
             }
 
             # Add group if provided
-            if(!is.null(group_col) && length(group_col) > 0 && group_col != "") {
-              if(!is.null(actor_col) && length(actor_col) > 0 && actor_col != "") {
-                unique_actors <- unique(self$data[[actor_col]])
-                if (length(unique_actors) == nrow(indices)) {
-                  group_values <- sapply(unique_actors, function(a) {
-                    self$data[[group_col]][self$data[[actor_col]] == a][1]
-                  })
-                  indices$group <- as.character(group_values)
-                } else {
-                  indices$group <- NA
-                }
-              } else {
-                indices$group <- NA
-              }
+            if(!is.null(sess_attr) && !is.null(group_col) && length(group_col) > 0 &&
+               group_col != "" && group_col %in% names(sess_attr)) {
+              indices$group <- as.character(sess_attr[[group_col]])
             } else {
               indices$group <- NA
             }
@@ -931,15 +1103,27 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                   actor = if(is.na(indices$actor[i])) "" else as.character(indices$actor[i]),
                   group = if(is.na(indices$group[i])) "" else as.character(indices$group[i]),
                   valid_n = as.integer(indices$valid_n[i]),
+                  valid_proportion = round(indices$valid_proportion[i], 3),
                   unique_states = as.integer(indices$unique_states[i]),
                   longitudinal_entropy = round(indices$longitudinal_entropy[i], 3),
                   simpson_diversity = round(indices$simpson_diversity[i], 3),
                   mean_spell_duration = round(indices$mean_spell_duration[i], 3),
+                  max_spell_duration = round(indices$max_spell_duration[i], 3),
                   self_loop_tendency = round(indices$self_loop_tendency[i], 3),
                   transition_rate = round(indices$transition_rate[i], 3),
+                  transition_complexity = round(indices$transition_complexity[i], 3),
+                  cyclic_feedback_strength = round(indices$cyclic_feedback_strength[i], 3),
+                  initial_state_persistence = round(indices$initial_state_persistence[i], 3),
+                  initial_state_proportion = round(indices$initial_state_proportion[i], 3),
+                  initial_state_influence_decay = round(indices$initial_state_influence_decay[i], 3),
                   first_state = as.character(indices$first_state[i]),
                   last_state = as.character(indices$last_state[i]),
                   dominant_state = as.character(indices$dominant_state[i]),
+                  dominant_proportion = round(indices$dominant_proportion[i], 3),
+                  dominant_max_spell = as.integer(indices$dominant_max_spell[i]),
+                  emergent_state = as.character(indices$emergent_state[i]),
+                  emergent_state_persistence = round(indices$emergent_state_persistence[i], 3),
+                  emergent_state_proportion = round(indices$emergent_state_proportion[i], 3),
                   complexity_index = round(indices$complexity_index[i], 3)
                 ))
               }
@@ -1057,11 +1241,21 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             print(p)
           }
         }, error = function(e) {
-          # Fallback to hist if plot_frequencies fails
-          w <- c(plotData$weights)
-          brks <- seq(0, max(1, max(w, na.rm = TRUE)) + 0.01, length.out = 20)
-          hist(x=plotData, breaks=brks, main="Frequencies Plot",
-               xlab="Edge Weights", ylab="Frequency")
+          counts <- tryCatch(table(unlist(plotData$data)), error = function(e2) NULL)
+          if(!is.null(counts) && length(counts) > 0) {
+            labs <- plotData$labels
+            if(!is.null(labs) && all(names(counts) %in% as.character(seq_along(labs)))) {
+              names(counts) <- labs[as.integer(names(counts))]
+            }
+            op <- par(mar = c(4, 7, 3, 1)); on.exit(par(op), add = TRUE)
+            barplot(sort(counts), horiz = TRUE, las = 1,
+                    main = "State frequencies",
+                    xlab = "Frequency", col = "#4a90d9", border = NA)
+          } else {
+            plot(1, type = "n", axes = FALSE, xlab = "", ylab = "",
+                 main = "Frequencies plot unavailable",
+                 sub = paste("tna::plot_frequencies failed:", conditionMessage(e)))
+          }
         })
         TRUE
       } else {

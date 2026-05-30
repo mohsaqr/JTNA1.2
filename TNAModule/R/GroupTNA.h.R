@@ -105,6 +105,22 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             compare_network_diff_plot_node_size = 8,
             compare_network_diff_plot_node_label_size = 1,
             compare_network_diff_plot_layout = "circle",
+            pattern_show_table = FALSE,
+            pattern_type = "ngram",
+            pattern_len_min = 2,
+            pattern_len_max = 5,
+            pattern_gap_min = 1,
+            pattern_gap_max = 3,
+            pattern_min_support = 0.01,
+            pattern_min_count = 2,
+            pattern_starts_with_use = FALSE,
+            pattern_starts_with = NULL,
+            pattern_ends_with_use = FALSE,
+            pattern_ends_with = NULL,
+            pattern_contains_use = FALSE,
+            pattern_contains = NULL,
+            pattern_table_max_rows = 20,
+            pattern_table_show_all = FALSE,
             indices_show_table = FALSE,
             indices_favorable = NULL,
             indices_omega = 1,
@@ -711,6 +727,88 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "oval",
                     "spring",
                     "layout_with_fr"))
+            private$..pattern_show_table <- jmvcore::OptionBool$new(
+                "pattern_show_table",
+                pattern_show_table,
+                default=FALSE)
+            private$..pattern_type <- jmvcore::OptionList$new(
+                "pattern_type",
+                pattern_type,
+                default="ngram",
+                options=list(
+                    "ngram",
+                    "gapped",
+                    "repeated"))
+            private$..pattern_len_min <- jmvcore::OptionInteger$new(
+                "pattern_len_min",
+                pattern_len_min,
+                default=2,
+                min=2,
+                max=20)
+            private$..pattern_len_max <- jmvcore::OptionInteger$new(
+                "pattern_len_max",
+                pattern_len_max,
+                default=5,
+                min=2,
+                max=20)
+            private$..pattern_gap_min <- jmvcore::OptionInteger$new(
+                "pattern_gap_min",
+                pattern_gap_min,
+                default=1,
+                min=1,
+                max=10)
+            private$..pattern_gap_max <- jmvcore::OptionInteger$new(
+                "pattern_gap_max",
+                pattern_gap_max,
+                default=3,
+                min=1,
+                max=10)
+            private$..pattern_min_support <- jmvcore::OptionNumber$new(
+                "pattern_min_support",
+                pattern_min_support,
+                default=0.01,
+                min=0,
+                max=1)
+            private$..pattern_min_count <- jmvcore::OptionInteger$new(
+                "pattern_min_count",
+                pattern_min_count,
+                default=2,
+                min=1,
+                max=1000)
+            private$..pattern_starts_with_use <- jmvcore::OptionBool$new(
+                "pattern_starts_with_use",
+                pattern_starts_with_use,
+                default=FALSE)
+            private$..pattern_starts_with <- jmvcore::OptionLevel$new(
+                "pattern_starts_with",
+                pattern_starts_with,
+                variable="(buildModel_variables_long_action)")
+            private$..pattern_ends_with_use <- jmvcore::OptionBool$new(
+                "pattern_ends_with_use",
+                pattern_ends_with_use,
+                default=FALSE)
+            private$..pattern_ends_with <- jmvcore::OptionLevel$new(
+                "pattern_ends_with",
+                pattern_ends_with,
+                variable="(buildModel_variables_long_action)")
+            private$..pattern_contains_use <- jmvcore::OptionBool$new(
+                "pattern_contains_use",
+                pattern_contains_use,
+                default=FALSE)
+            private$..pattern_contains <- jmvcore::OptionLevel$new(
+                "pattern_contains",
+                pattern_contains,
+                variable="(buildModel_variables_long_action)")
+            private$..pattern_table_max_rows <- jmvcore::OptionInteger$new(
+                "pattern_table_max_rows",
+                pattern_table_max_rows,
+                default=20,
+                min=1,
+                max=1000)
+            private$..pattern_table_show_all <- jmvcore::OptionBool$new(
+                "pattern_table_show_all",
+                pattern_table_show_all,
+                default=FALSE)
             private$..indices_show_table <- jmvcore::OptionBool$new(
                 "indices_show_table",
                 indices_show_table,
@@ -835,6 +933,22 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..compare_network_diff_plot_node_size)
             self$.addOption(private$..compare_network_diff_plot_node_label_size)
             self$.addOption(private$..compare_network_diff_plot_layout)
+            self$.addOption(private$..pattern_show_table)
+            self$.addOption(private$..pattern_type)
+            self$.addOption(private$..pattern_len_min)
+            self$.addOption(private$..pattern_len_max)
+            self$.addOption(private$..pattern_gap_min)
+            self$.addOption(private$..pattern_gap_max)
+            self$.addOption(private$..pattern_min_support)
+            self$.addOption(private$..pattern_min_count)
+            self$.addOption(private$..pattern_starts_with_use)
+            self$.addOption(private$..pattern_starts_with)
+            self$.addOption(private$..pattern_ends_with_use)
+            self$.addOption(private$..pattern_ends_with)
+            self$.addOption(private$..pattern_contains_use)
+            self$.addOption(private$..pattern_contains)
+            self$.addOption(private$..pattern_table_max_rows)
+            self$.addOption(private$..pattern_table_show_all)
             self$.addOption(private$..indices_show_table)
             self$.addOption(private$..indices_favorable)
             self$.addOption(private$..indices_omega)
@@ -941,6 +1055,22 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         compare_network_diff_plot_node_size = function() private$..compare_network_diff_plot_node_size$value,
         compare_network_diff_plot_node_label_size = function() private$..compare_network_diff_plot_node_label_size$value,
         compare_network_diff_plot_layout = function() private$..compare_network_diff_plot_layout$value,
+        pattern_show_table = function() private$..pattern_show_table$value,
+        pattern_type = function() private$..pattern_type$value,
+        pattern_len_min = function() private$..pattern_len_min$value,
+        pattern_len_max = function() private$..pattern_len_max$value,
+        pattern_gap_min = function() private$..pattern_gap_min$value,
+        pattern_gap_max = function() private$..pattern_gap_max$value,
+        pattern_min_support = function() private$..pattern_min_support$value,
+        pattern_min_count = function() private$..pattern_min_count$value,
+        pattern_starts_with_use = function() private$..pattern_starts_with_use$value,
+        pattern_starts_with = function() private$..pattern_starts_with$value,
+        pattern_ends_with_use = function() private$..pattern_ends_with_use$value,
+        pattern_ends_with = function() private$..pattern_ends_with$value,
+        pattern_contains_use = function() private$..pattern_contains_use$value,
+        pattern_contains = function() private$..pattern_contains$value,
+        pattern_table_max_rows = function() private$..pattern_table_max_rows$value,
+        pattern_table_show_all = function() private$..pattern_table_show_all$value,
         indices_show_table = function() private$..indices_show_table$value,
         indices_favorable = function() private$..indices_favorable$value,
         indices_omega = function() private$..indices_omega$value,
@@ -1046,6 +1176,22 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..compare_network_diff_plot_node_size = NA,
         ..compare_network_diff_plot_node_label_size = NA,
         ..compare_network_diff_plot_layout = NA,
+        ..pattern_show_table = NA,
+        ..pattern_type = NA,
+        ..pattern_len_min = NA,
+        ..pattern_len_max = NA,
+        ..pattern_gap_min = NA,
+        ..pattern_gap_max = NA,
+        ..pattern_min_support = NA,
+        ..pattern_min_count = NA,
+        ..pattern_starts_with_use = NA,
+        ..pattern_starts_with = NA,
+        ..pattern_ends_with_use = NA,
+        ..pattern_ends_with = NA,
+        ..pattern_contains_use = NA,
+        ..pattern_contains = NA,
+        ..pattern_table_max_rows = NA,
+        ..pattern_table_show_all = NA,
         ..indices_show_table = NA,
         ..indices_favorable = NA,
         ..indices_omega = NA,
@@ -1093,6 +1239,8 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         compareSequences_plot = function() private$.items[["compareSequences_plot"]],
         compareSequencesTable = function() private$.items[["compareSequencesTable"]],
         sequences_plot = function() private$.items[["sequences_plot"]],
+        patternTitle = function() private$.items[["patternTitle"]],
+        patternTable = function() private$.items[["patternTable"]],
         indicesTitle = function() private$.items[["indicesTitle"]],
         indicesTable = function() private$.items[["indicesTable"]]),
     private = list(),
@@ -1767,6 +1915,77 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "sequences_tick")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
+                name="patternTitle",
+                title="Pattern Discovery",
+                visible=FALSE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="patternTable",
+                title="Discovered Patterns",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="pattern", 
+                        `title`="Pattern", 
+                        `type`="text"),
+                    list(
+                        `name`="length", 
+                        `title`="Length", 
+                        `type`="integer"),
+                    list(
+                        `name`="count", 
+                        `title`="Count", 
+                        `type`="integer"),
+                    list(
+                        `name`="frequency", 
+                        `title`="Frequency", 
+                        `type`="number"),
+                    list(
+                        `name`="proportion", 
+                        `title`="Proportion", 
+                        `type`="number"),
+                    list(
+                        `name`="support", 
+                        `title`="Support", 
+                        `type`="number"),
+                    list(
+                        `name`="lift", 
+                        `title`="Lift", 
+                        `type`="number"),
+                    list(
+                        `name`="chisq", 
+                        `title`="\u03C7\u00B2", 
+                        `type`="number"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue")),
+                clearWith=list(
+                    "buildModel_variables_long_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_long_order",
+                    "buildModel_variables_long_group",
+                    "buildModel_type",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "buildModel_lambda",
+                    "pattern_type",
+                    "pattern_len_min",
+                    "pattern_len_max",
+                    "pattern_gap_min",
+                    "pattern_gap_max",
+                    "pattern_min_support",
+                    "pattern_min_count",
+                    "pattern_starts_with_use",
+                    "pattern_starts_with",
+                    "pattern_ends_with_use",
+                    "pattern_ends_with",
+                    "pattern_contains_use",
+                    "pattern_contains")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
                 name="indicesTitle",
                 title="Sequence Indices",
                 visible=FALSE))
@@ -1793,6 +2012,10 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Valid N", 
                         `type`="integer"),
                     list(
+                        `name`="valid_proportion", 
+                        `title`="Valid %", 
+                        `type`="number"),
+                    list(
                         `name`="unique_states", 
                         `title`="Unique", 
                         `type`="integer"),
@@ -1809,12 +2032,36 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Mean Spell", 
                         `type`="number"),
                     list(
+                        `name`="max_spell_duration", 
+                        `title`="Max Spell", 
+                        `type`="number"),
+                    list(
                         `name`="self_loop_tendency", 
                         `title`="Self-Loop", 
                         `type`="number"),
                     list(
                         `name`="transition_rate", 
                         `title`="Trans Rate", 
+                        `type`="number"),
+                    list(
+                        `name`="transition_complexity", 
+                        `title`="Trans Cplx", 
+                        `type`="number"),
+                    list(
+                        `name`="cyclic_feedback_strength", 
+                        `title`="Feedback", 
+                        `type`="number"),
+                    list(
+                        `name`="initial_state_persistence", 
+                        `title`="Init Persist", 
+                        `type`="number"),
+                    list(
+                        `name`="initial_state_proportion", 
+                        `title`="Init %", 
+                        `type`="number"),
+                    list(
+                        `name`="initial_state_influence_decay", 
+                        `title`="Init Decay", 
                         `type`="number"),
                     list(
                         `name`="first_state", 
@@ -1828,6 +2075,26 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="dominant_state", 
                         `title`="Dominant", 
                         `type`="text"),
+                    list(
+                        `name`="dominant_proportion", 
+                        `title`="Dom %", 
+                        `type`="number"),
+                    list(
+                        `name`="dominant_max_spell", 
+                        `title`="Dom Max", 
+                        `type`="integer"),
+                    list(
+                        `name`="emergent_state", 
+                        `title`="Emergent", 
+                        `type`="text"),
+                    list(
+                        `name`="emergent_state_persistence", 
+                        `title`="Em Persist", 
+                        `type`="number"),
+                    list(
+                        `name`="emergent_state_proportion", 
+                        `title`="Em %", 
+                        `type`="number"),
                     list(
                         `name`="complexity_index", 
                         `title`="Complexity", 
@@ -1976,6 +2243,22 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param compare_network_diff_plot_node_size .
 #' @param compare_network_diff_plot_node_label_size .
 #' @param compare_network_diff_plot_layout .
+#' @param pattern_show_table .
+#' @param pattern_type .
+#' @param pattern_len_min .
+#' @param pattern_len_max .
+#' @param pattern_gap_min .
+#' @param pattern_gap_max .
+#' @param pattern_min_support .
+#' @param pattern_min_count .
+#' @param pattern_starts_with_use .
+#' @param pattern_starts_with .
+#' @param pattern_ends_with_use .
+#' @param pattern_ends_with .
+#' @param pattern_contains_use .
+#' @param pattern_contains .
+#' @param pattern_table_max_rows .
+#' @param pattern_table_show_all .
 #' @param indices_show_table .
 #' @param indices_favorable State considered favorable for computing
 #'   integrative potential.
@@ -2020,6 +2303,8 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$compareSequences_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$compareSequencesTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$sequences_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$patternTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$patternTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$indicesTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$indicesTable} \tab \tab \tab \tab \tab a table \cr
 #' }
@@ -2132,6 +2417,22 @@ GroupTNA <- function(
     compare_network_diff_plot_node_size = 8,
     compare_network_diff_plot_node_label_size = 1,
     compare_network_diff_plot_layout = "circle",
+    pattern_show_table = FALSE,
+    pattern_type = "ngram",
+    pattern_len_min = 2,
+    pattern_len_max = 5,
+    pattern_gap_min = 1,
+    pattern_gap_max = 3,
+    pattern_min_support = 0.01,
+    pattern_min_count = 2,
+    pattern_starts_with_use = FALSE,
+    pattern_starts_with,
+    pattern_ends_with_use = FALSE,
+    pattern_ends_with,
+    pattern_contains_use = FALSE,
+    pattern_contains,
+    pattern_table_max_rows = 20,
+    pattern_table_show_all = FALSE,
     indices_show_table = FALSE,
     indices_favorable,
     indices_omega = 1,
@@ -2256,6 +2557,22 @@ GroupTNA <- function(
         compare_network_diff_plot_node_size = compare_network_diff_plot_node_size,
         compare_network_diff_plot_node_label_size = compare_network_diff_plot_node_label_size,
         compare_network_diff_plot_layout = compare_network_diff_plot_layout,
+        pattern_show_table = pattern_show_table,
+        pattern_type = pattern_type,
+        pattern_len_min = pattern_len_min,
+        pattern_len_max = pattern_len_max,
+        pattern_gap_min = pattern_gap_min,
+        pattern_gap_max = pattern_gap_max,
+        pattern_min_support = pattern_min_support,
+        pattern_min_count = pattern_min_count,
+        pattern_starts_with_use = pattern_starts_with_use,
+        pattern_starts_with = pattern_starts_with,
+        pattern_ends_with_use = pattern_ends_with_use,
+        pattern_ends_with = pattern_ends_with,
+        pattern_contains_use = pattern_contains_use,
+        pattern_contains = pattern_contains,
+        pattern_table_max_rows = pattern_table_max_rows,
+        pattern_table_show_all = pattern_table_show_all,
         indices_show_table = indices_show_table,
         indices_favorable = indices_favorable,
         indices_omega = indices_omega,

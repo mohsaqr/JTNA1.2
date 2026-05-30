@@ -1,7 +1,7 @@
 Package: JTNA
 Type: Package
 Title: Transition Network Analysis
-Version: 1.7.1
+Version: 1.8.0
 Author:
   -  Dylan Girault [cre]
   -  Mohammed Saqr [aut]
@@ -25,8 +25,11 @@ RoxygenNote: 7.3.2
 Imports:
     jmvcore (>= 0.8.5),
     R6,
-    ggplot2
+    ggplot2,
+    cograph,
+    codyna,
+    tna
 Remotes:
     sonsoleslp/cograph,
     sonsoleslp/tna@main,
-    santikka/codyna
+    santikka/codyna@dev

@@ -666,15 +666,27 @@ children:
           - type: Label
             label: Filters (optional)
             children:
-              - type: TextBox
+              - type: CheckBox
+                name: pattern_starts_with_use
+                label: Starts with
+              - type: LevelSelector
                 name: pattern_starts_with
-                format: string
-              - type: TextBox
+                variable: (buildModel_variables_long_action)
+                enable: (pattern_starts_with_use)
+              - type: CheckBox
+                name: pattern_ends_with_use
+                label: Ends with
+              - type: LevelSelector
                 name: pattern_ends_with
-                format: string
-              - type: TextBox
+                variable: (buildModel_variables_long_action)
+                enable: (pattern_ends_with_use)
+              - type: CheckBox
+                name: pattern_contains_use
+                label: Contains
+              - type: LevelSelector
                 name: pattern_contains
-                format: string
+                variable: (buildModel_variables_long_action)
+                enable: (pattern_contains_use)
           - type: Label
             label: Table Options
             children:

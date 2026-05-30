@@ -783,20 +783,35 @@ options:
       min: 1
       max: 1000
 
+    - name: pattern_starts_with_use
+      title: Use 'starts with' filter
+      type: Bool
+      default: false
+
     - name: pattern_starts_with
       title: Starts with
-      type: String
-      default: ""
+      type: Level
+      variable: (buildModel_variables_long_action)
+
+    - name: pattern_ends_with_use
+      title: Use 'ends with' filter
+      type: Bool
+      default: false
 
     - name: pattern_ends_with
       title: Ends with
-      type: String
-      default: ""
+      type: Level
+      variable: (buildModel_variables_long_action)
+
+    - name: pattern_contains_use
+      title: Use 'contains' filter
+      type: Bool
+      default: false
 
     - name: pattern_contains
       title: Contains
-      type: String
-      default: ""
+      type: Level
+      variable: (buildModel_variables_long_action)
 
     - name: pattern_table_max_rows
       title: Max rows

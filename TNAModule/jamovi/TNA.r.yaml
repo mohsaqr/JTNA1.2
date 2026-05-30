@@ -597,11 +597,17 @@ items:
         - name: count
           title: Count
           type: integer
+        - name: frequency
+          title: Frequency
+          type: number
         - name: proportion
           title: Proportion
           type: number
         - name: support
           title: Support
+          type: number
+        - name: lift
+          title: Lift
           type: number
       clearWith:
         - buildModel_variables_long_actor
@@ -620,8 +626,11 @@ items:
         - pattern_gap_max
         - pattern_min_support
         - pattern_min_count
+        - pattern_starts_with_use
         - pattern_starts_with
+        - pattern_ends_with_use
         - pattern_ends_with
+        - pattern_contains_use
         - pattern_contains
 
     ### SEQUENCE INDICES
@@ -645,6 +654,9 @@ items:
         - name: valid_n
           title: Valid N
           type: integer
+        - name: valid_proportion
+          title: Valid %
+          type: number
         - name: unique_states
           title: Unique
           type: integer
@@ -657,11 +669,29 @@ items:
         - name: mean_spell_duration
           title: Mean Spell
           type: number
+        - name: max_spell_duration
+          title: Max Spell
+          type: number
         - name: self_loop_tendency
           title: Self-Loop
           type: number
         - name: transition_rate
           title: Trans Rate
+          type: number
+        - name: transition_complexity
+          title: Trans Cplx
+          type: number
+        - name: cyclic_feedback_strength
+          title: Feedback
+          type: number
+        - name: initial_state_persistence
+          title: Init Persist
+          type: number
+        - name: initial_state_proportion
+          title: Init %
+          type: number
+        - name: initial_state_influence_decay
+          title: Init Decay
           type: number
         - name: first_state
           title: First
@@ -672,6 +702,21 @@ items:
         - name: dominant_state
           title: Dominant
           type: text
+        - name: dominant_proportion
+          title: Dom %
+          type: number
+        - name: dominant_max_spell
+          title: Dom Max
+          type: integer
+        - name: emergent_state
+          title: Emergent
+          type: text
+        - name: emergent_state_persistence
+          title: Em Persist
+          type: number
+        - name: emergent_state_proportion
+          title: Em %
+          type: number
         - name: complexity_index
           title: Complexity
           type: number

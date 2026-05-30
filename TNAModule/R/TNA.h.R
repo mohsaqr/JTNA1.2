@@ -100,9 +100,12 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             pattern_gap_max = 3,
             pattern_min_support = 0.01,
             pattern_min_count = 2,
-            pattern_starts_with = "",
-            pattern_ends_with = "",
-            pattern_contains = "",
+            pattern_starts_with_use = FALSE,
+            pattern_starts_with = NULL,
+            pattern_ends_with_use = FALSE,
+            pattern_ends_with = NULL,
+            pattern_contains_use = FALSE,
+            pattern_contains = NULL,
             pattern_table_max_rows = 20,
             pattern_table_show_all = FALSE,
             indices_show_table = FALSE,
@@ -679,18 +682,30 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=2,
                 min=1,
                 max=1000)
-            private$..pattern_starts_with <- jmvcore::OptionString$new(
+            private$..pattern_starts_with_use <- jmvcore::OptionBool$new(
+                "pattern_starts_with_use",
+                pattern_starts_with_use,
+                default=FALSE)
+            private$..pattern_starts_with <- jmvcore::OptionLevel$new(
                 "pattern_starts_with",
                 pattern_starts_with,
-                default="")
-            private$..pattern_ends_with <- jmvcore::OptionString$new(
+                variable="(buildModel_variables_long_action)")
+            private$..pattern_ends_with_use <- jmvcore::OptionBool$new(
+                "pattern_ends_with_use",
+                pattern_ends_with_use,
+                default=FALSE)
+            private$..pattern_ends_with <- jmvcore::OptionLevel$new(
                 "pattern_ends_with",
                 pattern_ends_with,
-                default="")
-            private$..pattern_contains <- jmvcore::OptionString$new(
+                variable="(buildModel_variables_long_action)")
+            private$..pattern_contains_use <- jmvcore::OptionBool$new(
+                "pattern_contains_use",
+                pattern_contains_use,
+                default=FALSE)
+            private$..pattern_contains <- jmvcore::OptionLevel$new(
                 "pattern_contains",
                 pattern_contains,
-                default="")
+                variable="(buildModel_variables_long_action)")
             private$..pattern_table_max_rows <- jmvcore::OptionInteger$new(
                 "pattern_table_max_rows",
                 pattern_table_max_rows,
@@ -820,8 +835,11 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..pattern_gap_max)
             self$.addOption(private$..pattern_min_support)
             self$.addOption(private$..pattern_min_count)
+            self$.addOption(private$..pattern_starts_with_use)
             self$.addOption(private$..pattern_starts_with)
+            self$.addOption(private$..pattern_ends_with_use)
             self$.addOption(private$..pattern_ends_with)
+            self$.addOption(private$..pattern_contains_use)
             self$.addOption(private$..pattern_contains)
             self$.addOption(private$..pattern_table_max_rows)
             self$.addOption(private$..pattern_table_show_all)
@@ -926,8 +944,11 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         pattern_gap_max = function() private$..pattern_gap_max$value,
         pattern_min_support = function() private$..pattern_min_support$value,
         pattern_min_count = function() private$..pattern_min_count$value,
+        pattern_starts_with_use = function() private$..pattern_starts_with_use$value,
         pattern_starts_with = function() private$..pattern_starts_with$value,
+        pattern_ends_with_use = function() private$..pattern_ends_with_use$value,
         pattern_ends_with = function() private$..pattern_ends_with$value,
+        pattern_contains_use = function() private$..pattern_contains_use$value,
         pattern_contains = function() private$..pattern_contains$value,
         pattern_table_max_rows = function() private$..pattern_table_max_rows$value,
         pattern_table_show_all = function() private$..pattern_table_show_all$value,
@@ -1031,8 +1052,11 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..pattern_gap_max = NA,
         ..pattern_min_support = NA,
         ..pattern_min_count = NA,
+        ..pattern_starts_with_use = NA,
         ..pattern_starts_with = NA,
+        ..pattern_ends_with_use = NA,
         ..pattern_ends_with = NA,
+        ..pattern_contains_use = NA,
         ..pattern_contains = NA,
         ..pattern_table_max_rows = NA,
         ..pattern_table_show_all = NA,
@@ -1683,12 +1707,20 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Count", 
                         `type`="integer"),
                     list(
+                        `name`="frequency", 
+                        `title`="Frequency", 
+                        `type`="number"),
+                    list(
                         `name`="proportion", 
                         `title`="Proportion", 
                         `type`="number"),
                     list(
                         `name`="support", 
                         `title`="Support", 
+                        `type`="number"),
+                    list(
+                        `name`="lift", 
+                        `title`="Lift", 
                         `type`="number")),
                 clearWith=list(
                     "buildModel_variables_long_actor",
@@ -1707,8 +1739,11 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "pattern_gap_max",
                     "pattern_min_support",
                     "pattern_min_count",
+                    "pattern_starts_with_use",
                     "pattern_starts_with",
+                    "pattern_ends_with_use",
                     "pattern_ends_with",
+                    "pattern_contains_use",
                     "pattern_contains")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -1734,6 +1769,10 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Valid N", 
                         `type`="integer"),
                     list(
+                        `name`="valid_proportion", 
+                        `title`="Valid %", 
+                        `type`="number"),
+                    list(
                         `name`="unique_states", 
                         `title`="Unique", 
                         `type`="integer"),
@@ -1750,12 +1789,36 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Mean Spell", 
                         `type`="number"),
                     list(
+                        `name`="max_spell_duration", 
+                        `title`="Max Spell", 
+                        `type`="number"),
+                    list(
                         `name`="self_loop_tendency", 
                         `title`="Self-Loop", 
                         `type`="number"),
                     list(
                         `name`="transition_rate", 
                         `title`="Trans Rate", 
+                        `type`="number"),
+                    list(
+                        `name`="transition_complexity", 
+                        `title`="Trans Cplx", 
+                        `type`="number"),
+                    list(
+                        `name`="cyclic_feedback_strength", 
+                        `title`="Feedback", 
+                        `type`="number"),
+                    list(
+                        `name`="initial_state_persistence", 
+                        `title`="Init Persist", 
+                        `type`="number"),
+                    list(
+                        `name`="initial_state_proportion", 
+                        `title`="Init %", 
+                        `type`="number"),
+                    list(
+                        `name`="initial_state_influence_decay", 
+                        `title`="Init Decay", 
                         `type`="number"),
                     list(
                         `name`="first_state", 
@@ -1769,6 +1832,26 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="dominant_state", 
                         `title`="Dominant", 
                         `type`="text"),
+                    list(
+                        `name`="dominant_proportion", 
+                        `title`="Dom %", 
+                        `type`="number"),
+                    list(
+                        `name`="dominant_max_spell", 
+                        `title`="Dom Max", 
+                        `type`="integer"),
+                    list(
+                        `name`="emergent_state", 
+                        `title`="Emergent", 
+                        `type`="text"),
+                    list(
+                        `name`="emergent_state_persistence", 
+                        `title`="Em Persist", 
+                        `type`="number"),
+                    list(
+                        `name`="emergent_state_proportion", 
+                        `title`="Em %", 
+                        `type`="number"),
                     list(
                         `name`="complexity_index", 
                         `title`="Complexity", 
@@ -1911,8 +1994,11 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param pattern_gap_max .
 #' @param pattern_min_support .
 #' @param pattern_min_count .
+#' @param pattern_starts_with_use .
 #' @param pattern_starts_with .
+#' @param pattern_ends_with_use .
 #' @param pattern_ends_with .
+#' @param pattern_contains_use .
 #' @param pattern_contains .
 #' @param pattern_table_max_rows .
 #' @param pattern_table_show_all .
@@ -2064,9 +2150,12 @@ TNA <- function(
     pattern_gap_max = 3,
     pattern_min_support = 0.01,
     pattern_min_count = 2,
-    pattern_starts_with = "",
-    pattern_ends_with = "",
-    pattern_contains = "",
+    pattern_starts_with_use = FALSE,
+    pattern_starts_with,
+    pattern_ends_with_use = FALSE,
+    pattern_ends_with,
+    pattern_contains_use = FALSE,
+    pattern_contains,
     pattern_table_max_rows = 20,
     pattern_table_show_all = FALSE,
     indices_show_table = FALSE,
@@ -2186,8 +2275,11 @@ TNA <- function(
         pattern_gap_max = pattern_gap_max,
         pattern_min_support = pattern_min_support,
         pattern_min_count = pattern_min_count,
+        pattern_starts_with_use = pattern_starts_with_use,
         pattern_starts_with = pattern_starts_with,
+        pattern_ends_with_use = pattern_ends_with_use,
         pattern_ends_with = pattern_ends_with,
+        pattern_contains_use = pattern_contains_use,
         pattern_contains = pattern_contains,
         pattern_table_max_rows = pattern_table_max_rows,
         pattern_table_show_all = pattern_table_show_all,

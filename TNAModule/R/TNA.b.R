@@ -65,7 +65,17 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         copyData[[self$options$buildModel_variables_long_actor]] <- as.character(copyData[[self$options$buildModel_variables_long_actor]])
                     }
                     if(!is.null(self$options$buildModel_variables_long_order)) {
-                        copyData[[self$options$buildModel_variables_long_order]] <- as.character(copyData[[self$options$buildModel_variables_long_order]])
+                        # Order is a sequence position: keep it numeric so
+                        # prepare_data sorts events numerically. Converting to
+                        # character makes prepare_data sort lexicographically
+                        # ("10" < "2"), scrambling any sequence longer than 9
+                        # events. Only coerce to numeric when fully numeric;
+                        # otherwise leave the original column untouched.
+                        ord_col <- self$options$buildModel_variables_long_order
+                        ord_num <- suppressWarnings(as.numeric(as.character(copyData[[ord_col]])))
+                        if(!anyNA(ord_num)) {
+                            copyData[[ord_col]] <- ord_num
+                        }
                     }
 
                     
@@ -106,7 +116,27 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             scaling = character(0L)
                         }
 
-                        if(type == "attention") {
+                        # Attention models scale ~O(L^2) with sequence length. A
+                        # missing Time column (or a coarse grouping variable used
+                        # as Actor) collapses the data into a few very long
+                        # sequences and the build can take minutes. Guard with an
+                        # instant, actionable message instead of hanging.
+                        attention_seq_limit <- 2000
+                        max_seq_len <- if(inherits(dataForTNA, "tna_data") &&
+                                          !is.null(dataForTNA$sequence_data))
+                            ncol(dataForTNA$sequence_data) else NA_integer_
+
+                        if(type == "attention" && !is.na(max_seq_len) &&
+                           max_seq_len > attention_seq_limit) {
+                            self$results$errorText$setContent(sprintf(
+                              paste0("Attention models scale quadratically with sequence length, ",
+                                     "and your longest sequence has %d events — building this ",
+                                     "would take a very long time. Add a Time column to split the ",
+                                     "data into sessions, use a finer Actor variable, or switch ",
+                                     "Type to Relative or Frequency."), max_seq_len))
+                            self$results$errorText$setVisible(TRUE)
+                            model <- NULL
+                        } else if(type == "attention") {
                             lambda <- self$options$buildModel_lambda
                             model <- tna::build_model(x=dataForTNA, type=type, scaling=scaling, params=list(lambda=lambda))
                         } else {
@@ -579,13 +609,16 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         min_support = self$options$pattern_min_support,
                         min_freq = self$options$pattern_min_count
                     )
-                    if (!is.null(self$options$pattern_starts_with) &&
+                    if (isTRUE(self$options$pattern_starts_with_use) &&
+                        !is.null(self$options$pattern_starts_with) &&
                         nzchar(self$options$pattern_starts_with))
                         pattern_args$start <- self$options$pattern_starts_with
-                    if (!is.null(self$options$pattern_ends_with) &&
+                    if (isTRUE(self$options$pattern_ends_with_use) &&
+                        !is.null(self$options$pattern_ends_with) &&
                         nzchar(self$options$pattern_ends_with))
                         pattern_args$end <- self$options$pattern_ends_with
-                    if (!is.null(self$options$pattern_contains) &&
+                    if (isTRUE(self$options$pattern_contains_use) &&
+                        !is.null(self$options$pattern_contains) &&
                         nzchar(self$options$pattern_contains))
                         pattern_args$contain <- self$options$pattern_contains
 
@@ -608,8 +641,10 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                 pattern = as.character(patterns$pattern[i]),
                                 length = as.integer(patterns$length[i]),
                                 count = as.integer(patterns$count[i]),
+                                frequency = if(!is.null(patterns$frequency)) patterns$frequency[i] else NA,
                                 proportion = patterns$proportion[i],
-                                support = patterns$support[i]
+                                support = patterns$support[i],
+                                lift = if(!is.null(patterns$lift)) patterns$lift[i] else NA
                             ))
                         }
 
@@ -717,15 +752,27 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                 sequence_id = indices$sequence_id[i],
                                 actor = if(is.na(indices$actor[i])) "" else as.character(indices$actor[i]),
                                 valid_n = as.integer(indices$valid_n[i]),
+                                valid_proportion = round(indices$valid_proportion[i], 3),
                                 unique_states = as.integer(indices$unique_states[i]),
                                 longitudinal_entropy = round(indices$longitudinal_entropy[i], 3),
                                 simpson_diversity = round(indices$simpson_diversity[i], 3),
                                 mean_spell_duration = round(indices$mean_spell_duration[i], 3),
+                                max_spell_duration = round(indices$max_spell_duration[i], 3),
                                 self_loop_tendency = round(indices$self_loop_tendency[i], 3),
                                 transition_rate = round(indices$transition_rate[i], 3),
+                                transition_complexity = round(indices$transition_complexity[i], 3),
+                                cyclic_feedback_strength = round(indices$cyclic_feedback_strength[i], 3),
+                                initial_state_persistence = round(indices$initial_state_persistence[i], 3),
+                                initial_state_proportion = round(indices$initial_state_proportion[i], 3),
+                                initial_state_influence_decay = round(indices$initial_state_influence_decay[i], 3),
                                 first_state = as.character(indices$first_state[i]),
                                 last_state = as.character(indices$last_state[i]),
                                 dominant_state = as.character(indices$dominant_state[i]),
+                                dominant_proportion = round(indices$dominant_proportion[i], 3),
+                                dominant_max_spell = as.integer(indices$dominant_max_spell[i]),
+                                emergent_state = as.character(indices$emergent_state[i]),
+                                emergent_state_persistence = round(indices$emergent_state_persistence[i], 3),
+                                emergent_state_proportion = round(indices$emergent_state_proportion[i], 3),
                                 complexity_index = round(indices$complexity_index[i], 3)
                             ))
                         }
@@ -786,20 +833,31 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         .showBuildModelFrequencies=function(image, ...) {
             plotData <- self$results$buildModelContent$state
-            
+
             if(!is.null(plotData) && self$options$buildModel_show_frequencies)  {
                 tryCatch({
-                    p <- plot_frequencies(x=plotData)
+                    p <- tna::plot_frequencies(x=plotData)
                     if(!is.null(p)) {
                         print(p)
                     }
                 }, error = function(e) {
-                    w <- c(plotData$weights)
-                    brks <- seq(0, max(1, max(w, na.rm = TRUE)) + 0.01, length.out = 20)
-                    hist(x=plotData, breaks=brks, main="Frequencies Plot",
-                         xlab="Edge Weights", ylab="Frequency")
+                    counts <- tryCatch(table(unlist(plotData$data)), error = function(e2) NULL)
+                    if(!is.null(counts) && length(counts) > 0) {
+                        labs <- plotData$labels
+                        if(!is.null(labs) && all(names(counts) %in% as.character(seq_along(labs)))) {
+                            names(counts) <- labs[as.integer(names(counts))]
+                        }
+                        op <- par(mar = c(4, 7, 3, 1)); on.exit(par(op), add = TRUE)
+                        barplot(sort(counts), horiz = TRUE, las = 1,
+                                main = "State frequencies",
+                                xlab = "Frequency", col = "#4a90d9", border = NA)
+                    } else {
+                        plot(1, type = "n", axes = FALSE, xlab = "", ylab = "",
+                             main = "Frequencies plot unavailable",
+                             sub = paste("tna::plot_frequencies failed:", conditionMessage(e)))
+                    }
                 })
-            }   
+            }
             TRUE
         },
         .showBuildModelMosaic=function(image, ...) {
