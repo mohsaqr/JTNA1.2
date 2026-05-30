@@ -116,24 +116,13 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             scaling = character(0L)
                         }
 
-                        # Attention models scale ~O(L^2) with sequence length. A
-                        # missing Time column (or a coarse grouping variable used
-                        # as Actor) collapses the data into a few very long
-                        # sequences and the build can take minutes. Guard with an
-                        # instant, actionable message instead of hanging.
-                        attention_seq_limit <- 2000
-                        max_seq_len <- if(inherits(dataForTNA, "tna_data") &&
-                                          !is.null(dataForTNA$sequence_data))
-                            ncol(dataForTNA$sequence_data) else NA_integer_
-
-                        if(type == "attention" && !is.na(max_seq_len) &&
-                           max_seq_len > attention_seq_limit) {
-                            self$results$errorText$setContent(sprintf(
-                              paste0("Attention models scale quadratically with sequence length, ",
-                                     "and your longest sequence has %d events — building this ",
-                                     "would take a very long time. Add a Time column to split the ",
-                                     "data into sessions, use a finer Actor variable, or switch ",
-                                     "Type to Relative or Frequency."), max_seq_len))
+                        # Attention models scale ~O(L^2) with sequence length and
+                        # can take a long time on long sequences. Rather than build
+                        # automatically, gate it behind an opt-in checkbox (like the
+                        # clustering "Run" gate) so it only runs when the user asks.
+                        if(type == "attention" && !isTRUE(self$options$buildModel_attention_run)) {
+                            self$results$errorText$setContent(
+                              "Attention models can be slow on long sequences. Check 'Run Attention Model' to build it.")
                             self$results$errorText$setVisible(TRUE)
                             model <- NULL
                         } else if(type == "attention") {

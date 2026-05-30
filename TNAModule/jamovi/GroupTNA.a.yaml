@@ -51,6 +51,11 @@ options:
       min: 0.01
       max: 10
 
+    - name: buildModel_attention_run
+      title: Run Attention Model
+      type: Bool
+      default: false
+
     - name: buildModel_scaling
       title: Scaling 
       type: List

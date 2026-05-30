@@ -41,6 +41,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
 
     - name: buildModel_plot
       type: Image
@@ -58,6 +59,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - buildModel_plot_cut
         - buildModel_plot_min_value
         - buildModel_plot_edge_label_size
@@ -81,6 +83,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
 
     - name: buildModel_frequencies
       type: Image
@@ -98,6 +101,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
 
     - name: buildModel_mosaic
       type: Image
@@ -115,6 +119,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - buildModel_digits
 
 
@@ -137,6 +142,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - centrality_loops
         - centrality_normalize
         - centrality_Betweenness
@@ -166,6 +172,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - centrality_loops
         - centrality_normalize
         - centrality_Betweenness
@@ -194,6 +201,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - centrality_loops
         - centrality_normalize
         - centrality_Betweenness
@@ -229,6 +237,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - community_methods
         - community_gamma
 
@@ -248,6 +257,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - community_methods
         - community_gamma
         - community_plot_layout
@@ -273,6 +283,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - community_methods
         - community_gamma
 
@@ -297,6 +308,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - cliques_size
         - cliques_threshold
         - cliques_plot_cut
@@ -365,6 +377,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - bootstrap_iteration
         - bootstrap_level
         - bootstrap_method
@@ -388,6 +401,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - bootstrap_iteration
         - bootstrap_level
         - bootstrap_method
@@ -435,6 +449,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - permutation_iter
         - permutation_paired
         - permutation_level
@@ -456,6 +471,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - permutation_iter
         - permutation_paired
         - permutation_level
@@ -481,6 +497,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - compare_network_diff_plot_cut
         - compare_network_diff_plot_min_value
         - compare_network_diff_plot_edge_label_size
@@ -515,6 +532,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - compare_group_i
         - compare_group_j
         - compare_scaling
@@ -541,6 +559,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - compare_group_i
         - compare_group_j
         - compare_scaling
@@ -569,6 +588,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - compare_group_i
         - compare_group_j
         - compare_scaling
@@ -596,6 +616,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - compare_sequences_sub_min
         - compare_sequences_sub_max
         - compare_sequences_min_freq
@@ -622,6 +643,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - compare_sequences_sub_min
         - compare_sequences_sub_max
         - compare_sequences_min_freq
@@ -646,6 +668,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - sequences_type
         - sequences_scale
         - sequences_geom
@@ -702,6 +725,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - pattern_type
         - pattern_len_min
         - pattern_len_max
@@ -816,6 +840,7 @@ items:
         - buildModel_scaling
         - buildModel_threshold
         - buildModel_lambda
+        - buildModel_attention_run
         - indices_favorable
         - indices_omega
 

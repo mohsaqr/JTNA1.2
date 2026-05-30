@@ -125,22 +125,12 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
               group <- dataForTNA$long_data[!duplicated(dataForTNA$long_data$.session_id),]
 
-              # Attention models scale ~O(L^2) with sequence length; guard against
-              # very long sequences (e.g. no Time column) to avoid a multi-minute
-              # hang. See TNA.b.R for the rationale.
-              attention_seq_limit <- 2000
-              max_seq_len <- if(inherits(dataForTNA, "tna_data") &&
-                                !is.null(dataForTNA$sequence_data))
-                  ncol(dataForTNA$sequence_data) else NA_integer_
-
-              if(type == "attention" && !is.na(max_seq_len) &&
-                 max_seq_len > attention_seq_limit) {
-                  self$results$errorText$setContent(sprintf(
-                    paste0("Attention models scale quadratically with sequence length, ",
-                           "and your longest sequence has %d events — building this would ",
-                           "take a very long time. Add a Time column to split the data into ",
-                           "sessions, use a finer Actor variable, or switch Type to Relative ",
-                           "or Frequency."), max_seq_len))
+              # Attention models scale ~O(L^2) with sequence length and can be
+              # slow; gate the build behind an opt-in checkbox (like the
+              # clustering "Run" gate) instead of building automatically.
+              if(type == "attention" && !isTRUE(self$options$buildModel_attention_run)) {
+                  self$results$errorText$setContent(
+                    "Attention models can be slow on long sequences. Check 'Run Attention Model' to build it.")
                   self$results$errorText$setVisible(TRUE)
                   model <- NULL
               } else if(type == "attention") {
