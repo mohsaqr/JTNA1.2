@@ -1,0 +1,427 @@
+title: Event Data (Clustering)
+name: CNAEventCluster
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Action
+        children:
+          - type: VariablesListBox
+            name: buildModel_variables_long_action
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Actor (Optional)
+        children:
+          - type: VariablesListBox
+            name: buildModel_variables_actor
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Time (Optional)
+        children:
+          - type: VariablesListBox
+            name: buildModel_variables_long_time
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Order (Optional)
+        children:
+          - type: VariablesListBox
+            name: buildModel_variables_long_order
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Clustering
+        children:
+          - type: CheckBox
+            name: clustering_run
+          - type: TextBox
+            name: clustering_k
+            format: number
+          - type: ComboBox
+            name: clustering_dissimilarity
+          - type: ComboBox
+            name: clustering_method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Scaling
+        children:
+          - type: RadioButton
+            name: buildModel_scaling_noScaling
+            optionName: buildModel_scaling
+            optionPart: noScaling
+          - type: RadioButton
+            name: buildModel_scaling_minmax
+            optionName: buildModel_scaling
+            optionPart: minmax
+          - type: RadioButton
+            name: buildModel_scaling_max
+            optionName: buildModel_scaling
+            optionPart: max
+          - type: RadioButton
+            name: buildModel_scaling_rank
+            optionName: buildModel_scaling
+            optionPart: rank
+      - type: CheckBox
+        name: buildModel_show_matrix
+      - type: TextBox
+        name: buildModel_threshold
+        format: number
+  - type: Label
+    label: Network Analysis
+    children: []
+  - type: CollapseBox
+    label: Visualization Settings
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: buildModel_show_plot
+          - type: CheckBox
+            name: buildModel_show_histo
+          - type: CheckBox
+            name: buildModel_show_frequencies
+          - type: CheckBox
+            name: buildModel_show_mosaic
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: buildModel_plot_cut
+            format: number
+          - type: TextBox
+            name: buildModel_plot_min_value
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: buildModel_plot_edge_label_size
+            format: number
+          - type: TextBox
+            name: buildModel_plot_node_size
+            format: number
+          - type: TextBox
+            name: buildModel_plot_node_label_size
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: buildModel_plot_layout
+          - type: TextBox
+            name: buildModel_digits
+            format: number
+  - type: CollapseBox
+    label: Centrality Analysis
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: centrality_show_table
+          - type: CheckBox
+            name: centrality_show_plot
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: centrality_OutStrength
+          - type: CheckBox
+            name: centrality_InStrength
+          - type: CheckBox
+            name: centrality_ClosenessIn
+          - type: CheckBox
+            name: centrality_ClosenessOut
+          - type: CheckBox
+            name: centrality_Closeness
+          - type: CheckBox
+            name: centrality_Betweenness
+          - type: CheckBox
+            name: centrality_BetweennessRSP
+          - type: CheckBox
+            name: centrality_Diffusion
+          - type: CheckBox
+            name: centrality_Clustering
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: centrality_loops
+          - type: CheckBox
+            name: centrality_normalize
+  - type: CollapseBox
+    label: Community Detection
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: community_show_table
+          - type: CheckBox
+            name: community_show_plot
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Method
+            children:
+              - type: RadioButton
+                name: community_methods_spinglass
+                optionName: community_methods
+                optionPart: spinglass
+              - type: RadioButton
+                name: community_methods_walktrap
+                optionName: community_methods
+                optionPart: walktrap
+              - type: RadioButton
+                name: community_methods_fast_greedy
+                optionName: community_methods
+                optionPart: fast_greedy
+              - type: RadioButton
+                name: community_methods_label_prop
+                optionName: community_methods
+                optionPart: label_prop
+              - type: RadioButton
+                name: community_methods_infomap
+                optionName: community_methods
+                optionPart: infomap
+              - type: RadioButton
+                name: community_methods_edge_betweenness
+                optionName: community_methods
+                optionPart: edge_betweenness
+              - type: RadioButton
+                name: community_methods_leading_eigen
+                optionName: community_methods
+                optionPart: leading_eigen
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: community_gamma
+            format: number
+  - type: CollapseBox
+    label: Clique Analysis
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: cliques_show_text
+          - type: CheckBox
+            name: cliques_show_plot
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: cliques_size
+            format: number
+          - type: TextBox
+            name: cliques_threshold
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: cliques_plot_cut
+            format: number
+          - type: TextBox
+            name: cliques_plot_min_value
+            format: number
+          - type: TextBox
+            name: cliques_plot_edge_label_size
+            format: number
+          - type: TextBox
+            name: cliques_plot_node_size
+            format: number
+          - type: TextBox
+            name: cliques_plot_node_label_size
+            format: number
+          - type: ComboBox
+            name: cliques_plot_layout
+  - type: Label
+    label: Confirmatory Testing
+    children: []
+  - type: CollapseBox
+    label: Bootstrap Analysis
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: bootstrap_show_table
+          - type: CheckBox
+            name: bootstrap_show_plot
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: bootstrap_iteration
+            format: number
+          - type: TextBox
+            name: bootstrap_level
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Method
+            children:
+              - type: RadioButton
+                name: bootstrap_method_stability
+                optionName: bootstrap_method
+                optionPart: stability
+              - type: RadioButton
+                name: bootstrap_method_threshold
+                optionName: bootstrap_method
+                optionPart: threshold
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: bootstrap_range_low
+            format: number
+          - type: TextBox
+            name: bootstrap_range_up
+            format: number
+          - type: TextBox
+            name: bootstrap_threshold
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: bootstrap_plot_cut
+            format: number
+          - type: TextBox
+            name: bootstrap_plot_min_value
+            format: number
+          - type: TextBox
+            name: bootstrap_plot_edge_label_size
+            format: number
+          - type: TextBox
+            name: bootstrap_plot_node_size
+            format: number
+          - type: TextBox
+            name: bootstrap_plot_node_label_size
+            format: number
+          - type: ComboBox
+            name: bootstrap_plot_layout
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: bootstrap_table_max_rows
+            format: number
+          - type: CheckBox
+            name: bootstrap_table_show_all
+          - type: CheckBox
+            name: bootstrap_table_significant_only
+  - type: CollapseBox
+    label: Permutation Analysis
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: permutation_show_table
+          - type: CheckBox
+            name: permutation_show_plot
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: permutation_iter
+            format: number
+          - type: TextBox
+            name: permutation_level
+            format: number
+          - type: CheckBox
+            name: permutation_paired
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: permutation_table_max_rows
+            format: number
+          - type: CheckBox
+            name: permutation_table_show_all
+  - type: Label
+    label: Comparisons
+    children: []
+  - type: CollapseBox
+    label: Network Difference Plot
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: compare_show_network_diff_plot
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: compare_network_diff_plot_cut
+            format: number
+          - type: TextBox
+            name: compare_network_diff_plot_min_value
+            format: number
+          - type: TextBox
+            name: compare_network_diff_plot_edge_label_size
+            format: number
+          - type: TextBox
+            name: compare_network_diff_plot_node_size
+            format: number
+          - type: TextBox
+            name: compare_network_diff_plot_node_label_size
+            format: number
+          - type: ComboBox
+            name: compare_network_diff_plot_layout
+  - type: CollapseBox
+    label: Compare Cluster Properties
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: compare_cluster_i
+            format: number
+          - type: TextBox
+            name: compare_cluster_j
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: compare_show_summary
+          - type: CheckBox
+            name: compare_show_network
+          - type: CheckBox
+            name: compare_show_plot
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: compare_plot_type
+          - type: ComboBox
+            name: compare_scaling

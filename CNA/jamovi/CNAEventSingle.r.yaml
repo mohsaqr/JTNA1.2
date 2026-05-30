@@ -1,0 +1,522 @@
+---
+name:  CNAEventSingle
+title: Event Data (Single/Group)
+jrs:   '1.1'
+refs:
+  - JTNA
+  - TNA
+  - TNALAK
+items:
+
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: True
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_actor
+        - buildModel_variables_group
+
+    - name: errorText
+      title: Error
+      type: Preformatted
+      visible: False
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_actor
+        - buildModel_variables_group
+
+    - name:  tnaTitle
+      title: Event Data (Single/Group)
+      type:  Preformatted
+      visible: True
+
+    ### BUILD MODEL
+    - name:  buildModelTitle
+      title: Model
+      type:  Preformatted
+      visible: True
+
+    - name:  buildModelContent
+      type:  Preformatted
+      visible: False
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+
+    - name: buildModel_plot
+      type: Image
+      width: 1000
+      height: 800
+      visible: False
+      renderFun: .showBuildModelPlot
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+        - buildModel_plot_cut
+        - buildModel_plot_min_value
+        - buildModel_plot_edge_label_size
+        - buildModel_plot_node_size
+        - buildModel_plot_node_label_size
+        - buildModel_plot_layout
+
+    - name: buildModel_histo
+      type: Image
+      width: 1000
+      height: 800
+      visible: False
+      renderFun: .showBuildModelHisto
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+
+    - name: buildModel_frequencies
+      type: Image
+      width: 1000
+      height: 800
+      visible: False
+      renderFun: .showBuildModelFrequencies
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+
+    - name: buildModel_mosaic
+      type: Image
+      width: 400
+      height: 300
+      visible: False
+      renderFun: .showBuildModelMosaic
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+        - buildModel_digits
+
+    ### CENTRALITY
+
+    - name: centralityTitle
+      title: Centrality
+      type: Preformatted
+      visible: False
+
+    - name: centralityTable
+      title: Centrality Measures
+      type: Table
+      visible: False
+      columns:
+        - name: group
+          title: Group
+          type: text
+        - name: state
+          title: State
+          type: text
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+        - centrality_loops
+        - centrality_normalize
+        - centrality_OutStrength
+        - centrality_InStrength
+        - centrality_ClosenessIn
+        - centrality_ClosenessOut
+        - centrality_Closeness
+        - centrality_Betweenness
+        - centrality_BetweennessRSP
+        - centrality_Diffusion
+        - centrality_Clustering
+
+    - name: centrality_plot
+      type: Image
+      width: 1000
+      height: 800
+      visible: False
+      renderFun: .showCentralityPlot
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+        - centrality_loops
+        - centrality_normalize
+        - centrality_OutStrength
+        - centrality_InStrength
+        - centrality_ClosenessIn
+        - centrality_ClosenessOut
+        - centrality_Closeness
+        - centrality_Betweenness
+        - centrality_BetweennessRSP
+        - centrality_Diffusion
+        - centrality_Clustering
+
+    ### COMMUNITY
+
+    - name: communityTitle
+      title: Community Detection
+      type: Preformatted
+      visible: False
+
+    - name: communityErrorText
+      title: ''
+      type: Preformatted
+      visible: False
+
+    - name: communityContent
+      type: Preformatted
+      visible: False
+
+    - name: communityTable
+      title: Community Assignments
+      type: Table
+      visible: False
+      columns:
+        - name: group
+          title: Group
+          type: text
+        - name: state
+          title: State
+          type: text
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+        - community_methods
+        - community_gamma
+
+    - name: community_plot
+      type: Image
+      width: 1000
+      height: 800
+      visible: False
+      renderFun: .showCommunityPlot
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+        - community_methods
+        - community_gamma
+
+    ### CLIQUES
+
+    - name: cliquesTitle
+      title: Cliques
+      type: Preformatted
+      visible: False
+
+    - name: cliquesContent
+      title: Cliques
+      type: Preformatted
+      visible: False
+
+    - name: cliques_multiple_plot
+      title: Cliques
+      type: Group
+      items:
+        - name: cliques_combined_plot
+          type: Image
+          width: 900
+          height: 700
+          visible: True
+          renderFun: .showCliquesPlot
+      visible: False
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+        - cliques_size
+        - cliques_threshold
+        - cliques_plot_cut
+        - cliques_plot_min_value
+        - cliques_plot_edge_label_size
+        - cliques_plot_node_size
+        - cliques_plot_node_label_size
+        - cliques_plot_layout
+
+    ### BOOTSTRAP
+
+    - name: bootstrapTitle
+      title: Bootstrap
+      type: Preformatted
+      visible: False
+
+    - name: bootstrapTable
+      title: Bootstrap Results
+      type: Table
+      visible: False
+      columns:
+        - name: group
+          title: Group
+          type: text
+        - name: from
+          title: From
+          type: text
+        - name: to
+          title: To
+          type: text
+        - name: weight
+          title: Weight
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: cr_lower
+          title: CR Lower
+          type: number
+        - name: cr_upper
+          title: CR Upper
+          type: number
+        - name: ci_lower
+          title: CI Lower
+          type: number
+        - name: ci_upper
+          title: CI Upper
+          type: number
+        - name: significant
+          title: Significant
+          type: text
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+        - bootstrap_iteration
+        - bootstrap_level
+        - bootstrap_method
+        - bootstrap_range_low
+        - bootstrap_range_up
+        - bootstrap_threshold
+
+    - name: bootstrap_plot
+      type: Image
+      width: 1000
+      height: 800
+      visible: False
+      renderFun: .showBootstrapPlot
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+        - bootstrap_iteration
+        - bootstrap_level
+        - bootstrap_method
+        - bootstrap_range_low
+        - bootstrap_range_up
+        - bootstrap_threshold
+
+    ### PERMUTATION
+
+    - name: permutationTitle
+      title: Permutation Test
+      type: Preformatted
+      visible: False
+
+    - name: permutationTable
+      title: Permutation Test Results
+      type: Table
+      visible: False
+      columns:
+        - name: group_comparison
+          title: Comparison
+          type: text
+        - name: edge_name
+          title: Edge
+          type: text
+        - name: diff_true
+          title: True Difference
+          type: number
+        - name: effect_size
+          title: Effect Size
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+        - permutation_iter
+        - permutation_paired
+        - permutation_level
+
+    - name: permutation_plot
+      type: Image
+      width: 1000
+      height: 1000
+      visible: False
+      renderFun: .showPermutationPlot
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+        - permutation_iter
+        - permutation_paired
+        - permutation_level
+
+    ### COMPARE NETWORK PROPERTIES
+
+    - name: compareInstructions
+      title: ''
+      type: Html
+      visible: False
+
+    - name: compareTitle
+      title: ''
+      type: Preformatted
+      visible: False
+
+    - name: compareSummaryTable
+      title: Summary Metrics
+      type: Table
+      visible: False
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+        - compare_group_i
+        - compare_group_j
+        - compare_scaling
+
+    - name: compareNetworkTable
+      title: Network Properties
+      type: Table
+      visible: False
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: group_i
+          title: Group 1
+          type: number
+        - name: group_j
+          title: Group 2
+          type: number
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+        - compare_group_i
+        - compare_group_j
+        - compare_scaling
+
+    - name: compare_plot
+      type: Image
+      width: 700
+      height: 500
+      visible: False
+      renderFun: .showComparePlot
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+        - compare_group_i
+        - compare_group_j
+        - compare_scaling
+        - compare_plot_type
+
+    ### NETWORK DIFFERENCE PLOT
+
+    - name: compare_network_diff_plot
+      type: Image
+      width: 1000
+      height: 800
+      visible: False
+      renderFun: .showCompareNetworkDiffPlot
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+        - compare_network_diff_plot_cut
+        - compare_network_diff_plot_min_value
+        - compare_network_diff_plot_edge_label_size
+        - compare_network_diff_plot_node_size
+        - compare_network_diff_plot_node_label_size
+        - compare_network_diff_plot_layout
+
+...

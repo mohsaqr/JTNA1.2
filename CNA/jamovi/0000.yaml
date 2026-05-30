@@ -1,0 +1,62 @@
+---
+title: Co-occurrence Network Analysis
+name: CNA
+version: 1.0.0
+jms: '1.0'
+authors:
+  - Dylan Girault
+  - Mohammed Saqr
+  - Santtu Tikka
+  - Sonsoles López-Pernas
+maintainer: Sonsoles López-Pernas <sonsoles.lopez@uef.fi>
+date: '2026-03-02'
+type: R
+description: >-
+  Provides tools for performing Co-occurrence Network Analysis (CNA) supporting
+  long-format and one-hot encoded data, with optional group comparison and
+  automatic clustering. Includes centrality measures, community detection,
+  clique analysis, bootstrap validation, and permutation testing.
+analyses:
+  - title: Event Data (Single/Group)
+    name: CNAEventSingle
+    ns: CNA
+    menuGroup: Co-occurrence Network Analysis
+    menuSubgroup: Event Data
+    menuTitle: Single / Group
+    category: analyses
+  - title: Event Data (Clustering)
+    name: CNAEventCluster
+    ns: CNA
+    menuGroup: Co-occurrence Network Analysis
+    menuSubgroup: Event Data
+    menuTitle: Clustering
+    category: analyses
+  - title: Binary Data (Single/Group)
+    name: CNABinarySingle
+    ns: CNA
+    menuGroup: Co-occurrence Network Analysis
+    menuSubgroup: Binary Data
+    menuTitle: Single / Group
+    category: analyses
+  - title: Binary Data (Clustering)
+    name: CNABinaryCluster
+    ns: CNA
+    menuGroup: Co-occurrence Network Analysis
+    menuSubgroup: Binary Data
+    menuTitle: Clustering
+    category: analyses
+usesNative: true
+minApp: 1.8.0
+datasets:
+  - name: Regulation_long
+    path: Regulation_long.csv
+    description: >-
+      Regulation data in long format. Contains Actor, Achievers, Group, Time,
+      and Action columns. Actions include: cohesion, consensus, discuss,
+      synthesis, and more.
+    tags:
+      - CNA
+      - co-occurrence
+      - long format
+
+...

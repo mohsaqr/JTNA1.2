@@ -1,0 +1,386 @@
+---
+name:  SNA
+title: Social Network Analysis
+menuGroup: JTNA
+version: '1.9.2'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    # Input Variables
+    - name: sna_from
+      title: From (Source)
+      type: Variable
+      description: The column containing the source node of each edge (required).
+
+    - name: sna_to
+      title: To (Target)
+      type: Variable
+      description: The column containing the target node of each edge (required).
+
+    - name: sna_weight
+      title: Weight (Optional)
+      type: Variable
+      description: The column containing edge weights. If not provided, defaults to 1 for unweighted networks.
+
+    - name: sna_group
+      title: Group (Optional)
+      type: Variable
+      description: The column containing group labels. If provided, separate networks will be built and plotted for each group.
+
+    - name: sna_aggregate
+      title: Aggregation Function
+      type: List
+      options:
+        - title: Sum
+          name: sum
+        - title: Mean
+          name: mean
+        - title: Max
+          name: max
+        - title: Min
+          name: min
+      default: sum
+
+    # Display Options
+    - name: sna_show_summary
+      title: Summary Table
+      type: Bool
+      default: True
+
+    - name: sna_show_degree_plot
+      title: Degree Distribution Plot
+      type: Bool
+      default: False
+
+    - name: sna_show_plot
+      title: Plot
+      type: Bool
+      default: True
+
+    # Quick Plot Controls (shown right after Network Plot checkbox)
+    - name: sna_plot_node_size_slider
+      title: Node Size
+      type: Number
+      default: 8
+      min: 1
+      max: 30
+
+    - name: sna_plot_edge_size_slider
+      title: Edge Size
+      type: Number
+      default: 6
+      min: 1
+      max: 30
+
+    - name: sna_plot_show_node_labels
+      title: Show node labels
+      type: Bool
+      default: False
+
+    - name: sna_plot_show_edge_labels
+      title: Show edge labels
+      type: Bool
+      default: False
+
+    # Plot Parameters
+    - name: sna_plot_cut
+      title: Cut value
+      type: Number
+      default: 0.1
+      min: 0
+      max: 1
+
+    - name: sna_plot_min_value
+      title: Minimum value
+      type: Number
+      default: 0.05
+      min: 0
+      max: 1
+
+    - name: sna_plot_edge_label_size
+      title: Edge label size
+      type: Number
+      default: 1
+      min: 0
+      max: 10
+
+    - name: sna_plot_node_size
+      title: Node size
+      type: Number
+      default: 1
+      min: 0
+      max: 2
+
+    - name: sna_plot_node_label_size
+      title: Node label size
+      type: Number
+      default: 1
+      min: 0
+      max: 10
+
+    - name: sna_plot_layout
+      title: Layout
+      type: List
+      options:
+        - title: Circle
+          name: circle
+        - title: Spring
+          name: spring
+        - title: Kamada-Kawai
+          name: layout_with_kk
+        - title: Graphopt
+          name: layout_with_graphopt
+        - title: GEM
+          name: layout_with_gem
+        - title: DRL
+          name: layout_with_drl
+        - title: Star
+          name: layout_as_star
+        - title: Grid
+          name: layout_on_grid
+        - title: Nicely
+          name: layout_nicely
+        - title: Fruchterman-Reingold
+          name: layout_with_fr
+        - title: Davidson-Harel
+          name: layout_with_dh
+        - title: LGL
+          name: layout_with_lgl
+        - title: Sugiyama
+          name: layout_with_sugiyama
+        - title: Random
+          name: layout_randomly
+
+    # Layout Parameters
+    - name: sna_plot_repulsion
+      title: Repulsion
+      type: Number
+      default: 1
+      min: 0.1
+      max: 10
+
+    # Node Appearance
+    - name: sna_plot_vsize
+      title: Node size (vsize)
+      type: Number
+      default: 8
+      min: 1
+      max: 30
+
+    - name: sna_plot_borders
+      title: Show node borders
+      type: Bool
+      default: True
+
+    - name: sna_plot_border_width
+      title: Border width
+      type: Number
+      default: 1
+      min: 0
+      max: 5
+
+    # Edge Appearance
+    - name: sna_plot_asize
+      title: Arrow size
+      type: Number
+      default: 2
+      min: 1
+      max: 15
+
+    - name: sna_plot_curve
+      title: Edge curvature
+      type: Number
+      default: 0
+      min: 0
+      max: 5
+
+    - name: sna_plot_curveAll
+      title: Curve all edges
+      type: Bool
+      default: False
+
+    # Color Settings
+    - name: sna_plot_theme
+      title: Color theme
+      type: List
+      default: colorblind
+      options:
+        - title: Colorblind
+          name: colorblind
+        - title: Classic
+          name: classic
+        - title: Gray
+          name: gray
+        - title: Hollywood
+          name: Hollywood
+        - title: Borkulo
+          name: Borkulo
+        - title: TeamFortress
+          name: TeamFortress
+        - title: Reddit
+          name: Reddit
+        - title: Leuven
+          name: Leuven
+        - title: Fried
+          name: Fried
+
+    - name: sna_plot_edge_color
+      title: Edge color
+      type: List
+      default: default
+      options:
+        - title: Default (theme)
+          name: default
+        - title: Green
+          name: green
+        - title: Blue
+          name: blue
+        - title: Red
+          name: red
+        - title: Orange
+          name: orange
+        - title: Purple
+          name: purple
+        - title: Gray
+          name: gray
+        - title: Black
+          name: black
+
+    # Plot Display
+    - name: sna_plot_details
+      title: Show details (min/max/cut)
+      type: Bool
+      default: False
+
+    - name: sna_plot_width
+      title: Plot width
+      type: Integer
+      default: 600
+      min: 300
+      max: 1200
+
+    - name: sna_plot_height
+      title: Plot height
+      type: Integer
+      default: 600
+      min: 300
+      max: 1200
+
+    # Centrality Options
+    - name: centrality_show_table
+      title: Show Centrality Table
+      type: Bool
+      default: False
+
+    - name: centrality_OutStrength
+      title: Out Strength
+      type: Bool
+      default: True
+
+    - name: centrality_InStrength
+      title: In Strength
+      type: Bool
+      default: True
+
+    - name: centrality_Betweenness
+      title: Betweenness
+      type: Bool
+      default: True
+
+    - name: centrality_BetweennessRSP
+      title: Betweenness RSP
+      type: Bool
+      default: False
+
+    - name: centrality_Closeness
+      title: Closeness
+      type: Bool
+      default: False
+
+    - name: centrality_ClosenessIn
+      title: Closeness In
+      type: Bool
+      default: False
+
+    - name: centrality_ClosenessOut
+      title: Closeness Out
+      type: Bool
+      default: False
+
+    - name: centrality_Diffusion
+      title: Diffusion
+      type: Bool
+      default: False
+
+    - name: centrality_Clustering
+      title: Clustering
+      type: Bool
+      default: False
+
+    # Centrality Parameters
+    - name: centrality_loops
+      title: Include self-loops
+      type: Bool
+      default: False
+
+    - name: centrality_normalize
+      title: Normalize values
+      type: Bool
+      default: False
+
+    # Community Detection Options
+    - name: community_show_table
+      title: Show Community Table
+      type: Bool
+      default: False
+
+    - name: community_walktrap
+      title: Walktrap
+      type: Bool
+      default: True
+
+    - name: community_fast_greedy
+      title: Fast Greedy
+      type: Bool
+      default: True
+
+    - name: community_label_prop
+      title: Label Propagation
+      type: Bool
+      default: False
+
+    - name: community_infomap
+      title: Infomap
+      type: Bool
+      default: False
+
+    - name: community_edge_betweenness
+      title: Edge Betweenness
+      type: Bool
+      default: False
+
+    - name: community_leading_eigen
+      title: Leading Eigenvector
+      type: Bool
+      default: False
+
+    - name: community_spinglass
+      title: Spinglass
+      type: Bool
+      default: False
+
+    # Edge Betweenness Options
+    - name: edge_betweenness_show_table
+      title: Show Edge Betweenness Table
+      type: Bool
+      default: False
+
+    - name: edge_betweenness_directed
+      title: Directed Network
+      type: Bool
+      default: True
+
+...

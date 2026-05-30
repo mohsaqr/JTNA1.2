@@ -1,0 +1,357 @@
+/* ============================================================
+   JTNA Tutorial — typography & layout
+   ============================================================ */
+
+:root {
+  --bg: #ffffff;
+  --bg-subtle: #f7f8fa;
+  --bg-soft: #fbfcfd;
+  --fg: #1f2328;
+  --fg-strong: #0b1018;
+  --muted: #57606a;
+  --accent: #0550ae;
+  --accent-soft: #e6eefc;
+  --border: #d0d7de;
+  --border-muted: #e6e9ee;
+  --code-bg: #f6f8fa;
+  --code-fg: #24292f;
+  --code-border: #e1e4e8;
+  --note-bg: #eef5fb;
+  --note-border: #4a90d9;
+  --important-bg: #fff5e6;
+  --important-border: #d97706;
+  --tip-bg: #edf7ee;
+  --tip-border: #2f9e44;
+  --scope-bg: #fff8dc;
+  --scope-border: #c49c0c;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter",
+               Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--fg);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---- Container & main column ---------------------------------- */
+.main-container {
+  max-width: 880px;
+  padding: 2.25rem 1.5rem 4rem;
+}
+
+/* rmarkdown uses a .container-fluid wrapper — tame width */
+@media (min-width: 992px) {
+  body .main-container { margin-left: auto; margin-right: auto; }
+}
+
+/* ---- Title block ---------------------------------------------- */
+h1.title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 2px solid var(--fg-strong);
+  color: var(--fg-strong);
+}
+h4.author, h4.date { color: var(--muted); font-weight: 400; }
+
+/* ---- Headings ------------------------------------------------- */
+h1, h2, h3, h4, h5 {
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--fg-strong);
+  letter-spacing: -0.015em;
+}
+
+h1 { font-size: 2rem; margin-top: 3rem; }
+h2 {
+  font-size: 1.55rem;
+  margin-top: 2.25rem;
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--border-muted);
+}
+h3 {
+  font-size: 1.22rem;
+  margin-top: 1.75rem;
+  margin-bottom: 0.6rem;
+  color: var(--fg-strong);
+}
+h4 {
+  font-size: 1.05rem;
+  margin-top: 1.3rem;
+  margin-bottom: 0.4rem;
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+p { margin: 0.7rem 0; }
+
+/* ---- Links ---------------------------------------------------- */
+a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 120ms ease, color 120ms ease;
+}
+a:hover, a:focus {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  text-decoration: none;
+}
+
+/* ---- Strong & em --------------------------------------------- */
+strong { color: var(--fg-strong); font-weight: 600; }
+
+/* ---- Inline & block code ------------------------------------- */
+code, kbd, samp, pre, tt {
+  font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo,
+               Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.88em;
+}
+code {
+  background: var(--code-bg);
+  color: var(--code-fg);
+  padding: 0.12em 0.38em;
+  border-radius: 5px;
+  border: 1px solid var(--code-border);
+}
+pre {
+  background: var(--code-bg);
+  color: var(--code-fg);
+  border: 1px solid var(--code-border);
+  border-radius: 8px;
+  padding: 0.95rem 1.1rem;
+  overflow-x: auto;
+  font-size: 0.87em;
+  line-height: 1.55;
+  margin: 1rem 0;
+}
+pre code { background: transparent; border: 0; padding: 0; font-size: inherit; }
+
+/* ---- Tables --------------------------------------------------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.3rem 0;
+  font-size: 0.94em;
+  background: var(--bg);
+}
+thead tr { background: var(--bg-subtle); }
+th {
+  text-align: left;
+  padding: 0.55rem 0.75rem;
+  font-weight: 600;
+  border-bottom: 2px solid var(--border);
+  color: var(--fg-strong);
+}
+td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border-muted);
+  vertical-align: top;
+}
+tbody tr:hover td { background: var(--bg-soft); }
+
+/* rmarkdown's paged tables */
+.pagedtable { font-size: 0.92em; }
+
+/* ---- Blockquote (default) ------------------------------------ */
+blockquote {
+  border-left: 4px solid var(--border);
+  background: var(--bg-subtle);
+  color: var(--muted);
+  margin: 1.2rem 0;
+  padding: 0.75rem 1rem;
+  font-style: normal;
+  font-size: 0.98em;
+  border-radius: 0 6px 6px 0;
+}
+blockquote p:first-child { margin-top: 0; }
+blockquote p:last-child { margin-bottom: 0; }
+blockquote strong { color: var(--fg-strong); }
+
+/* ---- Admonition callouts ------------------------------------- */
+.scope, .note, .important, .tip {
+  border-left: 4px solid;
+  padding: 0.85rem 1.1rem;
+  margin: 1.25rem 0;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.97em;
+}
+.scope p:first-child, .note p:first-child, .important p:first-child, .tip p:first-child { margin-top: 0; }
+.scope p:last-child, .note p:last-child, .important p:last-child, .tip p:last-child { margin-bottom: 0; }
+
+.scope      { background: var(--scope-bg);      border-color: var(--scope-border);      color: #5a4300; }
+.note       { background: var(--note-bg);       border-color: var(--note-border);       color: #0b3b6c; }
+.important  { background: var(--important-bg);  border-color: var(--important-border);  color: #7a3f02; }
+.tip        { background: var(--tip-bg);        border-color: var(--tip-border);        color: #22502c; }
+
+.scope strong, .note strong, .important strong, .tip strong { color: inherit; }
+
+/* ---- Horizontal rule ----------------------------------------- */
+hr {
+  border: 0;
+  border-top: 1px solid var(--border-muted);
+  margin: 2.5rem 0;
+}
+
+/* ---- Collapsible sections (wrapped via JS) ------------------- */
+details.section-collapse {
+  margin: 0;
+  padding: 0;
+}
+details.section-collapse > summary {
+  list-style: none;
+  cursor: pointer;
+  position: relative;
+  outline: none;
+  padding: 0;
+}
+details.section-collapse > summary::-webkit-details-marker { display: none; }
+
+/* The rotating chevron lives in the summary padding */
+details.section-collapse > summary::before {
+  content: "";
+  position: absolute;
+  left: -1.2rem;
+  top: 2.85rem;                     /* aligns roughly with h2 baseline */
+  width: 0;
+  height: 0;
+  border-left: 6px solid var(--muted);
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  transform-origin: 2px 50%;
+  transform: rotate(0deg);
+  transition: transform 160ms ease;
+  opacity: 0.7;
+}
+details.section-collapse[open] > summary::before {
+  transform: rotate(90deg);
+}
+details.section-collapse > summary:hover::before { opacity: 1; }
+details.section-collapse > summary h2 {
+  margin-top: 2.25rem;
+  margin-bottom: 0.9rem;
+}
+details.section-collapse > summary:hover h2 { color: var(--accent); }
+
+/* keep first section with less top margin */
+details.section-collapse:first-of-type > summary h2 { margin-top: 1.5rem; }
+
+/* ---- Floating "Expand / Collapse all" pill ------------------- */
+.collapse-toggle {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 999;
+  display: flex;
+  gap: 0;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(15, 20, 30, 0.08);
+  font-size: 0.82rem;
+  overflow: hidden;
+}
+.collapse-toggle button {
+  background: transparent;
+  border: 0;
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: inherit;
+  transition: background 120ms ease, color 120ms ease;
+}
+.collapse-toggle button:hover { background: var(--accent-soft); color: var(--accent); }
+.collapse-toggle button + button { border-left: 1px solid var(--border); }
+
+/* ---- TOC (rmarkdown's tocify) -------------------------------- */
+#TOC, .tocify {
+  font-size: 0.9em;
+  border: 0 !important;
+  border-radius: 8px;
+  background: var(--bg-soft);
+}
+.tocify .tocify-header { border: 0; }
+.tocify ul, .tocify li { list-style: none; }
+.tocify .list-group-item {
+  background: transparent;
+  border: 0;
+  padding: 0.3rem 0.9rem;
+  color: var(--muted);
+  font-size: 0.92em;
+}
+.tocify .list-group-item.active,
+.tocify .list-group-item.active:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 0;
+  border-left: 3px solid var(--accent);
+  padding-left: calc(0.9rem - 3px);
+  font-weight: 500;
+}
+.tocify .list-group-item:hover { background: var(--bg-subtle); color: var(--fg-strong); }
+.tocify-subheader .list-group-item { padding-left: 1.5rem; }
+.tocify-subheader .tocify-subheader .list-group-item { padding-left: 2.25rem; }
+
+/* ---- Code fence line numbers ---------------------------------- */
+pre.numberSource code > span { left: -3em; }
+pre.numberSource code > span > a:first-child::before {
+  color: var(--muted);
+  border: 0;
+}
+
+/* ---- Screenshot placeholders ---------------------------------- */
+p > code:only-child,
+p:has(> code:only-child):first-letter { /* noop */ }
+
+/* target the [SCREENSHOT n.n — ...] placeholders styled as emph backticks */
+p:has(> code:first-child:last-child) {
+  /* fallback — leave default */
+}
+
+/* explicit placeholder styling: any paragraph matching the pattern
+   we wrap via JS gets a .screenshot-slot class */
+.screenshot-slot {
+  background: #fafbfc;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 1.25rem 1rem;
+  color: var(--muted);
+  text-align: center;
+  font-size: 0.9em;
+  font-style: italic;
+  margin: 1rem 0;
+}
+.screenshot-slot::before {
+  content: "📷 ";
+  margin-right: 0.25rem;
+}
+
+/* ---- Small adjustments ---------------------------------------- */
+ul, ol { padding-left: 1.35rem; }
+li { margin: 0.2rem 0; }
+li > p { margin: 0.2rem 0; }
+
+/* Subtle selection color */
+::selection { background: var(--accent-soft); color: var(--fg-strong); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .main-container { padding: 1.5rem 1rem; }
+  h1.title { font-size: 1.8rem; }
+  h2 { font-size: 1.35rem; }
+  details.section-collapse > summary::before { left: -0.9rem; top: 2.35rem; }
+  .collapse-toggle { right: 0.75rem; bottom: 0.75rem; }
+}

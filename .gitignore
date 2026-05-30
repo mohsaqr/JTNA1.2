@@ -4,6 +4,7 @@
 *.tar.gz
 TNAModule/build/
 TNAModule/build*/
+CNA/build/
 
 # R artifacts
 .Rhistory
@@ -31,4 +32,5 @@ TNAModule/jamovi/ui/*.options.js
 
 # Temp
 temp/
+tmp/
 npm-debug.log

@@ -1,0 +1,27 @@
+Package: CNA
+Type: Package
+Title: Co-occurrence Network Analysis
+Version: 1.0.0
+Author:
+  -  Dylan Girault [cre]
+  -  Mohammed Saqr [aut]
+  -  Santtu Tikka [aut]
+  -  Sonsoles López-Pernas [aut]
+Maintainer: Sonsoles López-Pernas <sonsoles.lopez@uef.fi>
+Description: >-
+    Provides tools for performing Co-occurrence Network Analysis (CNA) supporting
+    long-format and one-hot encoded data, with optional group comparison and
+    automatic clustering. Includes centrality measures, community detection,
+    clique analysis, bootstrap validation, and permutation testing.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+URL: https://github.com/sonsoleslp/tna/, http://sonsoles.me/tna/
+BugReports: https://github.com/sonsoleslp/tna/issues/
+Depends: R (>= 4.1.0)
+RoxygenNote: 7.3.2
+Imports:
+    jmvcore (>= 0.8.5),
+    R6,
+    ggplot2,
+    tna
