@@ -30,6 +30,5 @@ Imports:
     codyna,
     tna
 Remotes:
-    sonsoleslp/cograph,
     sonsoleslp/tna@main,
     santikka/codyna@dev
