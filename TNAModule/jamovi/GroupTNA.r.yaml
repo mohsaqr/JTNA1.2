@@ -1,822 +1,862 @@
 ---
-name:  GroupTNA
+name: GroupTNA
 title: Group Transition Network Analysis
-jrs:   '1.1'
+jrs: '1.1'
 refs:
-  - JTNA
-  - TNA
-  - TNALAK
-  - CODYNA
+    - JTNA
+    - TNA
+    - TNALAK
+    - CODYNA
 items:
-
-    - name: instructions
-      title: Instructions
-      type: Html
-      visible: True
-
-    - name: errorText
-      title: Error
-      type: Preformatted
-      visible: False
-    - name:  tnaTitle
-      title: TNA
-      type:  Preformatted
-      visible: True
-    ### BUILD MODEL
-    - name:  buildModelTitle
-      title: Model
-      type:  Preformatted
-      visible: True
-
-    - name:  buildModelContent
-      type:  Preformatted
-      visible: False
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-
-    - name: buildModel_plot
-      type: Image
-      width: 1000
-      height: 800
-      visible: False
-      renderFun: .showBuildModelPlot
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - buildModel_plot_cut
-        - buildModel_plot_min_value
-        - buildModel_plot_edge_label_size
-        - buildModel_plot_node_size
-        - buildModel_plot_node_label_size
-        - buildModel_plot_layout
-
-    - name: buildModel_histo
-      type: Image
-      width: 1000
-      height: 800
-      visible: False
-      renderFun: .showBuildModelHisto
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-
-    - name: buildModel_frequencies
-      type: Image
-      width: 1000
-      height: 800
-      visible: False
-      renderFun: .showBuildModelFrequencies
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-
-    - name: buildModel_mosaic
-      type: Image
-      width: 400
-      height: 300
-      visible: False
-      renderFun: .showBuildModelMosaic
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - buildModel_digits
-
-
-    ### CENTRALITY
-    - name:  centralityTitle
-      title: Centrality
-      type:  Preformatted
-      visible: False
-    
-    - name:  centralityContent
-      type:  Preformatted
-      visible: False
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - centrality_loops
-        - centrality_normalize
-        - centrality_Betweenness
-        - centrality_BetweennessRSP
-        - centrality_Closeness
-        - centrality_ClosenessIn
-        - centrality_ClosenessOut
-        - centrality_Clustering
-        - centrality_Diffusion
-        - centrality_InStrength
-        - centrality_OutStrength
-
-    - name: centralityTable
-      type: Table
-      title: Centrality Measures
-      visible: False
-      columns:
-        - name: state
-          type: text
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - centrality_loops
-        - centrality_normalize
-        - centrality_Betweenness
-        - centrality_BetweennessRSP
-        - centrality_Closeness
-        - centrality_ClosenessIn
-        - centrality_ClosenessOut
-        - centrality_Clustering
-        - centrality_Diffusion
-        - centrality_InStrength
-        - centrality_OutStrength
-    
-    - name: centrality_plot
-      type: Image
-      width: 1000
-      height: 800
-      visible: False
-      renderFun: .showCentralityPlot
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - centrality_loops
-        - centrality_normalize
-        - centrality_Betweenness
-        - centrality_BetweennessRSP
-        - centrality_Closeness
-        - centrality_ClosenessIn
-        - centrality_ClosenessOut
-        - centrality_Clustering
-        - centrality_Diffusion
-        - centrality_InStrength
-        - centrality_OutStrength
-
-    ### COMMUNITY
-    - name:  communityTitle
-      title: Community
-      type:  Preformatted
-      visible: False
-    - name: communityErrorText
-      title: Error
-      type: Preformatted
-      visible: False
-
-    - name:  communityContent
-      type:  Preformatted
-      visible: False
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - community_methods
-        - community_gamma
-
-    - name: community_plot
-      type: Image
-      width: 1000
-      height: 800
-      visible: False
-      renderFun: .showCommunityPlot
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - community_methods
-        - community_gamma
-        - community_plot_layout
-
-    - name: communityTable
-      type: Table
-      title: Community Assignments
-      visible: False
-      columns:
-        - name: group
-          title: Group
-          type: text
-        - name: state
-          title: State
-          type: text
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - community_methods
-        - community_gamma
-
-    ### CLIQUE
-
-    - name:  cliquesTitle
-      type:  Preformatted
-      title: Cliques
-      visible: False
-
-    - name: cliques_multiple_plot
-      type: Group
-      title: ""
-      visible: False
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - cliques_size
-        - cliques_threshold
-        - cliques_plot_cut
-        - cliques_plot_min_value
-        - cliques_plot_edge_label_size
-        - cliques_plot_node_size
-        - cliques_plot_node_label_size
-        - cliques_plot_layout
-      items:
-      - name: cliques_combined_plot
-        type: Image
-        width: 900
-        height: 700
-        visible: True
-        renderFun: .showCliquesMultiPlot
-    
-    ### Bootstrap
-
-    - name:  bootstrapTitle
-      type:  Preformatted
-      title: Bootstrap
-      visible: False
-
-    - name:  bootstrapTable
-      type:  Table
-      title: Bootstrap Results
-      visible: False
-      columns:
-        - name: group
-          title: Group
-          type: text
-        - name: from
-          title: From
-          type: text
-        - name: to
-          title: To
-          type: text
-        - name: weight
-          title: Weight
-          type: number
-        - name: p_value
-          title: p-value
-          type: number
-        - name: cr_lower
-          title: CR Lower
-          type: number
-        - name: cr_upper
-          title: CR Upper
-          type: number
-        - name: ci_lower
-          title: CI Lower
-          type: number
-        - name: ci_upper
-          title: CI Upper
-          type: number
-        - name: significant
-          title: Significant
-          type: text
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - bootstrap_iteration
-        - bootstrap_level
-        - bootstrap_method
-        - bootstrap_range_low
-        - bootstrap_range_up
-        - bootstrap_threshold
-    
-    - name: bootstrap_plot
-      type: Image
-      width: 1000
-      height: 800
-      visible: False
-      renderFun: .showBootstrapPlot
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - bootstrap_iteration
-        - bootstrap_level
-        - bootstrap_method
-        - bootstrap_range_low
-        - bootstrap_range_up
-        - bootstrap_threshold
-        - bootstrap_plot_cut
-        - bootstrap_plot_min_value
-        - bootstrap_plot_edge_label_size
-        - bootstrap_plot_node_size
-        - bootstrap_plot_node_label_size
-        - bootstrap_plot_layout
-
-    
-    ### Permutation
-
-    - name:  permutationTitle
-      type:  Preformatted
-      title: Permutation
-      visible: False
-
-    - name:  permutationContent
-      type:  Table
-      title: Permutation Test Results
-      visible: False
-      columns:
-        - name: group_comparison
-          title: Group Comparison
-          type: text
-        - name: edge_name
-          type: text
-        - name: diff_true
-          type: number
-        - name: effect_size
-          type: number
-        - name: p_value
-          type: number
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - permutation_iter
-        - permutation_paired
-        - permutation_level
-        
-    
-    - name: permutation_plot
-      type: Image
-      width: 1000
-      height: 1000
-      visible: False
-      renderFun: .showPermutationPlot
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - permutation_iter
-        - permutation_paired
-        - permutation_level
-        - permutation_plot_layout
-
-    ### COMPARISONS
-
-    # Network Difference Plot (first in Comparisons section)
-    - name: compare_network_diff_plot
-      type: Image
-      title: Network Difference Plot
-      width: 1000
-      height: 800
-      visible: False
-      renderFun: .showCompareNetworkDiffPlot
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - compare_network_diff_plot_cut
-        - compare_network_diff_plot_min_value
-        - compare_network_diff_plot_edge_label_size
-        - compare_network_diff_plot_node_size
-        - compare_network_diff_plot_node_label_size
-        - compare_network_diff_plot_layout
-
-    # Compare Network Properties (second in Comparisons section)
-    - name: compareInstructions
-      type: Html
-      visible: False
-
-    - name: compareTitle
-      type: Preformatted
-      title: Compare Network Properties
-      visible: False
-
-    - name: compare_plot
-      type: Image
-      title: Group Comparison Plot
-      width: 700
-      height: 500
-      visible: False
-      renderFun: .showComparePlot
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - compare_group_i
-        - compare_group_j
-        - compare_scaling
-        - compare_plot_type
-
-    - name: compareSummaryTable
-      type: Table
-      title: Summary Metrics
-      visible: False
-      columns:
-        - name: metric
-          title: Metric
-          type: text
-        - name: value
-          title: Value
-          type: number
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - compare_group_i
-        - compare_group_j
-        - compare_scaling
-
-    - name: compareNetworkTable
-      type: Table
-      title: Network Properties
-      visible: False
-      columns:
-        - name: metric
-          title: Metric
-          type: text
-        - name: group_i
-          title: Group 1
-          type: number
-        - name: group_j
-          title: Group 2
-          type: number
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - compare_group_i
-        - compare_group_j
-        - compare_scaling
-
-    # Compare Sequences (third in Comparisons section)
-    - name: compareSequencesTitle
-      type: Preformatted
-      title: Compare Sequences
-      visible: False
-
-    - name: compareSequences_plot
-      type: Image
-      title: Sequence Comparison Plot
-      width: 700
-      height: 500
-      visible: False
-      renderFun: .showCompareSequencesPlot
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - compare_sequences_sub_min
-        - compare_sequences_sub_max
-        - compare_sequences_min_freq
-        - compare_sequences_correction
-
-    - name: compareSequencesTable
-      type: Table
-      title: Sequence Pattern Comparison
-      visible: False
-      columns:
-        - name: pattern
-          title: Pattern
-          type: text
-        - name: length
-          title: Length
-          type: integer
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - compare_sequences_sub_min
-        - compare_sequences_sub_max
-        - compare_sequences_min_freq
-        - compare_sequences_correction
-
-    ### SEQUENCE ANALYSIS
-
-    - name: sequences_plot
-      type: Image
-      title: Sequence Analysis Plot
-      width: 1000
-      height: 800
-      visible: False
-      renderFun: .showSequencesPlot
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - sequences_type
-        - sequences_scale
-        - sequences_geom
-        - sequences_include_na
-        - sequences_tick
-
-    ### PATTERN DISCOVERY
-
-    - name: patternTitle
-      type: Preformatted
-      title: Pattern Discovery
-      visible: False
-
-    - name: patternTable
-      type: Table
-      title: Discovered Patterns
-      visible: False
-      columns:
-        - name: pattern
-          title: Pattern
-          type: text
-        - name: length
-          title: Length
-          type: integer
-        - name: count
-          title: Count
-          type: integer
-        - name: frequency
-          title: Frequency
-          type: number
-        - name: proportion
-          title: Proportion
-          type: number
-        - name: support
-          title: Support
-          type: number
-        - name: lift
-          title: Lift
-          type: number
-        - name: chisq
-          title: χ²
-          type: number
-        - name: p_value
-          title: p
-          type: number
-          format: zto,pvalue
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - pattern_type
-        - pattern_len_min
-        - pattern_len_max
-        - pattern_gap_min
-        - pattern_gap_max
-        - pattern_min_support
-        - pattern_min_count
-        - pattern_starts_with_use
-        - pattern_starts_with
-        - pattern_ends_with_use
-        - pattern_ends_with
-        - pattern_contains_use
-        - pattern_contains
-
-    ### SEQUENCE INDICES
-
-    - name: indicesTitle
-      type: Preformatted
-      title: Sequence Indices
-      visible: False
-
-    - name: indicesTable
-      type: Table
-      title: Sequence Indices
-      visible: False
-      columns:
-        - name: sequence_id
-          title: Seq
-          type: integer
-        - name: actor
-          title: Actor
-          type: text
-        - name: group
-          title: Group
-          type: text
-        - name: valid_n
-          title: Valid N
-          type: integer
-        - name: valid_proportion
-          title: Valid %
-          type: number
-        - name: unique_states
-          title: Unique
-          type: integer
-        - name: longitudinal_entropy
-          title: Entropy
-          type: number
-        - name: simpson_diversity
-          title: Simpson
-          type: number
-        - name: mean_spell_duration
-          title: Mean Spell
-          type: number
-        - name: max_spell_duration
-          title: Max Spell
-          type: number
-        - name: self_loop_tendency
-          title: Self-Loop
-          type: number
-        - name: transition_rate
-          title: Trans Rate
-          type: number
-        - name: transition_complexity
-          title: Trans Cplx
-          type: number
-        - name: cyclic_feedback_strength
-          title: Feedback
-          type: number
-        - name: initial_state_persistence
-          title: Init Persist
-          type: number
-        - name: initial_state_proportion
-          title: Init %
-          type: number
-        - name: initial_state_influence_decay
-          title: Init Decay
-          type: number
-        - name: first_state
-          title: First
-          type: text
-        - name: last_state
-          title: Last
-          type: text
-        - name: dominant_state
-          title: Dominant
-          type: text
-        - name: dominant_proportion
-          title: Dom %
-          type: number
-        - name: dominant_max_spell
-          title: Dom Max
-          type: integer
-        - name: emergent_state
-          title: Emergent
-          type: text
-        - name: emergent_state_persistence
-          title: Em Persist
-          type: number
-        - name: emergent_state_proportion
-          title: Em %
-          type: number
-        - name: complexity_index
-          title: Complexity
-          type: number
-      clearWith:
-        - buildModel_variables_long_actor
-        - buildModel_variables_long_time
-        - buildModel_variables_long_action
-        - buildModel_variables_long_order
-        - buildModel_variables_long_group
-        - buildModel_type
-        - buildModel_scaling
-        - buildModel_threshold
-        - buildModel_lambda
-        - indices_favorable
-        - indices_omega
-
+    -   name: instructions
+        title: Instructions
+        type: Html
+        visible: false
+    -   name: modelCache
+        type: Preformatted
+        visible: false
+        clearWith:
+            - buildModel_variables_long_action
+            - buildModel_variables_long_actor
+            - buildModel_variables_long_time
+            - buildModel_variables_long_order
+            - buildModel_variables_long_group
+            - buildModel_type
+            - buildModel_scaling
+            - buildModel_threshold
+            - buildModel_lambda
+    -   name: model
+        title: Transition Models
+        type: Group
+        items:
+            -   name: matrices
+                title: Transition Matrices
+                type: Array
+                visible: (buildModel_show_matrix)
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                template:
+                    title: $key
+                    type: Table
+                    rows: 0
+                    columns:
+                        -   name: from
+                            title: From
+                            type: text
+            -   name: inits
+                title: Initial Probabilities
+                type: Table
+                visible: (buildModel_show_matrix)
+                rows: 0
+                columns:
+                    -   name: state
+                        title: State
+                        type: text
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+            -   name: plot
+                title: Network
+                type: Image
+                width: 600
+                height: 600
+                visible: (buildModel_show_plot)
+                renderFun: .showModelPlot
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - buildModel_plot_cut
+                    - buildModel_plot_min_value
+                    - buildModel_plot_edge_label_size
+                    - buildModel_plot_node_size
+                    - buildModel_plot_node_label_size
+                    - buildModel_plot_layout
+            -   name: histogram
+                title: Edge Weights
+                type: Image
+                width: 600
+                height: 600
+                visible: (buildModel_show_histo)
+                renderFun: .showModelHistogram
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+            -   name: frequencies
+                title: State Frequencies
+                type: Image
+                width: 600
+                height: 600
+                visible: (buildModel_show_frequencies)
+                renderFun: .showModelFrequencies
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+            -   name: mosaic
+                title: Mosaic Plot
+                type: Image
+                width: 600
+                height: 450
+                visible: (buildModel_show_mosaic && buildModel_type:frequency)
+                renderFun: .showModelMosaic
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+    -   name: centrality
+        title: Centrality
+        type: Group
+        items:
+            -   name: table
+                title: Centrality Measures
+                type: Table
+                visible: (centrality_show_table)
+                rows: 0
+                columns:
+                    -   name: group
+                        title: Group
+                        type: text
+                    -   name: state
+                        title: State
+                        type: text
+                    -   name: OutStrength
+                        title: Out-strength
+                        type: number
+                        visible: (centrality_OutStrength)
+                    -   name: InStrength
+                        title: In-strength
+                        type: number
+                        visible: (centrality_InStrength)
+                    -   name: ClosenessIn
+                        title: Closeness (in)
+                        type: number
+                        visible: (centrality_ClosenessIn)
+                    -   name: ClosenessOut
+                        title: Closeness (out)
+                        type: number
+                        visible: (centrality_ClosenessOut)
+                    -   name: Closeness
+                        title: Closeness
+                        type: number
+                        visible: (centrality_Closeness)
+                    -   name: Betweenness
+                        title: Betweenness
+                        type: number
+                        visible: (centrality_Betweenness)
+                    -   name: BetweennessRSP
+                        title: Betweenness (RSP)
+                        type: number
+                        visible: (centrality_BetweennessRSP)
+                    -   name: Diffusion
+                        title: Diffusion
+                        type: number
+                        visible: (centrality_Diffusion)
+                    -   name: Clustering
+                        title: Clustering
+                        type: number
+                        visible: (centrality_Clustering)
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - centrality_loops
+                    - centrality_normalize
+                    - centrality_OutStrength
+                    - centrality_InStrength
+                    - centrality_ClosenessIn
+                    - centrality_ClosenessOut
+                    - centrality_Closeness
+                    - centrality_Betweenness
+                    - centrality_BetweennessRSP
+                    - centrality_Diffusion
+                    - centrality_Clustering
+            -   name: plot
+                title: Centrality Plot
+                type: Image
+                width: 600
+                height: 600
+                visible: (centrality_show_plot)
+                renderFun: .showCentralityPlot
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - centrality_loops
+                    - centrality_normalize
+                    - centrality_OutStrength
+                    - centrality_InStrength
+                    - centrality_ClosenessIn
+                    - centrality_ClosenessOut
+                    - centrality_Closeness
+                    - centrality_Betweenness
+                    - centrality_BetweennessRSP
+                    - centrality_Diffusion
+                    - centrality_Clustering
+    -   name: community
+        title: Communities
+        type: Group
+        items:
+            -   name: table
+                title: Community Assignments
+                type: Table
+                visible: (community_show_table)
+                rows: 0
+                columns:
+                    -   name: group
+                        title: Group
+                        type: text
+                    -   name: state
+                        title: State
+                        type: text
+                    -   name: community
+                        title: Community
+                        type: integer
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - community_methods
+                    - community_gamma
+            -   name: plot
+                title: Community Plot
+                type: Image
+                width: 600
+                height: 600
+                visible: (community_show_plot)
+                renderFun: .showCommunityPlot
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - community_methods
+                    - community_gamma
+                    - community_plot_layout
+    -   name: cliques
+        title: Cliques
+        type: Group
+        items:
+            -   name: plot
+                title: Cliques
+                type: Image
+                width: 900
+                height: 700
+                visible: (cliques_show_plot)
+                renderFun: .showCliquesPlot
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - cliques_size
+                    - cliques_threshold
+                    - cliques_plot_cut
+                    - cliques_plot_min_value
+                    - cliques_plot_edge_label_size
+                    - cliques_plot_node_size
+                    - cliques_plot_node_label_size
+                    - cliques_plot_layout
+    -   name: bootstrap
+        title: Bootstrap
+        type: Group
+        items:
+            -   name: table
+                title: Bootstrap Results
+                type: Table
+                visible: (bootstrap_show_table)
+                rows: 0
+                columns:
+                    -   name: group
+                        title: Group
+                        type: text
+                    -   name: from
+                        title: From
+                        type: text
+                    -   name: to
+                        title: To
+                        type: text
+                    -   name: weight
+                        title: Weight
+                        type: number
+                    -   name: p_value
+                        title: p
+                        type: number
+                    -   name: cr_lower
+                        title: Lower
+                        type: number
+                        superTitle: Consistency range
+                    -   name: cr_upper
+                        title: Upper
+                        type: number
+                        superTitle: Consistency range
+                    -   name: ci_lower
+                        title: Lower
+                        type: number
+                        superTitle: Confidence interval
+                    -   name: ci_upper
+                        title: Upper
+                        type: number
+                        superTitle: Confidence interval
+                    -   name: significant
+                        title: Significant
+                        type: text
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - bootstrap_iteration
+                    - bootstrap_level
+                    - bootstrap_method
+                    - bootstrap_range_low
+                    - bootstrap_range_up
+                    - bootstrap_threshold
+            -   name: plot
+                title: Bootstrap Network
+                type: Image
+                width: 600
+                height: 600
+                visible: (bootstrap_show_plot)
+                renderFun: .showBootstrapPlot
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - bootstrap_iteration
+                    - bootstrap_level
+                    - bootstrap_method
+                    - bootstrap_range_low
+                    - bootstrap_range_up
+                    - bootstrap_threshold
+                    - bootstrap_plot_cut
+                    - bootstrap_plot_min_value
+                    - bootstrap_plot_edge_label_size
+                    - bootstrap_plot_node_size
+                    - bootstrap_plot_node_label_size
+                    - bootstrap_plot_layout
+    -   name: permutation
+        title: Permutation Test
+        type: Group
+        items:
+            -   name: table
+                title: Permutation Test Results
+                type: Table
+                visible: (permutation_show_text)
+                rows: 0
+                columns:
+                    -   name: group_comparison
+                        title: Comparison
+                        type: text
+                    -   name: edge_name
+                        title: Edge
+                        type: text
+                    -   name: diff_true
+                        title: Difference
+                        type: number
+                    -   name: effect_size
+                        title: Effect size
+                        type: number
+                    -   name: p_value
+                        title: p
+                        type: number
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - permutation_iter
+                    - permutation_paired
+                    - permutation_level
+            -   name: plot
+                title: Permutation Test
+                type: Image
+                width: 600
+                height: 600
+                visible: (permutation_show_plot)
+                renderFun: .showPermutationPlot
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - permutation_iter
+                    - permutation_paired
+                    - permutation_level
+                    - permutation_plot_layout
+    -   name: compare
+        title: Network Comparison
+        type: Group
+        items:
+            -   name: summary
+                title: Summary Metrics
+                type: Table
+                visible: (compare_show_summary)
+                rows: 0
+                columns:
+                    -   name: metric
+                        title: Metric
+                        type: text
+                    -   name: value
+                        title: Value
+                        type: number
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - compare_group_i
+                    - compare_group_j
+                    - compare_scaling
+            -   name: network
+                title: Network Properties
+                type: Table
+                visible: (compare_show_network)
+                rows: 0
+                columns:
+                    -   name: metric
+                        title: Metric
+                        type: text
+                    -   name: net_i
+                        title: Group i
+                        type: number
+                    -   name: net_j
+                        title: Group j
+                        type: number
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - compare_group_i
+                    - compare_group_j
+                    - compare_scaling
+            -   name: plot
+                title: Comparison Plot
+                type: Image
+                width: 600
+                height: 600
+                visible: (compare_show_plot)
+                renderFun: .showComparePlot
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - compare_group_i
+                    - compare_group_j
+                    - compare_scaling
+                    - compare_plot_type
+    -   name: networkDiff
+        title: Network Differences
+        type: Group
+        items:
+            -   name: plot
+                title: Difference Networks
+                type: Image
+                width: 900
+                height: 700
+                visible: (compare_show_network_diff_plot)
+                renderFun: .showNetworkDiffPlot
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - compare_network_diff_plot_cut
+                    - compare_network_diff_plot_min_value
+                    - compare_network_diff_plot_edge_label_size
+                    - compare_network_diff_plot_node_size
+                    - compare_network_diff_plot_node_label_size
+                    - compare_network_diff_plot_layout
+    -   name: compareSequences
+        title: Sequence Comparison
+        type: Group
+        items:
+            -   name: plot
+                title: Sequence Pattern Comparison
+                type: Image
+                width: 800
+                height: 600
+                visible: (compare_sequences_show_plot)
+                renderFun: .showCompareSequencesPlot
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - compare_sequences_sub_min
+                    - compare_sequences_sub_max
+                    - compare_sequences_min_freq
+                    - compare_sequences_correction
+            -   name: table
+                title: Sequence Pattern Comparison
+                type: Table
+                visible: (compare_sequences_show_table)
+                rows: 0
+                columns:
+                    -   name: pattern
+                        title: Pattern
+                        type: text
+                    -   name: length
+                        title: Length
+                        type: integer
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - compare_sequences_sub_min
+                    - compare_sequences_sub_max
+                    - compare_sequences_min_freq
+                    - compare_sequences_correction
+    -   name: sequences
+        title: Sequences
+        type: Group
+        items:
+            -   name: index
+                title: Sequence Index Plot
+                type: Image
+                width: 600
+                height: 450
+                visible: (sequences_show_index)
+                renderFun: .showSequenceIndexPlot
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - sequences_show_n
+                    - sequences_tick
+                    - sequences_xlab
+                    - sequences_legend_title
+                    - sequences_border
+                    - sequences_na_color
+                    - sequences_width
+                    - sequences_height
+                    - sequences_ncol
+                    - sequences_sort
+                    - sequences_index_title
+                    - sequences_index_ylab
+            -   name: distribution
+                title: State Distribution Plot
+                type: Image
+                width: 600
+                height: 450
+                visible: (sequences_show_distribution)
+                renderFun: .showSequenceDistributionPlot
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - sequences_show_n
+                    - sequences_tick
+                    - sequences_xlab
+                    - sequences_legend_title
+                    - sequences_border
+                    - sequences_na_color
+                    - sequences_width
+                    - sequences_height
+                    - sequences_ncol
+                    - sequences_scale
+                    - sequences_geom
+                    - sequences_include_na
+                    - sequences_distribution_title
+                    - sequences_distribution_ylab
+    -   name: patterns
+        title: Pattern Discovery
+        type: Group
+        items:
+            -   name: table
+                title: Discovered Patterns
+                type: Table
+                visible: (pattern_show_table)
+                rows: 0
+                columns:
+                    -   name: pattern
+                        title: Pattern
+                        type: text
+                    -   name: length
+                        title: Length
+                        type: integer
+                    -   name: count
+                        title: Count
+                        type: integer
+                    -   name: frequency
+                        title: Frequency
+                        type: number
+                    -   name: proportion
+                        title: Proportion
+                        type: number
+                    -   name: support
+                        title: Support
+                        type: number
+                    -   name: lift
+                        title: Lift
+                        type: number
+                    -   name: chisq
+                        title: χ²
+                        type: number
+                    -   name: p_value
+                        title: p
+                        type: number
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - pattern_type
+                    - pattern_len_min
+                    - pattern_len_max
+                    - pattern_gap_min
+                    - pattern_gap_max
+                    - pattern_min_support
+                    - pattern_min_count
+                    - pattern_starts_with_use
+                    - pattern_starts_with
+                    - pattern_ends_with_use
+                    - pattern_ends_with
+                    - pattern_contains_use
+                    - pattern_contains
+    -   name: indices
+        title: Sequence Indices
+        type: Group
+        items:
+            -   name: table
+                title: Sequence Indices
+                type: Table
+                visible: (indices_show_table)
+                rows: 0
+                columns:
+                    -   name: sequence_id
+                        title: Sequence
+                        type: integer
+                    -   name: actor
+                        title: Actor
+                        type: text
+                    -   name: session
+                        title: Session
+                        type: integer
+                    -   name: group
+                        title: Group
+                        type: text
+                    -   name: valid_n
+                        title: Valid N
+                        type: integer
+                    -   name: valid_proportion
+                        title: Valid proportion
+                        type: number
+                    -   name: unique_states
+                        title: Unique states
+                        type: integer
+                    -   name: longitudinal_entropy
+                        title: Longitudinal entropy
+                        type: number
+                    -   name: simpson_diversity
+                        title: Simpson diversity
+                        type: number
+                    -   name: mean_spell_duration
+                        title: Mean spell duration
+                        type: number
+                    -   name: max_spell_duration
+                        title: Max spell duration
+                        type: number
+                    -   name: self_loop_tendency
+                        title: Self-loop tendency
+                        type: number
+                    -   name: transition_rate
+                        title: Transition rate
+                        type: number
+                    -   name: transition_complexity
+                        title: Transition complexity
+                        type: number
+                    -   name: cyclic_feedback_strength
+                        title: Cyclic feedback strength
+                        type: number
+                    -   name: initial_state_persistence
+                        title: Initial state persistence
+                        type: number
+                    -   name: initial_state_proportion
+                        title: Initial state proportion
+                        type: number
+                    -   name: initial_state_influence_decay
+                        title: Initial state influence decay
+                        type: number
+                    -   name: first_state
+                        title: First state
+                        type: text
+                    -   name: last_state
+                        title: Last state
+                        type: text
+                    -   name: dominant_state
+                        title: Dominant state
+                        type: text
+                    -   name: dominant_proportion
+                        title: Dominant proportion
+                        type: number
+                    -   name: dominant_max_spell
+                        title: Dominant max spell
+                        type: integer
+                    -   name: emergent_state
+                        title: Emergent state
+                        type: text
+                    -   name: emergent_state_persistence
+                        title: Emergent state persistence
+                        type: number
+                    -   name: emergent_state_proportion
+                        title: Emergent state proportion
+                        type: number
+                    -   name: integrative_potential
+                        title: Integrative potential
+                        type: number
+                    -   name: complexity_index
+                        title: Complexity index
+                        type: number
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_variables_long_group
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - indices_favorable
+                    - indices_omega
 ...

@@ -21,12 +21,15 @@ jobs:
         with:
           use-public-rspm: true
 
-      # Reads TNAModule/DESCRIPTION (incl. Remotes: tna@main, codyna@dev) and
-      # installs all dependencies via pak, plus testthat for the test runner.
+      # Reads TNAModule/DESCRIPTION (tna from CRAN, codyna pinned by Remotes) and
+      # installs all dependencies via pak, plus testthat and pkgload: the
+      # end-to-end tests load the module from source and run its analyses.
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           working-directory: TNAModule
-          extra-packages: any::testthat
+          extra-packages: |
+            any::testthat
+            any::pkgload
 
       - name: Run testthat regression + equivalence suite
         working-directory: TNAModule

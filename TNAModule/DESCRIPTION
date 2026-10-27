@@ -1,7 +1,7 @@
 Package: JTNA
 Type: Package
 Title: Transition Network Analysis
-Version: 1.8.4
+Version: 1.9.0
 Author:
   -  Dylan Girault [cre]
   -  Mohammed Saqr [aut]
@@ -18,17 +18,22 @@ Description: >-
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-URL: https://github.com/sonsoleslp/tna/, http://sonsoles.me/tna/
-BugReports: https://github.com/sonsoleslp/tna/issues/
+URL: https://github.com/sonsoleslp/JTNA, https://sonsoles.me/tna/
+BugReports: https://github.com/sonsoleslp/JTNA/issues
 Depends: R (>= 4.1.0)
 RoxygenNote: 7.3.2
 Imports:
-    jmvcore (>= 0.8.5),
+    jmvcore (>= 2.6.3),
     R6,
     ggplot2,
-    cograph,
-    codyna,
-    tna
+    cograph (>= 2.7.2),
+    codyna (>= 1.0.0),
+    tna (>= 1.3.1)
+Suggests:
+    pkgload,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
 Remotes:
-    sonsoleslp/tna@main,
-    santikka/codyna@dev
+    sonsoleslp/cograph@39f2aa200b9fb31c9647a7dbab26a18aed77166a,
+    santikka/codyna@845534f0b55ca1ddbd01237b02c4c03a9891619a,
+    sonsoleslp/tna@a7638bfa90ddf85e752199a3a01f1598d8f62311

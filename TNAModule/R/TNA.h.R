@@ -25,7 +25,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             buildModel_show_histo = FALSE,
             buildModel_show_frequencies = FALSE,
             buildModel_show_mosaic = FALSE,
-            buildModel_digits = 1,
             centrality_loops = FALSE,
             centrality_normalize = FALSE,
             centrality_show_table = FALSE,
@@ -86,12 +85,24 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bootstrap_plot_node_size = 8,
             bootstrap_plot_node_label_size = 1,
             bootstrap_plot_layout = "circle",
-            sequences_show_plot = FALSE,
-            sequences_type = "index",
+            sequences_show_index = FALSE,
+            sequences_show_distribution = FALSE,
+            sequences_sort = "none",
             sequences_scale = "proportion",
             sequences_geom = "bar",
             sequences_include_na = FALSE,
+            sequences_show_n = TRUE,
             sequences_tick = 5,
+            sequences_index_title = "",
+            sequences_index_ylab = "",
+            sequences_distribution_title = "",
+            sequences_distribution_ylab = "",
+            sequences_xlab = "",
+            sequences_legend_title = "",
+            sequences_border = "",
+            sequences_na_color = "white",
+            sequences_width = 600,
+            sequences_height = 450,
             pattern_show_table = FALSE,
             pattern_type = "ngram",
             pattern_len_min = 2,
@@ -162,7 +173,8 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..buildModel_threshold <- jmvcore::OptionInteger$new(
                 "buildModel_threshold",
                 buildModel_threshold,
-                default=900)
+                default=900,
+                min=1)
             private$..buildModel_show_plot <- jmvcore::OptionBool$new(
                 "buildModel_show_plot",
                 buildModel_show_plot,
@@ -229,10 +241,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "buildModel_show_mosaic",
                 buildModel_show_mosaic,
                 default=FALSE)
-            private$..buildModel_digits <- jmvcore::OptionInteger$new(
-                "buildModel_digits",
-                buildModel_digits,
-                default=1)
             private$..centrality_loops <- jmvcore::OptionBool$new(
                 "centrality_loops",
                 centrality_loops,
@@ -393,7 +401,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "infomap",
                     "edge_betweenness",
                     "leading_eigen"))
-            private$..community_gamma <- jmvcore::OptionInteger$new(
+            private$..community_gamma <- jmvcore::OptionNumber$new(
                 "community_gamma",
                 community_gamma,
                 default=1,
@@ -494,7 +502,7 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "bootstrap_iteration",
                 bootstrap_iteration,
                 default=1000,
-                min=0,
+                min=10,
                 max=10000)
             private$..bootstrap_level <- jmvcore::OptionNumber$new(
                 "bootstrap_level",
@@ -599,17 +607,22 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "layout_with_lgl",
                     "layout_with_sugiyama",
                     "layout_randomly"))
-            private$..sequences_show_plot <- jmvcore::OptionBool$new(
-                "sequences_show_plot",
-                sequences_show_plot,
+            private$..sequences_show_index <- jmvcore::OptionBool$new(
+                "sequences_show_index",
+                sequences_show_index,
                 default=FALSE)
-            private$..sequences_type <- jmvcore::OptionList$new(
-                "sequences_type",
-                sequences_type,
-                default="index",
+            private$..sequences_show_distribution <- jmvcore::OptionBool$new(
+                "sequences_show_distribution",
+                sequences_show_distribution,
+                default=FALSE)
+            private$..sequences_sort <- jmvcore::OptionList$new(
+                "sequences_sort",
+                sequences_sort,
+                default="none",
                 options=list(
-                    "index",
-                    "distribution"))
+                    "none",
+                    "first",
+                    "all"))
             private$..sequences_scale <- jmvcore::OptionList$new(
                 "sequences_scale",
                 sequences_scale,
@@ -628,12 +641,60 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "sequences_include_na",
                 sequences_include_na,
                 default=FALSE)
+            private$..sequences_show_n <- jmvcore::OptionBool$new(
+                "sequences_show_n",
+                sequences_show_n,
+                default=TRUE)
             private$..sequences_tick <- jmvcore::OptionInteger$new(
                 "sequences_tick",
                 sequences_tick,
                 default=5,
                 min=1,
-                max=20)
+                max=100)
+            private$..sequences_index_title <- jmvcore::OptionString$new(
+                "sequences_index_title",
+                sequences_index_title,
+                default="")
+            private$..sequences_index_ylab <- jmvcore::OptionString$new(
+                "sequences_index_ylab",
+                sequences_index_ylab,
+                default="")
+            private$..sequences_distribution_title <- jmvcore::OptionString$new(
+                "sequences_distribution_title",
+                sequences_distribution_title,
+                default="")
+            private$..sequences_distribution_ylab <- jmvcore::OptionString$new(
+                "sequences_distribution_ylab",
+                sequences_distribution_ylab,
+                default="")
+            private$..sequences_xlab <- jmvcore::OptionString$new(
+                "sequences_xlab",
+                sequences_xlab,
+                default="")
+            private$..sequences_legend_title <- jmvcore::OptionString$new(
+                "sequences_legend_title",
+                sequences_legend_title,
+                default="")
+            private$..sequences_border <- jmvcore::OptionString$new(
+                "sequences_border",
+                sequences_border,
+                default="")
+            private$..sequences_na_color <- jmvcore::OptionString$new(
+                "sequences_na_color",
+                sequences_na_color,
+                default="white")
+            private$..sequences_width <- jmvcore::OptionInteger$new(
+                "sequences_width",
+                sequences_width,
+                default=600,
+                min=300,
+                max=2000)
+            private$..sequences_height <- jmvcore::OptionInteger$new(
+                "sequences_height",
+                sequences_height,
+                default=450,
+                min=200,
+                max=3000)
             private$..pattern_show_table <- jmvcore::OptionBool$new(
                 "pattern_show_table",
                 pattern_show_table,
@@ -760,7 +821,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..buildModel_show_histo)
             self$.addOption(private$..buildModel_show_frequencies)
             self$.addOption(private$..buildModel_show_mosaic)
-            self$.addOption(private$..buildModel_digits)
             self$.addOption(private$..centrality_loops)
             self$.addOption(private$..centrality_normalize)
             self$.addOption(private$..centrality_show_table)
@@ -821,12 +881,24 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..bootstrap_plot_node_size)
             self$.addOption(private$..bootstrap_plot_node_label_size)
             self$.addOption(private$..bootstrap_plot_layout)
-            self$.addOption(private$..sequences_show_plot)
-            self$.addOption(private$..sequences_type)
+            self$.addOption(private$..sequences_show_index)
+            self$.addOption(private$..sequences_show_distribution)
+            self$.addOption(private$..sequences_sort)
             self$.addOption(private$..sequences_scale)
             self$.addOption(private$..sequences_geom)
             self$.addOption(private$..sequences_include_na)
+            self$.addOption(private$..sequences_show_n)
             self$.addOption(private$..sequences_tick)
+            self$.addOption(private$..sequences_index_title)
+            self$.addOption(private$..sequences_index_ylab)
+            self$.addOption(private$..sequences_distribution_title)
+            self$.addOption(private$..sequences_distribution_ylab)
+            self$.addOption(private$..sequences_xlab)
+            self$.addOption(private$..sequences_legend_title)
+            self$.addOption(private$..sequences_border)
+            self$.addOption(private$..sequences_na_color)
+            self$.addOption(private$..sequences_width)
+            self$.addOption(private$..sequences_height)
             self$.addOption(private$..pattern_show_table)
             self$.addOption(private$..pattern_type)
             self$.addOption(private$..pattern_len_min)
@@ -869,7 +941,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         buildModel_show_histo = function() private$..buildModel_show_histo$value,
         buildModel_show_frequencies = function() private$..buildModel_show_frequencies$value,
         buildModel_show_mosaic = function() private$..buildModel_show_mosaic$value,
-        buildModel_digits = function() private$..buildModel_digits$value,
         centrality_loops = function() private$..centrality_loops$value,
         centrality_normalize = function() private$..centrality_normalize$value,
         centrality_show_table = function() private$..centrality_show_table$value,
@@ -930,12 +1001,24 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         bootstrap_plot_node_size = function() private$..bootstrap_plot_node_size$value,
         bootstrap_plot_node_label_size = function() private$..bootstrap_plot_node_label_size$value,
         bootstrap_plot_layout = function() private$..bootstrap_plot_layout$value,
-        sequences_show_plot = function() private$..sequences_show_plot$value,
-        sequences_type = function() private$..sequences_type$value,
+        sequences_show_index = function() private$..sequences_show_index$value,
+        sequences_show_distribution = function() private$..sequences_show_distribution$value,
+        sequences_sort = function() private$..sequences_sort$value,
         sequences_scale = function() private$..sequences_scale$value,
         sequences_geom = function() private$..sequences_geom$value,
         sequences_include_na = function() private$..sequences_include_na$value,
+        sequences_show_n = function() private$..sequences_show_n$value,
         sequences_tick = function() private$..sequences_tick$value,
+        sequences_index_title = function() private$..sequences_index_title$value,
+        sequences_index_ylab = function() private$..sequences_index_ylab$value,
+        sequences_distribution_title = function() private$..sequences_distribution_title$value,
+        sequences_distribution_ylab = function() private$..sequences_distribution_ylab$value,
+        sequences_xlab = function() private$..sequences_xlab$value,
+        sequences_legend_title = function() private$..sequences_legend_title$value,
+        sequences_border = function() private$..sequences_border$value,
+        sequences_na_color = function() private$..sequences_na_color$value,
+        sequences_width = function() private$..sequences_width$value,
+        sequences_height = function() private$..sequences_height$value,
         pattern_show_table = function() private$..pattern_show_table$value,
         pattern_type = function() private$..pattern_type$value,
         pattern_len_min = function() private$..pattern_len_min$value,
@@ -977,7 +1060,6 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..buildModel_show_histo = NA,
         ..buildModel_show_frequencies = NA,
         ..buildModel_show_mosaic = NA,
-        ..buildModel_digits = NA,
         ..centrality_loops = NA,
         ..centrality_normalize = NA,
         ..centrality_show_table = NA,
@@ -1038,12 +1120,24 @@ TNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..bootstrap_plot_node_size = NA,
         ..bootstrap_plot_node_label_size = NA,
         ..bootstrap_plot_layout = NA,
-        ..sequences_show_plot = NA,
-        ..sequences_type = NA,
+        ..sequences_show_index = NA,
+        ..sequences_show_distribution = NA,
+        ..sequences_sort = NA,
         ..sequences_scale = NA,
         ..sequences_geom = NA,
         ..sequences_include_na = NA,
+        ..sequences_show_n = NA,
         ..sequences_tick = NA,
+        ..sequences_index_title = NA,
+        ..sequences_index_ylab = NA,
+        ..sequences_distribution_title = NA,
+        ..sequences_distribution_ylab = NA,
+        ..sequences_xlab = NA,
+        ..sequences_legend_title = NA,
+        ..sequences_border = NA,
+        ..sequences_na_color = NA,
+        ..sequences_width = NA,
+        ..sequences_height = NA,
         ..pattern_show_table = NA,
         ..pattern_type = NA,
         ..pattern_len_min = NA,
@@ -1072,40 +1166,17 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
-        errorText = function() private$.items[["errorText"]],
-        tnaTitle = function() private$.items[["tnaTitle"]],
-        buildModelTitle = function() private$.items[["buildModelTitle"]],
-        buildModelContent = function() private$.items[["buildModelContent"]],
-        buildModel_plot = function() private$.items[["buildModel_plot"]],
-        buildModel_histo = function() private$.items[["buildModel_histo"]],
-        buildModel_frequencies = function() private$.items[["buildModel_frequencies"]],
-        buildModel_mosaic = function() private$.items[["buildModel_mosaic"]],
-        centralityTitle = function() private$.items[["centralityTitle"]],
-        centralityContent = function() private$.items[["centralityContent"]],
-        centralityTable = function() private$.items[["centralityTable"]],
-        centrality_plot = function() private$.items[["centrality_plot"]],
-        centralityStabilityTitle = function() private$.items[["centralityStabilityTitle"]],
-        centralityStabilityTable = function() private$.items[["centralityStabilityTable"]],
-        centrality_stability_plot = function() private$.items[["centrality_stability_plot"]],
-        edgeBetweennessTitle = function() private$.items[["edgeBetweennessTitle"]],
-        edgeBetweenness_plot = function() private$.items[["edgeBetweenness_plot"]],
-        edgeBetweennessTable = function() private$.items[["edgeBetweennessTable"]],
-        edgeBetweennessNoResultsNote = function() private$.items[["edgeBetweennessNoResultsNote"]],
-        communityTitle = function() private$.items[["communityTitle"]],
-        communityContent = function() private$.items[["communityContent"]],
-        community_plot = function() private$.items[["community_plot"]],
-        communityTable = function() private$.items[["communityTable"]],
-        cliquesTitle = function() private$.items[["cliquesTitle"]],
-        cliques_multiple_plot = function() private$.items[["cliques_multiple_plot"]],
-        bootstrapTitle = function() private$.items[["bootstrapTitle"]],
-        bootstrap_plot = function() private$.items[["bootstrap_plot"]],
-        bootstrapTable = function() private$.items[["bootstrapTable"]],
-        permutationTable = function() private$.items[["permutationTable"]],
-        sequences_plot = function() private$.items[["sequences_plot"]],
-        patternTitle = function() private$.items[["patternTitle"]],
-        patternTable = function() private$.items[["patternTable"]],
-        indicesTitle = function() private$.items[["indicesTitle"]],
-        indicesTable = function() private$.items[["indicesTable"]]),
+        modelCache = function() private$.items[["modelCache"]],
+        model = function() private$.items[["model"]],
+        centrality = function() private$.items[["centrality"]],
+        stability = function() private$.items[["stability"]],
+        edgeBetweenness = function() private$.items[["edgeBetweenness"]],
+        community = function() private$.items[["community"]],
+        cliques = function() private$.items[["cliques"]],
+        bootstrap = function() private$.items[["bootstrap"]],
+        sequences = function() private$.items[["sequences"]],
+        patterns = function() private$.items[["patterns"]],
+        indices = function() private$.items[["indices"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -1122,752 +1193,874 @@ TNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="instructions",
                 title="Instructions",
-                visible=TRUE))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="errorText",
-                title="Error",
                 visible=FALSE))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="tnaTitle",
-                title="TNA",
-                visible=TRUE))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="buildModelTitle",
-                title="Model",
-                visible=TRUE))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="buildModelContent",
+                name="modelCache",
                 visible=FALSE,
                 clearWith=list(
+                    "buildModel_variables_long_action",
                     "buildModel_variables_long_actor",
                     "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
                     "buildModel_variables_long_order",
                     "buildModel_type",
                     "buildModel_scaling",
                     "buildModel_threshold",
                     "buildModel_lambda")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="buildModel_plot",
-                width=600,
-                height=600,
-                visible=FALSE,
-                renderFun=".showBuildModelPlot",
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda",
-                    "buildModel_plot_cut",
-                    "buildModel_plot_min_value",
-                    "buildModel_plot_edge_label_size",
-                    "buildModel_plot_node_size",
-                    "buildModel_plot_node_label_size",
-                    "buildModel_plot_layout")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="buildModel_histo",
-                width=600,
-                height=600,
-                visible=FALSE,
-                renderFun=".showBuildModelHisto",
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="buildModel_frequencies",
-                width=600,
-                height=600,
-                visible=FALSE,
-                renderFun=".showBuildModelFrequencies",
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="buildModel_mosaic",
-                width=400,
-                height=300,
-                visible=FALSE,
-                renderFun=".showBuildModelMosaic",
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda",
-                    "buildModel_digits")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="centralityTitle",
-                title="Centrality",
-                visible=FALSE))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="centralityContent",
-                visible=FALSE,
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda",
-                    "centrality_loops",
-                    "centrality_normalize",
-                    "centrality_Betweenness",
-                    "centrality_BetweennessRSP",
-                    "centrality_Closeness",
-                    "centrality_ClosenessIn",
-                    "centrality_ClosenessOut",
-                    "centrality_Clustering",
-                    "centrality_Diffusion",
-                    "centrality_InStrength",
-                    "centrality_OutStrength")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="centralityTable",
-                title="Centrality Measures",
-                visible=FALSE,
-                columns=list(
-                    list(
-                        `name`="state", 
-                        `type`="text")),
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda",
-                    "centrality_loops",
-                    "centrality_normalize",
-                    "centrality_Betweenness",
-                    "centrality_BetweennessRSP",
-                    "centrality_Closeness",
-                    "centrality_ClosenessIn",
-                    "centrality_ClosenessOut",
-                    "centrality_Clustering",
-                    "centrality_Diffusion",
-                    "centrality_InStrength",
-                    "centrality_OutStrength")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="centrality_plot",
-                width=600,
-                height=600,
-                visible=FALSE,
-                renderFun=".showCentralityPlot",
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda",
-                    "centrality_loops",
-                    "centrality_normalize",
-                    "centrality_Betweenness",
-                    "centrality_BetweennessRSP",
-                    "centrality_Closeness",
-                    "centrality_ClosenessIn",
-                    "centrality_ClosenessOut",
-                    "centrality_Clustering",
-                    "centrality_Diffusion",
-                    "centrality_InStrength",
-                    "centrality_OutStrength")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="centralityStabilityTitle",
-                title="Centrality Stability",
-                visible=FALSE))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="centralityStabilityTable",
-                title="Centrality Stability (CS-Coefficients)",
-                visible=FALSE,
-                columns=list(
-                    list(
-                        `name`="measure", 
-                        `title`="Measure", 
-                        `type`="text"),
-                    list(
-                        `name`="cs_coefficient", 
-                        `title`="CS-Coefficient", 
-                        `type`="number")),
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda",
-                    "centrality_loops",
-                    "centrality_normalize",
-                    "centrality_stability_iteration",
-                    "centrality_stability_threshold",
-                    "centrality_stability_certainty",
-                    "centrality_stability_InStrength",
-                    "centrality_stability_OutStrength",
-                    "centrality_stability_Betweenness")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="centrality_stability_plot",
-                width=600,
-                height=500,
-                visible=FALSE,
-                renderFun=".showCentralityStabilityPlot",
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda",
-                    "centrality_loops",
-                    "centrality_normalize",
-                    "centrality_stability_iteration",
-                    "centrality_stability_threshold",
-                    "centrality_stability_certainty",
-                    "centrality_stability_InStrength",
-                    "centrality_stability_OutStrength",
-                    "centrality_stability_Betweenness")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="edgeBetweennessTitle",
-                title="Edge betweenness",
-                visible=FALSE))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="edgeBetweenness_plot",
-                width=600,
-                height=600,
-                visible=FALSE,
-                renderFun=".showEdgeBetweennessPlot",
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda",
-                    "edgeBetweenness_plot_cut",
-                    "edgeBetweenness_plot_min_value",
-                    "edgeBetweenness_plot_edge_label_size",
-                    "edgeBetweenness_plot_node_size",
-                    "edgeBetweenness_plot_node_label_size",
-                    "edgeBetweenness_plot_layout")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="edgeBetweennessTable",
-                title="Edge Betweenness",
-                visible="(edgeBetweenness_show_table)",
-                columns=list(
-                    list(
-                        `name`="from", 
-                        `title`="From", 
-                        `type`="text"),
-                    list(
-                        `name`="to", 
-                        `title`="To", 
-                        `type`="text"),
-                    list(
-                        `name`="value", 
-                        `title`="Value", 
-                        `type`="number")),
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="edgeBetweennessNoResultsNote",
-                visible=FALSE,
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="communityTitle",
-                title="Community",
-                visible=FALSE))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="communityContent",
-                visible=FALSE,
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda",
-                    "community_methods",
-                    "community_gamma")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="community_plot",
-                width=600,
-                height=600,
-                visible=FALSE,
-                renderFun=".showCommunityPlot",
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda",
-                    "community_methods",
-                    "community_gamma",
-                    "community_plot_layout")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="communityTable",
-                title="Community Assignments",
-                visible="(community_show_table)",
-                columns=list(
-                    list(
-                        `name`="state", 
-                        `title`="State", 
-                        `type`="text")),
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda",
-                    "community_methods",
-                    "community_gamma")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="cliquesTitle",
-                title="Cliques",
-                visible=FALSE))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
-                    cliques_combined_plot = function() private$.items[["cliques_combined_plot"]]),
+                    matrix = function() private$.items[["matrix"]],
+                    inits = function() private$.items[["inits"]],
+                    plot = function() private$.items[["plot"]],
+                    histogram = function() private$.items[["histogram"]],
+                    frequencies = function() private$.items[["frequencies"]],
+                    mosaic = function() private$.items[["mosaic"]]),
                 private = list(),
                 public=list(
                     initialize=function(options) {
                         super$initialize(
                             options=options,
-                            name="cliques_multiple_plot",
-                            title="",
+                            name="model",
+                            title="Transition Model")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="matrix",
+                            title="Transition Matrix",
+                            visible="(buildModel_show_matrix)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="from", 
+                                    `title`="From", 
+                                    `type`="text")),
                             clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda",
-                    "cliques_size",
-                    "cliques_threshold",
-                    "cliques_plot_min_value",
-                    "cliques_plot_edge_label_size",
-                    "cliques_plot_node_size",
-                    "cliques_plot_node_label_size",
-                    "cliques_plot_layout"))
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="inits",
+                            title="Initial Probabilities",
+                            visible="(buildModel_show_matrix)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="state", 
+                                    `title`="State", 
+                                    `type`="text"),
+                                list(
+                                    `name`="prob", 
+                                    `title`="Probability", 
+                                    `type`="number")),
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda")))
                         self$add(jmvcore::Image$new(
                             options=options,
-                            name="cliques_combined_plot",
+                            name="plot",
+                            title="Network",
+                            width=600,
+                            height=600,
+                            visible="(buildModel_show_plot)",
+                            renderFun=".showModelPlot",
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "buildModel_plot_cut",
+                                "buildModel_plot_min_value",
+                                "buildModel_plot_edge_label_size",
+                                "buildModel_plot_node_size",
+                                "buildModel_plot_node_label_size",
+                                "buildModel_plot_layout")))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="histogram",
+                            title="Edge Weights",
+                            width=600,
+                            height=600,
+                            visible="(buildModel_show_histo)",
+                            renderFun=".showModelHistogram",
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda")))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="frequencies",
+                            title="State Frequencies",
+                            width=600,
+                            height=600,
+                            visible="(buildModel_show_frequencies)",
+                            renderFun=".showModelFrequencies",
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda")))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="mosaic",
+                            title="Mosaic Plot",
+                            width=600,
+                            height=450,
+                            visible="(buildModel_show_mosaic && buildModel_type:frequency)",
+                            renderFun=".showModelMosaic",
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda")))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    table = function() private$.items[["table"]],
+                    plot = function() private$.items[["plot"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="centrality",
+                            title="Centrality")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="table",
+                            title="Centrality Measures",
+                            visible="(centrality_show_table)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="state", 
+                                    `title`="State", 
+                                    `type`="text"),
+                                list(
+                                    `name`="OutStrength", 
+                                    `title`="Out-strength", 
+                                    `type`="number", 
+                                    `visible`="(centrality_OutStrength)"),
+                                list(
+                                    `name`="InStrength", 
+                                    `title`="In-strength", 
+                                    `type`="number", 
+                                    `visible`="(centrality_InStrength)"),
+                                list(
+                                    `name`="ClosenessIn", 
+                                    `title`="Closeness (in)", 
+                                    `type`="number", 
+                                    `visible`="(centrality_ClosenessIn)"),
+                                list(
+                                    `name`="ClosenessOut", 
+                                    `title`="Closeness (out)", 
+                                    `type`="number", 
+                                    `visible`="(centrality_ClosenessOut)"),
+                                list(
+                                    `name`="Closeness", 
+                                    `title`="Closeness", 
+                                    `type`="number", 
+                                    `visible`="(centrality_Closeness)"),
+                                list(
+                                    `name`="Betweenness", 
+                                    `title`="Betweenness", 
+                                    `type`="number", 
+                                    `visible`="(centrality_Betweenness)"),
+                                list(
+                                    `name`="BetweennessRSP", 
+                                    `title`="Betweenness (RSP)", 
+                                    `type`="number", 
+                                    `visible`="(centrality_BetweennessRSP)"),
+                                list(
+                                    `name`="Diffusion", 
+                                    `title`="Diffusion", 
+                                    `type`="number", 
+                                    `visible`="(centrality_Diffusion)"),
+                                list(
+                                    `name`="Clustering", 
+                                    `title`="Clustering", 
+                                    `type`="number", 
+                                    `visible`="(centrality_Clustering)")),
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "centrality_loops",
+                                "centrality_normalize",
+                                "centrality_OutStrength",
+                                "centrality_InStrength",
+                                "centrality_ClosenessIn",
+                                "centrality_ClosenessOut",
+                                "centrality_Closeness",
+                                "centrality_Betweenness",
+                                "centrality_BetweennessRSP",
+                                "centrality_Diffusion",
+                                "centrality_Clustering")))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="plot",
+                            title="Centrality Plot",
+                            width=600,
+                            height=600,
+                            visible="(centrality_show_plot)",
+                            renderFun=".showCentralityPlot",
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "centrality_loops",
+                                "centrality_normalize",
+                                "centrality_OutStrength",
+                                "centrality_InStrength",
+                                "centrality_ClosenessIn",
+                                "centrality_ClosenessOut",
+                                "centrality_Closeness",
+                                "centrality_Betweenness",
+                                "centrality_BetweennessRSP",
+                                "centrality_Diffusion",
+                                "centrality_Clustering")))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    table = function() private$.items[["table"]],
+                    plot = function() private$.items[["plot"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="stability",
+                            title="Centrality Stability")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="table",
+                            title="CS-Coefficients",
+                            visible="(centrality_stability_show_table)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="measure", 
+                                    `title`="Measure", 
+                                    `type`="text"),
+                                list(
+                                    `name`="cs_coefficient", 
+                                    `title`="CS-coefficient", 
+                                    `type`="number")),
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "centrality_loops",
+                                "centrality_normalize",
+                                "centrality_stability_iteration",
+                                "centrality_stability_threshold",
+                                "centrality_stability_certainty",
+                                "centrality_stability_InStrength",
+                                "centrality_stability_OutStrength",
+                                "centrality_stability_Betweenness")))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="plot",
+                            title="Stability Plot",
+                            width=600,
+                            height=500,
+                            visible="(centrality_stability_show_plot)",
+                            renderFun=".showStabilityPlot",
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "centrality_loops",
+                                "centrality_normalize",
+                                "centrality_stability_iteration",
+                                "centrality_stability_threshold",
+                                "centrality_stability_certainty",
+                                "centrality_stability_InStrength",
+                                "centrality_stability_OutStrength",
+                                "centrality_stability_Betweenness")))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    table = function() private$.items[["table"]],
+                    plot = function() private$.items[["plot"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="edgeBetweenness",
+                            title="Edge Betweenness")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="table",
+                            title="Edge Betweenness",
+                            visible="(edgeBetweenness_show_table)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="from", 
+                                    `title`="From", 
+                                    `type`="text"),
+                                list(
+                                    `name`="to", 
+                                    `title`="To", 
+                                    `type`="text"),
+                                list(
+                                    `name`="value", 
+                                    `title`="Betweenness", 
+                                    `type`="number")),
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda")))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="plot",
+                            title="Edge Betweenness Network",
+                            width=600,
+                            height=600,
+                            visible="(edgeBetweenness_show_plot)",
+                            renderFun=".showEdgeBetweennessPlot",
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "edgeBetweenness_plot_cut",
+                                "edgeBetweenness_plot_min_value",
+                                "edgeBetweenness_plot_edge_label_size",
+                                "edgeBetweenness_plot_node_size",
+                                "edgeBetweenness_plot_node_label_size",
+                                "edgeBetweenness_plot_layout")))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    table = function() private$.items[["table"]],
+                    plot = function() private$.items[["plot"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="community",
+                            title="Communities")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="table",
+                            title="Community Assignments",
+                            visible="(community_show_table)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="state", 
+                                    `title`="State", 
+                                    `type`="text"),
+                                list(
+                                    `name`="community", 
+                                    `title`="Community", 
+                                    `type`="integer")),
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "community_methods",
+                                "community_gamma")))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="plot",
+                            title="Community Plot",
+                            width=600,
+                            height=600,
+                            visible="(community_show_plot)",
+                            renderFun=".showCommunityPlot",
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "community_methods",
+                                "community_gamma",
+                                "community_plot_layout")))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    plot = function() private$.items[["plot"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="cliques",
+                            title="Cliques")
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="plot",
+                            title="Cliques",
                             width=900,
                             height=700,
-                            visible=TRUE,
-                            renderFun=".showCliquesMultiPlot"))}))$new(options=options))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="bootstrapTitle",
-                title="Bootstrap",
-                visible=FALSE))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="bootstrap_plot",
-                width=600,
-                height=600,
-                visible=FALSE,
-                renderFun=".showBootstrapPlot",
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda",
-                    "bootstrap_iteration",
-                    "bootstrap_level",
-                    "bootstrap_method",
-                    "bootstrap_range_low",
-                    "bootstrap_range_up",
-                    "bootstrap_threshold",
-                    "bootstrap_plot_cut",
-                    "bootstrap_plot_min_value",
-                    "bootstrap_plot_edge_label_size",
-                    "bootstrap_plot_node_size",
-                    "bootstrap_plot_node_label_size",
-                    "bootstrap_plot_layout")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="bootstrapTable",
-                title="Bootstrap Results",
-                visible="(bootstrap_show_table)",
-                columns=list(
-                    list(
-                        `name`="from", 
-                        `title`="From", 
-                        `type`="text"),
-                    list(
-                        `name`="to", 
-                        `title`="To", 
-                        `type`="text"),
-                    list(
-                        `name`="weight", 
-                        `title`="Weight", 
-                        `type`="number"),
-                    list(
-                        `name`="p_value", 
-                        `title`="p-value", 
-                        `type`="number"),
-                    list(
-                        `name`="cr_lower", 
-                        `title`="CR Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="cr_upper", 
-                        `title`="CR Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="significant", 
-                        `title`="Significant", 
-                        `type`="text")),
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda",
-                    "bootstrap_iteration",
-                    "bootstrap_level",
-                    "bootstrap_method",
-                    "bootstrap_range_low",
-                    "bootstrap_range_up",
-                    "bootstrap_threshold")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="permutationTable",
-                title="Permutation Test Results",
-                visible=FALSE,
-                columns=list(
-                    list(
-                        `name`="group_comparison", 
-                        `title`="Comparison", 
-                        `type`="text"),
-                    list(
-                        `name`="edge_name", 
-                        `title`="Edge", 
-                        `type`="text"),
-                    list(
-                        `name`="diff_true", 
-                        `title`="Diff (True)", 
-                        `type`="number"),
-                    list(
-                        `name`="effect_size", 
-                        `title`="Effect Size", 
-                        `type`="number"),
-                    list(
-                        `name`="p_value", 
-                        `title`="p-value", 
-                        `type`="number")),
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda",
-                    "permutation_iter",
-                    "permutation_paired",
-                    "permutation_level")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="sequences_plot",
-                title="Sequence Analysis Plot",
-                width=600,
-                height=400,
-                visible=FALSE,
-                renderFun=".showSequencesPlot",
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda",
-                    "sequences_type",
-                    "sequences_scale",
-                    "sequences_geom",
-                    "sequences_include_na",
-                    "sequences_tick")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="patternTitle",
-                title="Pattern Discovery",
-                visible=FALSE))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="patternTable",
-                title="Discovered Patterns",
-                visible=FALSE,
-                columns=list(
-                    list(
-                        `name`="pattern", 
-                        `title`="Pattern", 
-                        `type`="text"),
-                    list(
-                        `name`="length", 
-                        `title`="Length", 
-                        `type`="integer"),
-                    list(
-                        `name`="count", 
-                        `title`="Count", 
-                        `type`="integer"),
-                    list(
-                        `name`="frequency", 
-                        `title`="Frequency", 
-                        `type`="number"),
-                    list(
-                        `name`="proportion", 
-                        `title`="Proportion", 
-                        `type`="number"),
-                    list(
-                        `name`="support", 
-                        `title`="Support", 
-                        `type`="number"),
-                    list(
-                        `name`="lift", 
-                        `title`="Lift", 
-                        `type`="number")),
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda",
-                    "pattern_type",
-                    "pattern_custom",
-                    "pattern_len_min",
-                    "pattern_len_max",
-                    "pattern_gap_min",
-                    "pattern_gap_max",
-                    "pattern_min_support",
-                    "pattern_min_count",
-                    "pattern_starts_with_use",
-                    "pattern_starts_with",
-                    "pattern_ends_with_use",
-                    "pattern_ends_with",
-                    "pattern_contains_use",
-                    "pattern_contains")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="indicesTitle",
-                title="Sequence Indices",
-                visible=FALSE))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="indicesTable",
-                title="Sequence Indices",
-                visible=FALSE,
-                columns=list(
-                    list(
-                        `name`="sequence_id", 
-                        `title`="Seq", 
-                        `type`="integer"),
-                    list(
-                        `name`="actor", 
-                        `title`="Actor", 
-                        `type`="text"),
-                    list(
-                        `name`="valid_n", 
-                        `title`="Valid N", 
-                        `type`="integer"),
-                    list(
-                        `name`="valid_proportion", 
-                        `title`="Valid %", 
-                        `type`="number"),
-                    list(
-                        `name`="unique_states", 
-                        `title`="Unique", 
-                        `type`="integer"),
-                    list(
-                        `name`="longitudinal_entropy", 
-                        `title`="Entropy", 
-                        `type`="number"),
-                    list(
-                        `name`="simpson_diversity", 
-                        `title`="Simpson", 
-                        `type`="number"),
-                    list(
-                        `name`="mean_spell_duration", 
-                        `title`="Mean Spell", 
-                        `type`="number"),
-                    list(
-                        `name`="max_spell_duration", 
-                        `title`="Max Spell", 
-                        `type`="number"),
-                    list(
-                        `name`="self_loop_tendency", 
-                        `title`="Self-Loop", 
-                        `type`="number"),
-                    list(
-                        `name`="transition_rate", 
-                        `title`="Trans Rate", 
-                        `type`="number"),
-                    list(
-                        `name`="transition_complexity", 
-                        `title`="Trans Cplx", 
-                        `type`="number"),
-                    list(
-                        `name`="cyclic_feedback_strength", 
-                        `title`="Feedback", 
-                        `type`="number"),
-                    list(
-                        `name`="initial_state_persistence", 
-                        `title`="Init Persist", 
-                        `type`="number"),
-                    list(
-                        `name`="initial_state_proportion", 
-                        `title`="Init %", 
-                        `type`="number"),
-                    list(
-                        `name`="initial_state_influence_decay", 
-                        `title`="Init Decay", 
-                        `type`="number"),
-                    list(
-                        `name`="first_state", 
-                        `title`="First", 
-                        `type`="text"),
-                    list(
-                        `name`="last_state", 
-                        `title`="Last", 
-                        `type`="text"),
-                    list(
-                        `name`="dominant_state", 
-                        `title`="Dominant", 
-                        `type`="text"),
-                    list(
-                        `name`="dominant_proportion", 
-                        `title`="Dom %", 
-                        `type`="number"),
-                    list(
-                        `name`="dominant_max_spell", 
-                        `title`="Dom Max", 
-                        `type`="integer"),
-                    list(
-                        `name`="emergent_state", 
-                        `title`="Emergent", 
-                        `type`="text"),
-                    list(
-                        `name`="emergent_state_persistence", 
-                        `title`="Em Persist", 
-                        `type`="number"),
-                    list(
-                        `name`="emergent_state_proportion", 
-                        `title`="Em %", 
-                        `type`="number"),
-                    list(
-                        `name`="complexity_index", 
-                        `title`="Complexity", 
-                        `type`="number")),
-                clearWith=list(
-                    "buildModel_variables_long_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_long_order",
-                    "buildModel_type",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "buildModel_lambda",
-                    "indices_group",
-                    "indices_favorable",
-                    "indices_omega")))}))
+                            visible="(cliques_show_plot)",
+                            renderFun=".showCliquesPlot",
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "cliques_size",
+                                "cliques_threshold",
+                                "cliques_plot_cut",
+                                "cliques_plot_min_value",
+                                "cliques_plot_edge_label_size",
+                                "cliques_plot_node_size",
+                                "cliques_plot_node_label_size",
+                                "cliques_plot_layout")))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    table = function() private$.items[["table"]],
+                    plot = function() private$.items[["plot"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="bootstrap",
+                            title="Bootstrap")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="table",
+                            title="Bootstrap Results",
+                            visible="(bootstrap_show_table)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="from", 
+                                    `title`="From", 
+                                    `type`="text"),
+                                list(
+                                    `name`="to", 
+                                    `title`="To", 
+                                    `type`="text"),
+                                list(
+                                    `name`="weight", 
+                                    `title`="Weight", 
+                                    `type`="number"),
+                                list(
+                                    `name`="p_value", 
+                                    `title`="p", 
+                                    `type`="number"),
+                                list(
+                                    `name`="cr_lower", 
+                                    `title`="Lower", 
+                                    `type`="number", 
+                                    `superTitle`="Consistency range"),
+                                list(
+                                    `name`="cr_upper", 
+                                    `title`="Upper", 
+                                    `type`="number", 
+                                    `superTitle`="Consistency range"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="Lower", 
+                                    `type`="number", 
+                                    `superTitle`="Confidence interval"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="Upper", 
+                                    `type`="number", 
+                                    `superTitle`="Confidence interval"),
+                                list(
+                                    `name`="significant", 
+                                    `title`="Significant", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "bootstrap_iteration",
+                                "bootstrap_level",
+                                "bootstrap_method",
+                                "bootstrap_range_low",
+                                "bootstrap_range_up",
+                                "bootstrap_threshold")))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="plot",
+                            title="Bootstrap Network",
+                            width=600,
+                            height=600,
+                            visible="(bootstrap_show_plot)",
+                            renderFun=".showBootstrapPlot",
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "bootstrap_iteration",
+                                "bootstrap_level",
+                                "bootstrap_method",
+                                "bootstrap_range_low",
+                                "bootstrap_range_up",
+                                "bootstrap_threshold",
+                                "bootstrap_plot_cut",
+                                "bootstrap_plot_min_value",
+                                "bootstrap_plot_edge_label_size",
+                                "bootstrap_plot_node_size",
+                                "bootstrap_plot_node_label_size",
+                                "bootstrap_plot_layout")))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    index = function() private$.items[["index"]],
+                    distribution = function() private$.items[["distribution"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="sequences",
+                            title="Sequences")
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="index",
+                            title="Sequence Index Plot",
+                            width=600,
+                            height=450,
+                            visible="(sequences_show_index)",
+                            renderFun=".showSequenceIndexPlot",
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "sequences_show_n",
+                                "sequences_tick",
+                                "sequences_xlab",
+                                "sequences_legend_title",
+                                "sequences_border",
+                                "sequences_na_color",
+                                "sequences_width",
+                                "sequences_height",
+                                "sequences_sort",
+                                "sequences_index_title",
+                                "sequences_index_ylab")))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="distribution",
+                            title="State Distribution Plot",
+                            width=600,
+                            height=450,
+                            visible="(sequences_show_distribution)",
+                            renderFun=".showSequenceDistributionPlot",
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "sequences_show_n",
+                                "sequences_tick",
+                                "sequences_xlab",
+                                "sequences_legend_title",
+                                "sequences_border",
+                                "sequences_na_color",
+                                "sequences_width",
+                                "sequences_height",
+                                "sequences_scale",
+                                "sequences_geom",
+                                "sequences_include_na",
+                                "sequences_distribution_title",
+                                "sequences_distribution_ylab")))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    table = function() private$.items[["table"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="patterns",
+                            title="Pattern Discovery")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="table",
+                            title="Discovered Patterns",
+                            visible="(pattern_show_table)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="pattern", 
+                                    `title`="Pattern", 
+                                    `type`="text"),
+                                list(
+                                    `name`="length", 
+                                    `title`="Length", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="count", 
+                                    `title`="Count", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="frequency", 
+                                    `title`="Frequency", 
+                                    `type`="number"),
+                                list(
+                                    `name`="proportion", 
+                                    `title`="Proportion", 
+                                    `type`="number"),
+                                list(
+                                    `name`="support", 
+                                    `title`="Support", 
+                                    `type`="number"),
+                                list(
+                                    `name`="lift", 
+                                    `title`="Lift", 
+                                    `type`="number")),
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "pattern_type",
+                                "pattern_len_min",
+                                "pattern_len_max",
+                                "pattern_gap_min",
+                                "pattern_gap_max",
+                                "pattern_min_support",
+                                "pattern_min_count",
+                                "pattern_starts_with_use",
+                                "pattern_starts_with",
+                                "pattern_ends_with_use",
+                                "pattern_ends_with",
+                                "pattern_contains_use",
+                                "pattern_contains")))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    table = function() private$.items[["table"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="indices",
+                            title="Sequence Indices")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="table",
+                            title="Sequence Indices",
+                            visible="(indices_show_table)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="sequence_id", 
+                                    `title`="Sequence", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="actor", 
+                                    `title`="Actor", 
+                                    `type`="text"),
+                                list(
+                                    `name`="session", 
+                                    `title`="Session", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="valid_n", 
+                                    `title`="Valid N", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="valid_proportion", 
+                                    `title`="Valid proportion", 
+                                    `type`="number"),
+                                list(
+                                    `name`="unique_states", 
+                                    `title`="Unique states", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="longitudinal_entropy", 
+                                    `title`="Longitudinal entropy", 
+                                    `type`="number"),
+                                list(
+                                    `name`="simpson_diversity", 
+                                    `title`="Simpson diversity", 
+                                    `type`="number"),
+                                list(
+                                    `name`="mean_spell_duration", 
+                                    `title`="Mean spell duration", 
+                                    `type`="number"),
+                                list(
+                                    `name`="max_spell_duration", 
+                                    `title`="Max spell duration", 
+                                    `type`="number"),
+                                list(
+                                    `name`="self_loop_tendency", 
+                                    `title`="Self-loop tendency", 
+                                    `type`="number"),
+                                list(
+                                    `name`="transition_rate", 
+                                    `title`="Transition rate", 
+                                    `type`="number"),
+                                list(
+                                    `name`="transition_complexity", 
+                                    `title`="Transition complexity", 
+                                    `type`="number"),
+                                list(
+                                    `name`="cyclic_feedback_strength", 
+                                    `title`="Cyclic feedback strength", 
+                                    `type`="number"),
+                                list(
+                                    `name`="initial_state_persistence", 
+                                    `title`="Initial state persistence", 
+                                    `type`="number"),
+                                list(
+                                    `name`="initial_state_proportion", 
+                                    `title`="Initial state proportion", 
+                                    `type`="number"),
+                                list(
+                                    `name`="initial_state_influence_decay", 
+                                    `title`="Initial state influence decay", 
+                                    `type`="number"),
+                                list(
+                                    `name`="first_state", 
+                                    `title`="First state", 
+                                    `type`="text"),
+                                list(
+                                    `name`="last_state", 
+                                    `title`="Last state", 
+                                    `type`="text"),
+                                list(
+                                    `name`="dominant_state", 
+                                    `title`="Dominant state", 
+                                    `type`="text"),
+                                list(
+                                    `name`="dominant_proportion", 
+                                    `title`="Dominant proportion", 
+                                    `type`="number"),
+                                list(
+                                    `name`="dominant_max_spell", 
+                                    `title`="Dominant max spell", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="emergent_state", 
+                                    `title`="Emergent state", 
+                                    `type`="text"),
+                                list(
+                                    `name`="emergent_state_persistence", 
+                                    `title`="Emergent state persistence", 
+                                    `type`="number"),
+                                list(
+                                    `name`="emergent_state_proportion", 
+                                    `title`="Emergent state proportion", 
+                                    `type`="number"),
+                                list(
+                                    `name`="integrative_potential", 
+                                    `title`="Integrative potential", 
+                                    `type`="number"),
+                                list(
+                                    `name`="complexity_index", 
+                                    `title`="Complexity index", 
+                                    `type`="number")),
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "indices_favorable",
+                                "indices_omega")))}))$new(options=options))}))
 
 TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "TNABase",
@@ -1919,7 +2112,6 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param buildModel_show_histo .
 #' @param buildModel_show_frequencies .
 #' @param buildModel_show_mosaic .
-#' @param buildModel_digits .
 #' @param centrality_loops .
 #' @param centrality_normalize .
 #' @param centrality_show_table .
@@ -1980,12 +2172,26 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param bootstrap_plot_node_size .
 #' @param bootstrap_plot_node_label_size .
 #' @param bootstrap_plot_layout .
-#' @param sequences_show_plot .
-#' @param sequences_type .
+#' @param sequences_show_index One row per sequence, coloured by state.
+#' @param sequences_show_distribution The proportion (or count) of each state
+#'   at every time point.
+#' @param sequences_sort .
 #' @param sequences_scale .
 #' @param sequences_geom .
 #' @param sequences_include_na .
+#' @param sequences_show_n .
 #' @param sequences_tick .
+#' @param sequences_index_title .
+#' @param sequences_index_ylab .
+#' @param sequences_distribution_title .
+#' @param sequences_distribution_ylab .
+#' @param sequences_xlab .
+#' @param sequences_legend_title .
+#' @param sequences_border Colour of tile borders (index plot) and bar
+#'   outlines (distribution plot), e.g. grey40. Empty for none.
+#' @param sequences_na_color .
+#' @param sequences_width .
+#' @param sequences_height .
 #' @param pattern_show_table .
 #' @param pattern_type .
 #' @param pattern_len_min .
@@ -2011,47 +2217,29 @@ TNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$errorText} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$tnaTitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$buildModelTitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$buildModelContent} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$buildModel_plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$buildModel_histo} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$buildModel_frequencies} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$buildModel_mosaic} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$centralityTitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$centralityContent} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$centralityTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$centrality_plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$centralityStabilityTitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$centralityStabilityTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$centrality_stability_plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$edgeBetweennessTitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$edgeBetweenness_plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$edgeBetweennessTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$edgeBetweennessNoResultsNote} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$communityTitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$communityContent} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$community_plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$communityTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$cliquesTitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$cliques_multiple_plot$cliques_combined_plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$bootstrapTitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$bootstrap_plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$permutationTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$sequences_plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$patternTitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$patternTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$indicesTitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$indicesTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$modelCache} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$model$matrix} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$model$inits} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$model$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$model$histogram} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$model$frequencies} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$model$mosaic} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$centrality$table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$centrality$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$stability$table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stability$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$edgeBetweenness$table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$edgeBetweenness$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$community$table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$community$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$cliques$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$bootstrap$table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$bootstrap$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$sequences$index} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$sequences$distribution} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$patterns$table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$indices$table} \tab \tab \tab \tab \tab a table \cr
 #' }
-#'
-#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
-#'
-#' \code{results$centralityTable$asDF}
-#'
-#' \code{as.data.frame(results$centralityTable)}
 #'
 #' @export
 TNA <- function(
@@ -2075,7 +2263,6 @@ TNA <- function(
     buildModel_show_histo = FALSE,
     buildModel_show_frequencies = FALSE,
     buildModel_show_mosaic = FALSE,
-    buildModel_digits = 1,
     centrality_loops = FALSE,
     centrality_normalize = FALSE,
     centrality_show_table = FALSE,
@@ -2136,12 +2323,24 @@ TNA <- function(
     bootstrap_plot_node_size = 8,
     bootstrap_plot_node_label_size = 1,
     bootstrap_plot_layout = "circle",
-    sequences_show_plot = FALSE,
-    sequences_type = "index",
+    sequences_show_index = FALSE,
+    sequences_show_distribution = FALSE,
+    sequences_sort = "none",
     sequences_scale = "proportion",
     sequences_geom = "bar",
     sequences_include_na = FALSE,
+    sequences_show_n = TRUE,
     sequences_tick = 5,
+    sequences_index_title = "",
+    sequences_index_ylab = "",
+    sequences_distribution_title = "",
+    sequences_distribution_ylab = "",
+    sequences_xlab = "",
+    sequences_legend_title = "",
+    sequences_border = "",
+    sequences_na_color = "white",
+    sequences_width = 600,
+    sequences_height = 450,
     pattern_show_table = FALSE,
     pattern_type = "ngram",
     pattern_len_min = 2,
@@ -2200,7 +2399,6 @@ TNA <- function(
         buildModel_show_histo = buildModel_show_histo,
         buildModel_show_frequencies = buildModel_show_frequencies,
         buildModel_show_mosaic = buildModel_show_mosaic,
-        buildModel_digits = buildModel_digits,
         centrality_loops = centrality_loops,
         centrality_normalize = centrality_normalize,
         centrality_show_table = centrality_show_table,
@@ -2261,12 +2459,24 @@ TNA <- function(
         bootstrap_plot_node_size = bootstrap_plot_node_size,
         bootstrap_plot_node_label_size = bootstrap_plot_node_label_size,
         bootstrap_plot_layout = bootstrap_plot_layout,
-        sequences_show_plot = sequences_show_plot,
-        sequences_type = sequences_type,
+        sequences_show_index = sequences_show_index,
+        sequences_show_distribution = sequences_show_distribution,
+        sequences_sort = sequences_sort,
         sequences_scale = sequences_scale,
         sequences_geom = sequences_geom,
         sequences_include_na = sequences_include_na,
+        sequences_show_n = sequences_show_n,
         sequences_tick = sequences_tick,
+        sequences_index_title = sequences_index_title,
+        sequences_index_ylab = sequences_index_ylab,
+        sequences_distribution_title = sequences_distribution_title,
+        sequences_distribution_ylab = sequences_distribution_ylab,
+        sequences_xlab = sequences_xlab,
+        sequences_legend_title = sequences_legend_title,
+        sequences_border = sequences_border,
+        sequences_na_color = sequences_na_color,
+        sequences_width = sequences_width,
+        sequences_height = sequences_height,
         pattern_show_table = pattern_show_table,
         pattern_type = pattern_type,
         pattern_len_min = pattern_len_min,

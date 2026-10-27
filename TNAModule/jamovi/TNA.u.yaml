@@ -93,7 +93,7 @@ children:
                 name: buildModel_threshold
                 format: number
   - type: Label
-    label: ━━ 𝗡𝗲𝘁𝘄𝗼𝗿𝗸 𝗔𝗻𝗮𝗹𝘆𝘀𝗶𝘀 ━━
+    label: Network Analysis
     style: list-inline
     margin: large
   - type: CollapseBox
@@ -151,10 +151,6 @@ children:
               - type: ComboBox
                 name: buildModel_plot_layout
                 enable: (buildModel_show_plot)
-              - type: TextBox
-                name: buildModel_digits
-                format: number
-                enable: (buildModel_show_mosaic)
   - type: CollapseBox
     label: Centrality Analysis
     margin: large
@@ -179,19 +175,19 @@ children:
             children:
               - type: CheckBox
                 name: centrality_OutStrength
-                label: Out Strength
+                label: Out-strength
               - type: CheckBox
                 name: centrality_InStrength
-                label: In Strength
+                label: In-strength
               - type: CheckBox
                 name: centrality_Closeness
                 label: Closeness
               - type: CheckBox
                 name: centrality_ClosenessIn
-                label: Closeness In
+                label: Closeness (in)
               - type: CheckBox
                 name: centrality_ClosenessOut
-                label: Closeness Out
+                label: Closeness (out)
       - type: LayoutBox
         stretchFactor: 1
         children:
@@ -212,7 +208,7 @@ children:
                 label: Betweenness
               - type: CheckBox
                 name: centrality_BetweennessRSP
-                label: Betweenness RSP
+                label: Betweenness (RSP)
               - type: CheckBox
                 name: centrality_Clustering
                 label: Clustering
@@ -384,7 +380,7 @@ children:
                 name: cliques_plot_layout
                 enable: (cliques_show_plot)
   - type: Label
-    label: ━━ 𝗖𝗼𝗻𝗳𝗶𝗿𝗺𝗮𝘁𝗼𝗿𝘆 𝗧𝗲𝘀𝘁𝗶𝗻𝗴 ━━
+    label: Confirmatory Testing
     style: list-inline
     margin: large
   - type: CollapseBox
@@ -495,19 +491,19 @@ children:
             children:
               - type: CheckBox
                 name: centrality_stability_show_table
-                label: Stability Table
+                label: Table
               - type: CheckBox
                 name: centrality_stability_show_plot
-                label: Stability Plot
+                label: Plot
           - type: Label
             label: Measures
             children:
               - type: CheckBox
                 name: centrality_stability_InStrength
-                label: In Strength
+                label: In-strength
               - type: CheckBox
                 name: centrality_stability_OutStrength
-                label: Out Strength
+                label: Out-strength
               - type: CheckBox
                 name: centrality_stability_Betweenness
                 label: Betweenness
@@ -527,7 +523,7 @@ children:
                 name: centrality_stability_certainty
                 format: number
   - type: Label
-    label: ━━ 𝗦𝗲𝗾𝘂𝗲𝗻𝗰𝗲 𝗔𝗻𝗮𝗹𝘆𝘀𝗶𝘀 ━━
+    label: Sequences
     style: list-inline
     margin: large
   - type: CollapseBox
@@ -541,60 +537,86 @@ children:
         stretchFactor: 1
         children:
           - type: Label
-            label: Display Options
+            label: Plots
             children:
               - type: CheckBox
-                name: sequences_show_plot
-                label: Sequence plot
-      - type: LayoutBox
-        stretchFactor: 1
-        children:
+                name: sequences_show_index
+              - type: CheckBox
+                name: sequences_show_distribution
           - type: Label
-            label: Plot Type
+            label: Index Plot
             children:
-              - type: RadioButton
-                name: sequences_type_index
-                optionName: sequences_type
-                optionPart: index
-              - type: RadioButton
-                name: sequences_type_distribution
-                optionName: sequences_type
-                optionPart: distribution
+              - type: ComboBox
+                name: sequences_sort
+                enable: (sequences_show_index)
+              - type: TextBox
+                name: sequences_index_title
+                format: string
+                enable: (sequences_show_index)
+              - type: TextBox
+                name: sequences_index_ylab
+                format: string
+                enable: (sequences_show_index)
           - type: Label
-            label: Scale
+            label: Distribution Plot
             children:
-              - type: RadioButton
-                name: sequences_scale_proportion
-                optionName: sequences_scale
-                optionPart: proportion
-              - type: RadioButton
-                name: sequences_scale_count
-                optionName: sequences_scale
-                optionPart: count
-      - type: LayoutBox
-        stretchFactor: 1
-        children:
-          - type: Label
-            label: Geometry
-            children:
-              - type: RadioButton
-                name: sequences_geom_bar
-                optionName: sequences_geom
-                optionPart: bar
-              - type: RadioButton
-                name: sequences_geom_area
-                optionName: sequences_geom
-                optionPart: area
-          - type: Label
-            label: Options
-            children:
+              - type: ComboBox
+                name: sequences_scale
+                enable: (sequences_show_distribution)
+              - type: ComboBox
+                name: sequences_geom
+                enable: (sequences_show_distribution)
               - type: CheckBox
                 name: sequences_include_na
-                label: Include missing values
+                enable: (sequences_show_distribution)
+              - type: TextBox
+                name: sequences_distribution_title
+                format: string
+                enable: (sequences_show_distribution)
+              - type: TextBox
+                name: sequences_distribution_ylab
+                format: string
+                enable: (sequences_show_distribution)
+      - type: LayoutBox
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Appearance
+            children:
+              - type: CheckBox
+                name: sequences_show_n
+                enable: (sequences_show_index || sequences_show_distribution)
+              - type: TextBox
+                name: sequences_xlab
+                format: string
+                enable: (sequences_show_index || sequences_show_distribution)
+              - type: TextBox
+                name: sequences_legend_title
+                format: string
+                enable: (sequences_show_index || sequences_show_distribution)
               - type: TextBox
                 name: sequences_tick
                 format: number
-                label: Tick Interval
+                enable: (sequences_show_index || sequences_show_distribution)
+              - type: TextBox
+                name: sequences_border
+                format: string
+                enable: (sequences_show_index || sequences_show_distribution)
+              - type: TextBox
+                name: sequences_na_color
+                format: string
+                enable: (sequences_show_index || sequences_show_distribution)
+          - type: Label
+            label: Size
+            children:
+              - type: TextBox
+                name: sequences_width
+                format: number
+                enable: (sequences_show_index || sequences_show_distribution)
+              - type: TextBox
+                name: sequences_height
+                format: number
+                enable: (sequences_show_index || sequences_show_distribution)
   - type: CollapseBox
     label: Pattern Discovery
     margin: large
@@ -610,7 +632,7 @@ children:
             children:
               - type: CheckBox
                 name: pattern_show_table
-                label: Show patterns table
+                label: Patterns table
           - type: Label
             label: Pattern Type
             children:
@@ -707,9 +729,9 @@ children:
             children:
               - type: CheckBox
                 name: indices_show_table
-                label: Show indices table
+                label: Indices table
           - type: Label
-            label: Favorable State (optional)
+            label: Favorable State (Optional)
             children:
               - type: LevelSelector
                 name: indices_favorable

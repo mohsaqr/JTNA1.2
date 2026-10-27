@@ -1,10 +1,23 @@
 # JTNA - Jamovi Transition Network Analysis Module
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version: 1.8.4](https://img.shields.io/badge/Version-1.8.4-blue.svg)]()
+[![Version: 1.9.0](https://img.shields.io/badge/Version-1.9.0-blue.svg)]()
 [![Jamovi](https://img.shields.io/badge/Jamovi-Compatible-green.svg)](https://www.jamovi.org/)
 
 A comprehensive **jamovi module** for performing **Transition Network Analysis (TNA)** to study relational dynamics and behavioral patterns in sequential data. JTNA provides an intuitive point-and-click interface for advanced network analysis techniques -- no coding required.
+
+## What's New in 1.9
+
+Fixes every finding of the jamovi library's module audit of 1.7.1.
+
+- **Cluster TNA honours Type, Scaling and Lambda**: it used to build a relative model whatever was chosen. Patterns and indices now get the cluster of each sequence.
+- **Mosaic and frequencies plots draw**; the transition matrix and initial probabilities are proper tables you can copy into Excel or Word.
+- **One failing section no longer stops the rest**: a failure (for example community detection on a disconnected network) is reported on that section, and every other section still runs.
+- **Every panel control works**: bootstrap plot settings, the network-plot cut in Group/Cluster TNA, Lambda in Group TNA, Favorable state and Omega in TNA.
+- **The same sessions everywhere**: the model, pattern discovery and sequence indices use one prepared data set, so the session gap applies to all of them, and ISO time stamps (`2025-01-01T08:27:07Z`) keep their time of day.
+- Normalised betweenness shows its decimals; numbers follow jamovi's number format; saved files are smaller.
+- **Sequence plots revamped**: show the index and distribution plots together, and control sorting, titles, axis and legend labels, colours, tick interval, facet columns and size.
+- Grouped models with scaling scale within each group (tna does not analyse grouped models scaled across groups).
 
 ## What's New in 1.8
 

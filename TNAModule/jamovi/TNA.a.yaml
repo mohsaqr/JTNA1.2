@@ -68,9 +68,10 @@ options:
       default: False
 
     - name: buildModel_threshold
-      title: Threshold
+      title: Session gap (seconds)
       type: Integer
       default: 900
+      min: 1
     
     - name: buildModel_show_plot
       title: Plot
@@ -161,20 +162,15 @@ options:
       type: Bool
       default: False
 
-    - name: buildModel_digits
-      title: Digits
-      type: Integer
-      default: 1
-
     ### CENTRALITY DATA
 
     - name: centrality_loops
-      title: loops
+      title: Include loops
       type: Bool
       default: False
 
     - name: centrality_normalize
-      title: normalize
+      title: Normalize values
       type: Bool
       default: False
 
@@ -388,7 +384,7 @@ options:
 
     - name: community_gamma
       title: Gamma
-      type: Integer
+      type: Number
       default: 1
       min: 0
       max: 100
@@ -533,7 +529,7 @@ options:
       title: Iteration
       type: Integer
       default: 1000
-      min: 0
+      min: 10
       max: 10000
 
     - name: bootstrap_level
@@ -675,20 +671,29 @@ options:
 
     ### SEQUENCE ANALYSIS
 
-    - name: sequences_show_plot
-      title: Sequence Plot
+    - name: sequences_show_index
+      title: Index plot
       type: Bool
-      default: False
+      default: false
+      description: One row per sequence, coloured by state.
 
-    - name: sequences_type
-      title: Type
+    - name: sequences_show_distribution
+      title: Distribution plot
+      type: Bool
+      default: false
+      description: The proportion (or count) of each state at every time point.
+
+    - name: sequences_sort
+      title: Sort sequences by
       type: List
-      default: index
+      default: none
       options:
-        - title: Index
-          name: index
-        - title: Distribution
-          name: distribution
+        - title: Data order
+          name: none
+        - title: First state
+          name: first
+        - title: All time points
+          name: all
 
     - name: sequences_scale
       title: Scale
@@ -715,12 +720,72 @@ options:
       type: Bool
       default: false
 
+    - name: sequences_show_n
+      title: Show n in title
+      type: Bool
+      default: true
+
     - name: sequences_tick
-      title: Tick
+      title: Tick interval
       type: Integer
       default: 5
       min: 1
-      max: 20
+      max: 100
+
+    - name: sequences_index_title
+      title: Index plot title
+      type: String
+      default: ''
+
+    - name: sequences_index_ylab
+      title: Index plot y-axis label
+      type: String
+      default: ''
+
+    - name: sequences_distribution_title
+      title: Distribution plot title
+      type: String
+      default: ''
+
+    - name: sequences_distribution_ylab
+      title: Distribution plot y-axis label
+      type: String
+      default: ''
+
+    - name: sequences_xlab
+      title: X-axis label
+      type: String
+      default: ''
+
+    - name: sequences_legend_title
+      title: Legend title
+      type: String
+      default: ''
+
+    - name: sequences_border
+      title: Border colour
+      type: String
+      default: ''
+      description: Colour of tile borders (index plot) and bar outlines (distribution plot), e.g. grey40. Empty for none.
+
+    - name: sequences_na_color
+      title: Missing-value colour
+      type: String
+      default: white
+
+    - name: sequences_width
+      title: Width
+      type: Integer
+      default: 600
+      min: 300
+      max: 2000
+
+    - name: sequences_height
+      title: Height
+      type: Integer
+      default: 450
+      min: 200
+      max: 3000
 
     ### PATTERN DISCOVERY
 
