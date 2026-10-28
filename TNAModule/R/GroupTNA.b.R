@@ -11,6 +11,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                   "sequences", "patterns", "indices"),
 
     .run = function() {
+      .jtna_stamp_version(self$results)
       vars <- .jtna_vars(self$options)
       ready <- all(c("action", "actor", "group") %in% names(vars))
       self$results$instructions$setVisible(!ready)
@@ -29,7 +30,6 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           sprintf("Excluded %d events with missing Group values.", missing_group_events),
           name = "missing_group", type = jmvcore::NoticeType$WARNING)
       }
-      .jtna_check_mosaic(res$model, opts)
       private$.section("model", "transition models", \() {
         .jtna_run_matrix(res$model, opts, model, "group")
       })

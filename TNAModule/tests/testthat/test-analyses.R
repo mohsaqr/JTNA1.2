@@ -208,6 +208,24 @@ test_that("instructions show only until the required variables are set", {
   expect_true(gate$instructions$visible)
 })
 
+test_that("every analysis shows the module version in its title, before and after setup", {
+  stamp <- sprintf("(JTNA %s)", utils::packageVersion("JTNA"))
+  titles <- c(TNA = "Transition Network Analysis", GroupTNA = "Group Transition Network Analysis",
+              ClusterTNA = "Cluster Transition Network Analysis")
+  invisible(lapply(names(titles), \(analysis) {
+    empty <- jtna_run(analysis, data = jtna_small(), buildModel_variables_long_actor = "actor")
+    expect_identical(empty$title, paste(titles[[analysis]], stamp), label = paste(analysis, "before setup"))
+    extra <- switch(analysis, TNA = list(), GroupTNA = list(buildModel_variables_long_group = "group"),
+                    ClusterTNA = list(clustering_run = TRUE))
+    ready <- do.call(run_small, c(list(analysis), extra))
+    expect_identical(ready$title, paste(titles[[analysis]], stamp), label = paste(analysis, "after setup"))
+  }))
+  # A second stamp replaces the first instead of repeating it.
+  r <- run_small("TNA")
+  .jtna_stamp_version(r)
+  expect_identical(r$title, paste(titles[["TNA"]], stamp))
+})
+
 test_that("a pattern length range with min above max is reported on the section", {
   r <- run_small("TNA", pattern_show_table = TRUE, pattern_len_min = 4, pattern_len_max = 2)
   expect_match(jtna_notices(r$patterns), "minimum length is larger")

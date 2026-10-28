@@ -50,7 +50,7 @@
   .jtna_fill_table(table, cbind(from = states, df, stringsAsFactors = FALSE))
 }
 
-# The mosaic plot is defined for frequency models only.
+# A single network's mosaic needs integer weights (tna: frequency models).
 .jtna_check_mosaic <- function(section, options) {
   if (isTRUE(options$buildModel_show_mosaic) && !identical(options$buildModel_type, "frequency")) {
     .jtna_notice(options, section,

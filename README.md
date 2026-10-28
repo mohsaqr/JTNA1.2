@@ -1,13 +1,18 @@
 # JTNA - Jamovi Transition Network Analysis Module
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version: 1.9.2](https://img.shields.io/badge/Version-1.9.2-blue.svg)](https://github.com/mohsaqr/JTNA1.2/releases)
+[![Version: 1.9.3](https://img.shields.io/badge/Version-1.9.3-blue.svg)](https://github.com/mohsaqr/JTNA1.2/releases)
 [![tests](https://github.com/mohsaqr/JTNA1.2/actions/workflows/tests.yml/badge.svg)](https://github.com/mohsaqr/JTNA1.2/actions/workflows/tests.yml)
 [![Jamovi](https://img.shields.io/badge/Jamovi-Compatible-green.svg)](https://www.jamovi.org/)
 
 A comprehensive **jamovi module** for performing **Transition Network Analysis (TNA)** to study relational dynamics and behavioral patterns in sequential data. JTNA provides an intuitive point-and-click interface for advanced network analysis techniques -- no coding required.
 
 JTNA is a front end to the [tna](https://sonsoles.me/tna/) R package: every option has tna's default, and every result is what tna (or [codyna](https://github.com/santikka/codyna)) returns for the same data and settings.
+
+## What's New in 1.9.3
+
+- **Mosaic plot in Group and Cluster TNA** for every model type, as in tna (states by group). It used to appear only with Type set to Frequency, which tna requires only for a single network.
+- **Version stamp**: every analysis shows the module version in its title, for example *Transition Network Analysis (JTNA 1.9.3)*.
 
 ## What's New in 1.9.2
 

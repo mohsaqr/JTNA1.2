@@ -585,6 +585,14 @@
 
 # ---- Instructions -------------------------------------------------------------
 
+# Stamp the module version on the results title, so the output always shows
+# which JTNA produced it. Strips an earlier stamp so re-runs do not repeat it.
+.jtna_stamp_version <- function(results) {
+  base <- sub(" \\(JTNA [^)]*\\)$", "", results$title)
+  results$setTitle(sprintf("%s (JTNA %s)", base, utils::packageVersion("JTNA")))
+  invisible()
+}
+
 .jtna_instructions <- function(kind = c("single", "group", "cluster")) {
   kind <- match.arg(kind)
   roles <- switch(kind,

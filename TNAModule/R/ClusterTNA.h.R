@@ -1626,7 +1626,7 @@ ClusterTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             title="Mosaic Plot",
                             width=600,
                             height=450,
-                            visible="(buildModel_show_mosaic && buildModel_type:frequency)",
+                            visible="(buildModel_show_mosaic)",
                             renderFun=".showModelMosaic",
                             clearWith=list(
                                 "buildModel_variables_long_action",

@@ -11,6 +11,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                       "patterns", "indices"),
 
         .run = function() {
+            .jtna_stamp_version(self$results)
             ready <- !is.null(self$options$buildModel_variables_long_action)
             self$results$instructions$setVisible(!ready)
             if (!ready) {

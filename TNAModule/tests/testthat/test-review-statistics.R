@@ -2,20 +2,40 @@ skip_if_not_installed("tna")
 skip_if_not_installed("pkgload")
 
 test_that("requesting only an unavailable mosaic still explains its requirement", {
+  # tna: a single network's mosaic needs a frequency model.
+  result <- jtna_run("TNA", data = jtna_small(),
+    buildModel_variables_long_action = "action", buildModel_variables_long_actor = "actor",
+    buildModel_show_plot = FALSE, buildModel_show_mosaic = TRUE)
+  expect_false(result$model$mosaic$visible)
+  expect_true(result$model$visible)
+  expect_match(jtna_notices(result$model), "needs a Frequency model")
+  expect_length(jtna_errors(result), 0L)
+})
+
+test_that("grouped mosaic (states by group) draws for every model type, as in tna", {
   data <- jtna_small()
-  invisible(lapply(c("TNA", "GroupTNA", "ClusterTNA"), function(analysis) {
-    args <- list(
-      analysis = analysis, data = data,
-      buildModel_variables_long_action = "action",
-      buildModel_variables_long_actor = "actor",
-      buildModel_show_plot = FALSE, buildModel_show_mosaic = TRUE)
-    if (analysis == "GroupTNA") args$buildModel_variables_long_group <- "group"
-    if (analysis == "ClusterTNA") args$clustering_run <- TRUE
-    result <- do.call(jtna_run, args)
-    expect_false(result$model$mosaic$visible, info = analysis)
-    expect_true(result$model$visible, info = analysis)
-    expect_match(jtna_notices(result$model), "needs a Frequency model", info = analysis)
-    expect_length(jtna_errors(result), 0L)
+  invisible(lapply(c("GroupTNA", "ClusterTNA"), function(analysis) {
+    lapply(c("relative", "frequency", "attention"), function(type) {
+      args <- list(
+        analysis = analysis, data = data,
+        buildModel_variables_long_action = "action",
+        buildModel_variables_long_actor = "actor",
+        buildModel_type = type, buildModel_show_plot = FALSE, buildModel_show_mosaic = TRUE)
+      if (analysis == "GroupTNA") args$buildModel_variables_long_group <- "group"
+      if (analysis == "ClusterTNA") args$clustering_run <- TRUE
+      result <- do.call(jtna_run, args)
+      label <- paste(analysis, type)
+      expect_true(result$model$mosaic$visible, label = label)
+      expect_false(any(grepl("Frequency", jtna_notices(result$model))), label = label)
+      expect_length(jtna_errors(result), 0L)
+      path <- tempfile(fileext = ".png")
+      on.exit(unlink(path), add = TRUE)
+      expect_no_warning(result$model$mosaic$saveAs(path), class = "jtna_plot_failed", message = label)
+      expect_true(file.exists(path), label = label)
+      # Same counts as tna's own grouped mosaic.
+      ref <- tna::plot_mosaic(result$modelCache$state)
+      expect_s3_class(ref, "ggplot")
+    })
   }))
 })
 

@@ -11,6 +11,7 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                   "sequences", "patterns", "indices"),
 
     .run = function() {
+      .jtna_stamp_version(self$results)
       vars <- .jtna_vars(self$options)
       ready <- all(c("action", "actor") %in% names(vars)) && isTRUE(self$options$clustering_run)
       self$results$instructions$setVisible(!ready)
@@ -23,7 +24,6 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       model <- private$.model()
       opts <- self$options
       res <- self$results
-      .jtna_check_mosaic(res$model, opts)
       private$.section("model", "cluster models", \() {
         .jtna_run_matrix(res$model, opts, model, "cluster")
       })

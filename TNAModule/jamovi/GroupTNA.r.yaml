@@ -132,7 +132,7 @@ items:
                 type: Image
                 width: 600
                 height: 450
-                visible: (buildModel_show_mosaic && buildModel_type:frequency)
+                visible: (buildModel_show_mosaic)
                 renderFun: .showModelMosaic
                 clearWith:
                     - buildModel_variables_long_action
