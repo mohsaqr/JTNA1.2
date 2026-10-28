@@ -446,10 +446,13 @@ children:
                 name: bootstrap_range_up
                 format: number
                 enable: (bootstrap_method_stability)
+              - type: CheckBox
+                name: bootstrap_threshold_use
+                enable: (bootstrap_method_threshold)
               - type: TextBox
                 name: bootstrap_threshold
                 format: number
-                enable: (bootstrap_method_threshold)
+                enable: (bootstrap_method_threshold && bootstrap_threshold_use)
           - type: Label
             label: Plot Parameters
             children:

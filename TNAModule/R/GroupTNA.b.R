@@ -62,7 +62,7 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                  call. = FALSE)
           }
         }
-        .jtna_run_permutation(res$permutation, opts, model, "group", private$.unscaledModel)
+        .jtna_run_permutation(res$permutation, opts, model, "group")
       })
       private$.section("compare", "network comparison", \() {
         groups <- names(model)
@@ -127,8 +127,6 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       cache$setState(model)
       model
     },
-
-    .unscaledModel = function() private$.build(character(0L)),
 
     # ---- Plots ------------------------------------------------------------
 

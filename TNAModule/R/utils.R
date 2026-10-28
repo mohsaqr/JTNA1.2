@@ -61,7 +61,7 @@
 
 # A Level option's value, or `default` when nothing is selected.
 .jtna_level <- function(value, default) {
-  if (length(value) == 1L && !is.na(value) && nzchar(value)) value else default
+  if (length(value) == 1L && !is.na(value)) value else default
 }
 
 # tna's `scaling` argument: the panel's "No scaling" maps to character(0).
@@ -105,11 +105,9 @@
   if (any(ticked)) candidates[ticked] else candidates
 }
 
-# A clique threshold of 0 means "pick a sensible default for the size".
+# Pass the selected threshold literally, including tna's default of zero.
 .jtna_cliques_threshold <- function(options) {
-  threshold <- as.numeric(options$cliques_threshold)
-  if (threshold > 0) return(threshold)
-  if (as.numeric(options$cliques_size) <= 2) 0.1 else 0.01
+  as.numeric(options$cliques_threshold)
 }
 
 # ---- Data preparation and validation --------------------------------------
@@ -124,7 +122,7 @@
 .jtna_validate <- function(data, options) {
   vars <- .jtna_vars(options)
   action <- as.character(data[[vars$action]])
-  present <- !is.na(action) & nzchar(trimws(action))
+  present <- !is.na(action)
   if (!any(present)) {
     .jtna_reject("The Action variable has no non-missing values.")
   }
@@ -133,7 +131,7 @@
   }
   if (!is.null(vars$group)) {
     group <- as.character(data[[vars$group]])
-    group <- unique(group[!is.na(group) & nzchar(trimws(group))])
+    group <- unique(group[!is.na(group)])
     if (length(group) < 2L) {
       .jtna_reject("The Group variable needs at least two groups to compare.")
     }
@@ -309,10 +307,24 @@
   if (is.null(df) || nrow(df) == 0L) return(invisible(table))
   df <- as.data.frame(df, stringsAsFactors = FALSE)
   df[] <- lapply(df, \(col) if (is.factor(col)) as.character(col) else col)
+  # jmvcore represents an empty text cell as missing. Quote the complete
+  # label column when it contains blank labels so those states stay visible
+  # and distinct from missing values and literal quote characters.
+  df[] <- lapply(df, \(col) if (is.character(col)) .jtna_display_labels(col) else col)
   invisible(lapply(seq_len(nrow(df)), \(i) {
     table$addRow(rowKey = i, values = as.list(df[i, , drop = FALSE]))
   }))
   invisible(table)
+}
+
+#' Format blank labels without changing stored state identifiers
+#' @param labels A character vector of state, actor, or group labels.
+#' @return Labels, quoted consistently when any label is blank or whitespace.
+.jtna_display_labels <- function(labels) {
+  stopifnot(is.character(labels))
+  if (any(!is.na(labels) & !nzchar(trimws(labels)))) {
+    encodeString(labels, quote = '"', na.encode = FALSE)
+  } else labels
 }
 
 # Keep the first `max_rows` rows unless the user asked for all of them, and
@@ -345,7 +357,7 @@
     df
   }
   if (is.null(id)) return(one(coms))
-  do.call(rbind, lapply(names(coms), \(net) one(coms[[net]], net)))
+  do.call(rbind, lapply(seq_along(coms), \(k) one(coms[[k]], names(coms)[k])))
 }
 
 # Bootstrap edges: significant ones first, then by p-value. `id` adds the
@@ -366,7 +378,7 @@
     df
   }
   if (is.null(id)) return(one(bs$summary))
-  do.call(rbind, lapply(names(bs), \(net) one(bs[[net]]$summary, net)))
+  do.call(rbind, lapply(seq_along(bs), \(k) one(bs[[k]]$summary, names(bs)[k])))
 }
 
 # Permutation-test edges for every pair of networks, smallest p-value first.
@@ -405,8 +417,10 @@
   # tna joins labels with "->" before counting patterns. Encode labels
   # containing that delimiter so distinct sequences cannot collapse into
   # the same pattern (e.g. c("A->B", "C") versus c("A", "B->C")).
+  # Encode empty labels too: strsplit drops a trailing empty token, which
+  # would report an A -> empty-state bigram as a one-state pattern.
   labels <- model[[1L]]$labels
-  encoded <- any(grepl("->", labels, fixed = TRUE))
+  encoded <- any(!nzchar(labels) | grepl("->", labels, fixed = TRUE))
   if (encoded) {
     tokens <- sprintf("state%0*d", nchar(length(labels)), seq_along(labels))
     model[] <- lapply(model, function(network) {
@@ -471,22 +485,31 @@
   gap_max <- min(options$pattern_gap_max, longest - 2L)
   clipped <- c(if (len_max < options$pattern_len_max) sprintf("lengths above %d", len_max),
                if (gapped && gap_max < options$pattern_gap_max) sprintf("gaps above %d", gap_max))
+  encoding <- .jtna_encode_states(.jtna_sequences(prepared))
   args <- list(
-    data = .jtna_sequences(prepared),
+    data = encoding$data,
     type = options$pattern_type,
     len = seq.int(options$pattern_len_min, len_max),
     gap = if (gapped) seq.int(options$pattern_gap_min, gap_max) else 1L,
     min_support = options$pattern_min_support,
-    min_freq = options$pattern_min_count,
-    outcome = outcome
+    min_freq = options$pattern_min_count
   )
   filters <- c(start = "pattern_starts_with", end = "pattern_ends_with", contain = "pattern_contains")
   chosen <- lapply(filters, \(f) {
     value <- options[[f]]
-    if (isTRUE(options[[paste0(f, "_use")]]) && length(value) == 1L && nzchar(value)) value
+    if (isTRUE(options[[paste0(f, "_use")]]) && length(value) == 1L && !is.na(value)) {
+      token <- encoding$tokens[match(value, encoding$labels)]
+      if (is.na(token)) stop("the selected pattern state is not present in the data.", call. = FALSE)
+      token
+    }
   })
   args <- c(Filter(Negate(is.null), args), Filter(Negate(is.null), chosen))
-  patterns <- .jtna_plain(do.call(codyna::discover_patterns, args))
+  raw <- do.call(codyna::discover_patterns, args)
+  patterns <- .jtna_plain(raw)
+  if (!is.null(outcome)) {
+    patterns <- .jtna_pattern_association(patterns, attr(raw, "patterns"), outcome)
+  }
+  patterns$pattern <- .jtna_decode_patterns(patterns$pattern, encoding)
   if (length(clipped) > 0L) {
     attr(patterns, "jtna_note") <- sprintf("Pattern %s were skipped: the longest sequence has %d events.",
                                            paste(clipped, collapse = " and "), longest)
@@ -498,8 +521,9 @@
 # table, titled after the group.
 .jtna_add_count_columns <- function(table, patterns) {
   counts <- grep("^count_", names(patterns), value = TRUE)
-  invisible(lapply(counts, \(col) {
-    table$addColumn(name = col, title = sub("^count_", "", col), type = "integer",
+  titles <- .jtna_display_labels(sub("^count_", "", counts))
+  invisible(lapply(seq_along(counts), \(k) {
+    table$addColumn(name = counts[k], title = titles[k], type = "integer",
                     superTitle = "Count by group")
   }))
 }
@@ -513,13 +537,21 @@
     stop(sprintf("sequence indices need a sequence of at least three events; the longest here has %d.",
                  longest), call. = FALSE)
   }
-  args <- list(data = .jtna_sequences(prepared), omega = options$indices_omega)
+  encoding <- .jtna_encode_states(.jtna_sequences(prepared))
+  args <- list(data = encoding$data, omega = options$indices_omega)
   favorable <- options$indices_favorable
-  if (length(favorable) == 1L && nzchar(favorable)) args$favorable <- favorable
+  if (length(favorable) == 1L && !is.na(favorable)) {
+    args$favorable <- encoding$tokens[match(favorable, encoding$labels)]
+  }
   indices <- .jtna_plain(do.call(codyna::sequence_indices, args))
   indices$dominant_max_spell <- .jtna_dominant_spell(args$data, indices$dominant_state)
+  state_columns <- intersect(c("first_state", "last_state", "dominant_state", "emergent_state"), names(indices))
+  indices[state_columns] <- lapply(indices[state_columns], function(column) {
+    encoding$labels[match(column, encoding$tokens)]
+  })
   id <- data.frame(sequence_id = seq_len(nrow(indices)))
-  cbind(id, as.data.frame(labels, stringsAsFactors = FALSE), indices)
+  if (length(labels)) id <- cbind(id, as.data.frame(labels, stringsAsFactors = FALSE))
+  cbind(id, indices)
 }
 
 # The longest run of each sequence's dominant state. codyna 1.0.0 assigns
@@ -559,8 +591,8 @@
 # One network plot per element of a grouped object (a group_tna model or a
 # grouped bootstrap), each titled with its group.
 .jtna_plot_networks <- function(x, args) {
-  invisible(lapply(names(x), \(net) {
-    do.call(cograph::splot, c(list(x = x[[net]], title = net), args))
+  invisible(lapply(seq_along(x), \(k) {
+    do.call(cograph::splot, c(list(x = x[[k]], title = names(x)[k]), args))
   }))
 }
 

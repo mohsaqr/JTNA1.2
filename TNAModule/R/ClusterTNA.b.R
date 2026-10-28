@@ -42,7 +42,7 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                      "cannot be established. Turn off Paired to use an unpaired test."),
                call. = FALSE)
         }
-        .jtna_run_permutation(res$permutation, opts, model, "cluster", private$.unscaledModel)
+        .jtna_run_permutation(res$permutation, opts, model, "cluster")
       })
       private$.section("compare", "network comparison", \() {
         k <- length(model)
@@ -97,15 +97,7 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           "The number of clusters (%d) must be smaller than the number of sequences (%d).",
           k, nrow(sequences)))
       }
-      clustering <- .jtna_with_seed(.jtna_seed(self$options), \() tna::cluster_sequences(
-        data = sequences,
-        k = k,
-        dissimilarity = self$options$clustering_dissimilarity,
-        method = self$options$clustering_method,
-        # A disabled checkbox keeps its value when the distance changes.
-        weighted = identical(self$options$clustering_dissimilarity, "hamming") &&
-          isTRUE(self$options$clustering_weighted),
-        lambda = self$options$clustering_lambda))
+      clustering <- .jtna_cluster_sequences(sequences, self$options)
       # Levels in numeric order, so "Cluster 10" follows "Cluster 9".
       clusters <- factor(paste("Cluster", clustering$assignments),
                          levels = paste("Cluster", seq_len(k)))
@@ -114,14 +106,6 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       attr(model, "jtna_clusters") <- as.character(clusters)
       cache$setState(model)
       model
-    },
-
-    .unscaledModel = function() {
-      model <- self$results$modelCache$state
-      # Preserve numeric cluster order when rebuilding for permutation tests.
-      clusters <- factor(attr(model, "jtna_clusters"), levels = names(model))
-      .jtna_group_model(private$.prepared(), clusters, self$options,
-                        scaling = character(0L))
     },
 
     # ---- Plots ------------------------------------------------------------

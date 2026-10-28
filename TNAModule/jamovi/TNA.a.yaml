@@ -277,7 +277,7 @@ options:
     - name: centrality_stability_iteration
       title: Iterations
       type: Integer
-      default: 100
+      default: 1000
       min: 10
       max: 10000
 
@@ -587,6 +587,12 @@ options:
       min: 0
       max: 10
     
+    - name: bootstrap_threshold_use
+      title: Set threshold
+      type: Bool
+      default: false
+      description: Override the default threshold (the 10th percentile of each network's edge weights).
+
     - name: bootstrap_threshold
       title: Threshold
       type: Number

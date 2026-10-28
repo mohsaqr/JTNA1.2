@@ -1,7 +1,7 @@
 ---
 title: Transition Network Analysis
 name: JTNA
-version: 1.9.3
+version: 1.9.4
 jms: '1.0'
 authors:
   - Dylan Girault
@@ -9,7 +9,7 @@ authors:
   - Santtu Tikka
   - Sonsoles López-Pernas
 maintainer: Sonsoles López-Pernas <sonsoles.lopez@uef.fi>
-date: '2026-02-03'
+date: '2026-10-28'
 type: R
 description: >-
   Provides tools for performing Transition Network Analysis (TNA) to study

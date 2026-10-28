@@ -43,8 +43,14 @@ for (analysis in c("TNA", "GroupTNA", "ClusterTNA")) {
     lapply(methods, \(m) {
       r <- run_eq(analysis, community_show_table = TRUE, community_methods = m)
       got <- jtna_table(r$community$table)
-      ref <- .jtna_community_df(seeded(tna::communities(r$modelCache$state, methods = m)), m, id)
-      expect_equal(got$community, ref$community, label = paste(analysis, m))
+      direct <- seeded(tna::communities(r$modelCache$state, methods = m))
+      networks <- if (is.null(id)) list(direct) else direct
+      ref_states <- unlist(lapply(networks, \(network) as.character(network$assignments$state)), use.names = FALSE)
+      ref_values <- unlist(lapply(networks, \(network) as.integer(network$assignments[[m]])), use.names = FALSE)
+      expect_identical(got$state, ref_states, label = paste(analysis, m, "state identity"))
+      if (!is.null(id)) expect_identical(got[[id]],
+        rep(names(direct), vapply(networks, \(network) nrow(network$assignments), integer(1))))
+      expect_equal(got$community, ref_values, label = paste(analysis, m))
     })
   })
 
@@ -59,13 +65,22 @@ for (analysis in c("TNA", "GroupTNA", "ClusterTNA")) {
       r <- run_eq(analysis, bootstrap_show_table = TRUE, bootstrap_iteration = 40,
                   bootstrap_method = method, bootstrap_table_show_all = TRUE)
       got <- jtna_table(r$bootstrap$table)
-      # The panel's defaults, passed explicitly (they differ from tna's for
-      # the threshold method).
-      ref <- .jtna_bootstrap_df(seeded(tna::bootstrap(r$modelCache$state, iter = 40, method = method,
-                                                      level = 0.05, threshold = 0.1,
-                                                      consistency_range = c(0.75, 1.25))),
-                                FALSE, id)
+      # Omit default arguments, and compare raw upstream fields without using
+      # the production table mapper to construct its own expected result.
+      direct <- seeded(tna::bootstrap(r$modelCache$state, iter = 40, method = method))
+      networks <- if (is.null(id)) list(direct) else direct
+      ref <- do.call(rbind, lapply(networks, \(network) as.data.frame(network$summary)))
+      expected_key <- key(ref$from, ref$to)
+      actual_key <- key(got$from, got$to)
+      if (!is.null(id)) {
+        groups <- rep(names(direct), vapply(networks, \(network) nrow(network$summary), integer(1)))
+        expected_key <- key(groups, expected_key)
+        actual_key <- key(got[[id]], actual_key)
+      }
       expect_equal(nrow(got), nrow(ref), label = paste(analysis, method))
+      expect_setequal(actual_key, expected_key)
+      ref <- ref[match(actual_key, expected_key), , drop = FALSE]
+      expect_identical(got$significant, ifelse(ref$sig, "Yes", "No"))
       lapply(c("weight", "p_value", "cr_lower", "cr_upper", "ci_lower", "ci_upper"), \(col) {
         expect_equal(got[[col]], ref[[col]], tolerance = tol, label = paste(analysis, method, col))
       })
@@ -87,7 +102,18 @@ for (analysis in c("TNA", "GroupTNA", "ClusterTNA")) {
       expect_identical(got$pattern, ref$pattern, label = paste(analysis, type))
       expect_equal(got$frequency, ref$frequency, tolerance = tol, label = paste(analysis, type))
       expect_equal(got$support, ref$support, tolerance = tol, label = paste(analysis, type))
-      if (!is.null(outcome)) expect_equal(got$p_value, ref$p_value, tolerance = tol, label = paste(analysis, type))
+      if (!is.null(outcome)) {
+        # Compatibility correction: codyna tests uniform counts, whereas
+        # JTNA reports association of presence/absence with group.
+        groups <- unique(as.character(outcome))
+        sizes <- vapply(groups, function(group) sum(outcome == group), integer(1))
+        expected_p <- vapply(seq_len(nrow(ref)), function(i) {
+          present <- as.numeric(ref[i, paste0("count_", groups)])
+          if (sum(present) == sum(sizes)) return(1)
+          suppressWarnings(chisq.test(cbind(present, sizes - present), correct = FALSE))$p.value
+        }, numeric(1))
+        expect_equal(got$p_value, expected_p, tolerance = tol, label = paste(analysis, type))
+      }
     })
   })
 
@@ -127,9 +153,14 @@ for (analysis in c("GroupTNA", "ClusterTNA")) {
       r <- run_eq(analysis, permutation_show_text = TRUE, permutation_iter = 40, permutation_adjust = adjust,
                   permutation_table_show_all = TRUE)
       got <- jtna_table(r$permutation$table)
-      ref <- .jtna_permutation_df(seeded(tna::permutation_test(r$modelCache$state, iter = 40,
-                                                                 adjust = adjust)), id)
-      expect_identical(got$edge_name, ref$edge_name, label = paste(analysis, adjust))
+      direct <- seeded(tna::permutation_test(r$modelCache$state, iter = 40, adjust = adjust))
+      ref <- do.call(rbind, lapply(direct, \(pair) as.data.frame(pair$edges$stats)))
+      pairs <- rep(names(direct), vapply(direct, \(pair) nrow(pair$edges$stats), integer(1)))
+      expected_key <- key(pairs, trimws(as.character(ref$edge_name)))
+      actual_key <- key(got[[paste0(id, "_comparison")]], got$edge_name)
+      expect_equal(nrow(got), nrow(ref))
+      expect_setequal(actual_key, expected_key)
+      ref <- ref[match(actual_key, expected_key), , drop = FALSE]
       lapply(c("diff_true", "effect_size", "p_value"), \(col) {
         expect_equal(got[[col]], ref[[col]], tolerance = tol, label = paste(analysis, adjust, col))
       })

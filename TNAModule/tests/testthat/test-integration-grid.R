@@ -63,7 +63,7 @@ test_that("every scaling: sections run as tna allows, and every plot draws", {
   # bootstrap and permutation tests on them by design, and in tna 1.3.1
   # communities() and compare() fail on them (the scaled weight matrices
   # lose their state names). Every other section must run.
-  tna_limited <- c("community", "bootstrap", "compare", "compareSequences")
+  tna_limited <- c("community", "bootstrap", "permutation", "compare", "compareSequences")
   grid <- expand.grid(analysis = c("TNA", "GroupTNA", "ClusterTNA"),
                       scaling = c("minmax", "max", "rank"), stringsAsFactors = FALSE)
   invisible(Map(\(analysis, scaling) {
@@ -102,16 +102,16 @@ test_that("each cache is cleared by every option its computation reads, and only
                   "buildModel_variables_long_time", "buildModel_variables_long_order",
                   "buildModel_type", "buildModel_scaling", "buildModel_threshold", "buildModel_lambda")
   needs <- list(
-    "bootstrap/plot" = c(paste0("bootstrap_", c("iteration", "level", "method", "range_low",
+    "bootstrap/cache" = c("bootstrap_threshold_use", paste0("bootstrap_", c("iteration", "level", "method", "range_low",
                                                 "range_up", "threshold")), "random_seed_use", "random_seed"),
-    "community/plot" = c("community_methods", "community_gamma", "random_seed_use", "random_seed"),
-    "cliques/plot" = c("cliques_size", "cliques_threshold", "cliques_sum_weights"),
+    "community/cache" = c("community_methods", "community_gamma", "random_seed_use", "random_seed"),
+    "cliques/cache" = c("cliques_size", "cliques_threshold", "cliques_sum_weights"),
     "centrality/table" = c("centrality_loops", "centrality_normalize", "centrality_invert"),
     "patterns/table" = c("pattern_type", "pattern_len_min", "pattern_len_max", "pattern_gap_min",
                          "pattern_gap_max", "pattern_min_support", "pattern_min_count"),
     "indices/table" = c("indices_favorable", "indices_omega"))
   grouped_needs <- list(
-    "permutation/plot" = c("permutation_iter", "permutation_paired", "permutation_level",
+    "permutation/cache" = c("permutation_iter", "permutation_paired", "permutation_level",
                            "permutation_adjust", "random_seed_use", "random_seed"),
     "compareSequences/plot" = c("compare_sequences_sub_min", "compare_sequences_sub_max",
                                 "compare_sequences_min_freq", "compare_sequences_correction",

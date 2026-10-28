@@ -43,19 +43,29 @@ ref_centralities <- function(weights) {
   )
 }
 
-# Bigram ("a->b") occurrences: total frequency and the number of sequences
-# containing each bigram.
+# Bigram occurrences: count adjacent state tuples, never a joined string.
+# Internal missing events break adjacency. `pattern` is a display convenience;
+# `from` and `to` retain tuple identity even when labels themselves contain ->.
 ref_bigrams <- function(seqs) {
-  per_seq <- lapply(seq_len(nrow(seqs)), \(i) {
-    s <- seqs[i, !is.na(seqs[i, ])]
-    if (length(s) < 2L) return(character(0))
-    paste(s[-length(s)], s[-1L], sep = "->")
+  seqs <- as.matrix(seqs)
+  empty <- data.frame(pattern = character(), frequency = integer(), count = integer(),
+                       from = character(), to = character(), stringsAsFactors = FALSE)
+  if (ncol(seqs) < 2L || nrow(seqs) == 0L) return(empty)
+  occurrences <- data.frame(
+    from = as.vector(seqs[, -ncol(seqs), drop = FALSE]),
+    to = as.vector(seqs[, -1L, drop = FALSE]),
+    sequence = rep(seq_len(nrow(seqs)), times = ncol(seqs) - 1L),
+    stringsAsFactors = FALSE)
+  occurrences <- occurrences[!is.na(occurrences$from) & !is.na(occurrences$to), , drop = FALSE]
+  if (nrow(occurrences) == 0L) return(empty)
+  tuples <- unique(occurrences[c("from", "to")])
+  matching <- lapply(seq_len(nrow(tuples)), \(i) {
+    occurrences$from == tuples$from[i] & occurrences$to == tuples$to[i]
   })
-  all <- unlist(per_seq)
-  freq <- table(all)
-  count <- table(unlist(lapply(per_seq, unique)))
-  data.frame(pattern = names(freq), frequency = as.integer(freq),
-             count = as.integer(count[names(freq)]), stringsAsFactors = FALSE)
+  data.frame(pattern = paste(tuples$from, tuples$to, sep = "->"),
+             frequency = vapply(matching, sum, integer(1)),
+             count = vapply(matching, \(hit) length(unique(occurrences$sequence[hit])), integer(1)),
+             from = tuples$from, to = tuples$to, stringsAsFactors = FALSE)
 }
 
 # Simple per-sequence indices from their definitions (codyna's

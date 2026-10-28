@@ -14,7 +14,7 @@ test_that("a retained Hamming weight option does not break other distances", {
                    attr(ordinary$modelCache$state, "jtna_clusters"))
 })
 
-test_that("scaling preserves cluster pair order and permutation difference signs", {
+test_that("cluster pair order is numeric and scaled permutation is refused", {
   data <- jtna_small(n_actor = 30)
   run <- function(scaling) jtna_run("ClusterTNA", data = data,
     buildModel_variables_long_action = "action",
@@ -24,10 +24,10 @@ test_that("scaling preserves cluster pair order and permutation difference signs
     random_seed_use = TRUE, random_seed = 91)
   raw <- run("noScaling")
   scaled <- run("max")
-  expect_length(jtna_errors(scaled), 0L)
-  expect_identical(names(scaled$permutation$plot$state), names(raw$permutation$plot$state))
-  expect_equal(scaled$permutation$plot$state, raw$permutation$plot$state)
-  expect_true("Cluster 2 vs. Cluster 10" %in% names(scaled$permutation$plot$state))
+  expect_identical(names(scaled$modelCache$state), paste("Cluster", 1:10))
+  expect_match(jtna_notices(scaled$permutation), "globally scaled")
+  expect_null(scaled$permutation$plot$state)
+  expect_true("Cluster 2 vs. Cluster 10" %in% names(raw$permutation$plot$state))
 })
 
 test_that("actors reused across groups retain separate sequences and networks", {

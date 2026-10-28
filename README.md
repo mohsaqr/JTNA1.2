@@ -1,13 +1,25 @@
 # JTNA - Jamovi Transition Network Analysis Module
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version: 1.9.3](https://img.shields.io/badge/Version-1.9.3-blue.svg)](https://github.com/mohsaqr/JTNA1.2/releases)
+[![Version: 1.9.4](https://img.shields.io/badge/Version-1.9.4-blue.svg)](https://github.com/mohsaqr/JTNA1.2/releases)
 [![tests](https://github.com/mohsaqr/JTNA1.2/actions/workflows/tests.yml/badge.svg)](https://github.com/mohsaqr/JTNA1.2/actions/workflows/tests.yml)
 [![Jamovi](https://img.shields.io/badge/Jamovi-Compatible-green.svg)](https://www.jamovi.org/)
 
 A comprehensive **jamovi module** for performing **Transition Network Analysis (TNA)** to study relational dynamics and behavioral patterns in sequential data. JTNA provides an intuitive point-and-click interface for advanced network analysis techniques -- no coding required.
 
-JTNA is a front end to the [tna](https://sonsoles.me/tna/) R package: every option has tna's default, and every result is what tna (or [codyna](https://github.com/santikka/codyna)) returns for the same data and settings.
+JTNA is a front end to the [tna](https://sonsoles.me/tna/) and [codyna](https://github.com/santikka/codyna) R packages. It uses their model and sequence-analysis algorithms, with corrections for verified label-handling and statistical defects described below. Inferential defaults follow tna, and unsupported globally scaled analyses report tna's refusal.
+
+## What's New in 1.9.4
+
+- **Correct pattern association tests:** group and cluster pattern tables test sequence-level pattern presence/absence against group membership, accounting for unequal group sizes. They no longer use codyna 1.0.0's equal-count goodness-of-fit test. Re-run earlier pattern/group significance results.
+- **Literal states stay distinct:** empty labels, `*`, `%`, and labels containing `->` retain their identity in clustering, patterns, and indices. Pattern filters select exact states; literal asterisk states have the correct lift. Blank table labels are quoted so they are distinguishable from missing values.
+- **Correct labels and complete output:** scaled grouped centralities retain their state names, blank-named groups retain their matrices, and grouped clique plots show every computed clique.
+- **Cosmetic changes preserve statistics:** changing bootstrap, permutation, or community plot appearance no longer reruns the numerical analysis.
+- **Defaults aligned:** clique threshold zero is honored literally; sequence-comparison minimum frequency is 5; stability uses 1,000 iterations. Threshold bootstrap uses tna's automatic weight quantile unless **Set threshold** is selected. Review that setting when reopening analyses created with earlier versions.
+- **Scaled permutation behavior aligned:** globally scaled models now receive tna's unsupported-analysis message. The previous silent unscaled rebuild has been removed.
+- **Clear clustering limit:** the bundled tna encoder supports 62 symbols, including symbols allocated for missing/padded events. Data exceeding its capacity receive an actionable message.
+
+The compatibility corrections preserve the selected algorithms and model weights. Pattern/group p-values intentionally differ from codyna's erroneous equal-count statistic; label encoding and clustering's literal-state handling intentionally correct upstream interpretation of ordinary long-format values.
 
 ## What's New in 1.9.3
 
@@ -28,7 +40,7 @@ The first release since 1.8.4. It includes 1.9.0 and 1.9.1, which fix every find
 
 **Defaults and behaviour follow tna**
 - **Edge betweenness is directed** again (tna's default), as before 1.6.6.
-- **Grouped models with scaling are scaled across groups**, as in tna. With tna 1.3.1, bootstrap, sequence comparison, community detection and network comparison are not available for such models; those sections show tna's message and the rest of the analysis runs.
+- **Grouped models with scaling are scaled across groups**, as in tna. With tna 1.3.1, bootstrap, permutation, sequence comparison, community detection and network comparison are not available for such models; those sections show tna's message and the rest of the analysis runs.
 - **Include missing values** in sequence plots is off by default, as in tna.
 - Labels such as `*` or `A->B` are ordinary states, as in tna.
 
@@ -44,12 +56,12 @@ The first release since 1.8.4. It includes 1.9.0 and 1.9.1, which fix every find
 - **Every panel control works**, the mosaic and frequencies plots draw, and the transition matrix and initial probabilities are proper tables you can copy into Excel or Word.
 - **The same sessions everywhere**: the model, pattern discovery and sequence indices use one prepared data set, so the session gap applies to all of them. Missing Group values are left out and counted.
 
-**Tested**: every table is checked against a direct tna or codyna call and against independent calculations; every option value is run in each analysis; the suite runs on Linux, macOS and Windows on every push (see [Testing](#testing)).
+**Tested**: the suites exercise actual analysis classes, seeded upstream comparisons, independent calculations for selected statistics, and an optional option sweep (see [Testing](#testing)).
 
 ## What's New in 1.8
 
 - **Pattern discovery in groups & clusters** — Group/Cluster TNA pattern tables now show a per-group breakdown with χ² and p-value (previously dropped whenever a Time threshold split actors into sessions).
-- **Scaled models now permute** — permutation tests run correctly on scaled grouped models (computed on an unscaled rebuild).
+- **Scaled models could permute through an unscaled rebuild** — this 1.8 behavior was removed in 1.9.4 to preserve the displayed model and respect tna's scaling restriction.
 - **Correct event ordering** — the Order column is treated numerically, so sequences longer than 9 events are no longer mis-sorted; Cluster TNA now honours Order and the session Threshold too.
 - **Attention models** build directly with a heads-up that they can be slower on long sequences.
 - Default **edge label size** is now **0.7** for cleaner plots.
@@ -106,7 +118,7 @@ See the [Releases](https://github.com/mohsaqr/JTNA1.2/releases) page for full re
 - Support for **N-gram**, **gapped**, and **repeated** pattern types
 - Filter by pattern length range, gap range, minimum support, and minimum frequency
 - Constrain patterns by starting, ending, or containing specific states (checkbox-gated level pickers)
-- In **Group TNA** / **Cluster TNA**, patterns include a per-group/cluster breakdown with χ² and p-value of pattern × group association
+- In **Group TNA** / **Cluster TNA**, patterns include per-group/cluster sequence counts and an unadjusted Pearson χ² test of pattern presence/absence by group, without continuity correction
 
 ### Sequence Indices
 - Compute 20+ per-sequence indices via [codyna](https://github.com/santikka/codyna) — complexity, longitudinal entropy, Simpson diversity, spell durations, transition rate/complexity, self-loop tendency, and initial/dominant/emergent-state metrics
@@ -178,7 +190,9 @@ testthat::test_file("tests/testthat/test-option-sweep.R")
 Rscript tools/check-bundle.R
 ```
 
-The suite checks every results table against a direct, seeded tna or codyna call, against independent base-R and igraph calculations, and on 100 random data sets. It runs on Linux, macOS and Windows on every push.
+The suite checks results tables against direct, seeded upstream calls, with independent label/edge matching. Base-R and igraph references cover transition counts, initial probabilities, selected centralities, bigrams, selected sequence indices, edge betweenness, and pattern/group contingency tests. A 100-data-set Monte Carlo check covers relative-model counts and invariants; further invariants run on 30 data sets. These are complementary checks, not independent proofs of every upstream algorithm.
+
+Regression tests include literal-state relabeling, unequal group sizes, zero thresholds, complete clique rendering, and cache restoration without changing RNG state. The optional sweep exercises one option at a time; full saved-file persistence and the installed jamovi GUI lifecycle remain separate validation tasks. CI is configured for Linux, macOS and Windows.
 
 ## Quick Start
 

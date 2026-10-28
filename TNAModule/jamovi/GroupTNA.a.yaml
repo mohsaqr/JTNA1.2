@@ -460,6 +460,12 @@ options:
       min: 0
       max: 10
     
+    - name: bootstrap_threshold_use
+      title: Set threshold
+      type: Bool
+      default: false
+      description: Override the default threshold (the 10th percentile of each network's edge weights).
+
     - name: bootstrap_threshold
       title: Threshold
       type: Number
@@ -818,7 +824,7 @@ options:
     - name: compare_sequences_min_freq
       title: Minimum Frequency
       type: Integer
-      default: 20
+      default: 5
       min: 1
       max: 100
 

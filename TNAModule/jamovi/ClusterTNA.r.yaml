@@ -305,6 +305,29 @@ items:
         title: Communities
         type: Group
         items:
+            -   name: cache
+                type: Preformatted
+                visible: false
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - clustering_k
+                    - clustering_dissimilarity
+                    - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
+                    - community_methods
+                    - community_gamma
+                    - random_seed_use
+                    - random_seed
             -   name: table
                 title: Community Assignments
                 type: Table
@@ -372,6 +395,28 @@ items:
         title: Cliques
         type: Group
         items:
+            -   name: cache
+                type: Preformatted
+                visible: false
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - clustering_k
+                    - clustering_dissimilarity
+                    - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
+                    - cliques_size
+                    - cliques_threshold
+                    - cliques_sum_weights
             -   name: plot
                 title: Cliques
                 type: Image
@@ -408,6 +453,34 @@ items:
         title: Bootstrap
         type: Group
         items:
+            -   name: cache
+                type: Preformatted
+                visible: false
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - clustering_k
+                    - clustering_dissimilarity
+                    - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
+                    - bootstrap_iteration
+                    - bootstrap_level
+                    - bootstrap_method
+                    - bootstrap_range_low
+                    - bootstrap_range_up
+                    - bootstrap_threshold
+                    - bootstrap_threshold_use
+                    - random_seed_use
+                    - random_seed
             -   name: table
                 title: Bootstrap Results
                 type: Table
@@ -470,6 +543,7 @@ items:
                     - bootstrap_range_low
                     - bootstrap_range_up
                     - bootstrap_threshold
+                    - bootstrap_threshold_use
                     - random_seed_use
                     - random_seed
             -   name: plot
@@ -501,6 +575,7 @@ items:
                     - bootstrap_range_low
                     - bootstrap_range_up
                     - bootstrap_threshold
+                    - bootstrap_threshold_use
                     - random_seed_use
                     - random_seed
                     - bootstrap_plot_cut
@@ -513,6 +588,31 @@ items:
         title: Permutation Test
         type: Group
         items:
+            -   name: cache
+                type: Preformatted
+                visible: false
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - clustering_k
+                    - clustering_dissimilarity
+                    - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
+                    - permutation_iter
+                    - permutation_paired
+                    - permutation_level
+                    - permutation_adjust
+                    - random_seed_use
+                    - random_seed
             -   name: table
                 title: Permutation Test Results
                 type: Table
@@ -590,6 +690,28 @@ items:
         title: Network Comparison
         type: Group
         items:
+            -   name: cache
+                type: Preformatted
+                visible: false
+                clearWith:
+                    - buildModel_variables_long_action
+                    - buildModel_variables_long_actor
+                    - buildModel_variables_long_time
+                    - buildModel_variables_long_order
+                    - buildModel_type
+                    - buildModel_scaling
+                    - buildModel_threshold
+                    - buildModel_lambda
+                    - clustering_k
+                    - clustering_dissimilarity
+                    - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
+                    - compare_cluster_i
+                    - compare_cluster_j
+                    - compare_scaling
             -   name: summary
                 title: Summary Metrics
                 type: Table

@@ -67,6 +67,7 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bootstrap_method = "stability",
             bootstrap_range_low = 0.75,
             bootstrap_range_up = 1.25,
+            bootstrap_threshold_use = FALSE,
             bootstrap_threshold = 0.1,
             bootstrap_show_table = FALSE,
             bootstrap_table_max_rows = 20,
@@ -111,7 +112,7 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             compare_sequences_show_plot = FALSE,
             compare_sequences_sub_min = 2,
             compare_sequences_sub_max = 4,
-            compare_sequences_min_freq = 20,
+            compare_sequences_min_freq = 5,
             compare_sequences_correction = "bonferroni",
             compare_show_summary = FALSE,
             compare_show_network = FALSE,
@@ -522,6 +523,10 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=1.25,
                 min=0,
                 max=10)
+            private$..bootstrap_threshold_use <- jmvcore::OptionBool$new(
+                "bootstrap_threshold_use",
+                bootstrap_threshold_use,
+                default=FALSE)
             private$..bootstrap_threshold <- jmvcore::OptionNumber$new(
                 "bootstrap_threshold",
                 bootstrap_threshold,
@@ -779,7 +784,7 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..compare_sequences_min_freq <- jmvcore::OptionInteger$new(
                 "compare_sequences_min_freq",
                 compare_sequences_min_freq,
-                default=20,
+                default=5,
                 min=1,
                 max=100)
             private$..compare_sequences_correction <- jmvcore::OptionList$new(
@@ -1044,6 +1049,7 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..bootstrap_method)
             self$.addOption(private$..bootstrap_range_low)
             self$.addOption(private$..bootstrap_range_up)
+            self$.addOption(private$..bootstrap_threshold_use)
             self$.addOption(private$..bootstrap_threshold)
             self$.addOption(private$..bootstrap_show_table)
             self$.addOption(private$..bootstrap_table_max_rows)
@@ -1188,6 +1194,7 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         bootstrap_method = function() private$..bootstrap_method$value,
         bootstrap_range_low = function() private$..bootstrap_range_low$value,
         bootstrap_range_up = function() private$..bootstrap_range_up$value,
+        bootstrap_threshold_use = function() private$..bootstrap_threshold_use$value,
         bootstrap_threshold = function() private$..bootstrap_threshold$value,
         bootstrap_show_table = function() private$..bootstrap_show_table$value,
         bootstrap_table_max_rows = function() private$..bootstrap_table_max_rows$value,
@@ -1331,6 +1338,7 @@ ClusterTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..bootstrap_method = NA,
         ..bootstrap_range_low = NA,
         ..bootstrap_range_up = NA,
+        ..bootstrap_threshold_use = NA,
         ..bootstrap_threshold = NA,
         ..bootstrap_show_table = NA,
         ..bootstrap_table_max_rows = NA,
@@ -1783,6 +1791,7 @@ ClusterTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
+                    cache = function() private$.items[["cache"]],
                     table = function() private$.items[["table"]],
                     plot = function() private$.items[["plot"]]),
                 private = list(),
@@ -1792,6 +1801,30 @@ ClusterTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             options=options,
                             name="community",
                             title="Communities")
+                        self$add(jmvcore::Preformatted$new(
+                            options=options,
+                            name="cache",
+                            visible=FALSE,
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "clustering_k",
+                                "clustering_dissimilarity",
+                                "clustering_method",
+                                "clustering_weighted",
+                                "clustering_lambda",
+                                "random_seed_use",
+                                "random_seed",
+                                "community_methods",
+                                "community_gamma",
+                                "random_seed_use",
+                                "random_seed")))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="table",
@@ -1863,6 +1896,7 @@ ClusterTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
+                    cache = function() private$.items[["cache"]],
                     plot = function() private$.items[["plot"]]),
                 private = list(),
                 public=list(
@@ -1871,6 +1905,29 @@ ClusterTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             options=options,
                             name="cliques",
                             title="Cliques")
+                        self$add(jmvcore::Preformatted$new(
+                            options=options,
+                            name="cache",
+                            visible=FALSE,
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "clustering_k",
+                                "clustering_dissimilarity",
+                                "clustering_method",
+                                "clustering_weighted",
+                                "clustering_lambda",
+                                "random_seed_use",
+                                "random_seed",
+                                "cliques_size",
+                                "cliques_threshold",
+                                "cliques_sum_weights")))
                         self$add(jmvcore::Image$new(
                             options=options,
                             name="plot",
@@ -1907,6 +1964,7 @@ ClusterTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
+                    cache = function() private$.items[["cache"]],
                     table = function() private$.items[["table"]],
                     plot = function() private$.items[["plot"]]),
                 private = list(),
@@ -1916,6 +1974,35 @@ ClusterTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             options=options,
                             name="bootstrap",
                             title="Bootstrap")
+                        self$add(jmvcore::Preformatted$new(
+                            options=options,
+                            name="cache",
+                            visible=FALSE,
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "clustering_k",
+                                "clustering_dissimilarity",
+                                "clustering_method",
+                                "clustering_weighted",
+                                "clustering_lambda",
+                                "random_seed_use",
+                                "random_seed",
+                                "bootstrap_iteration",
+                                "bootstrap_level",
+                                "bootstrap_method",
+                                "bootstrap_range_low",
+                                "bootstrap_range_up",
+                                "bootstrap_threshold",
+                                "bootstrap_threshold_use",
+                                "random_seed_use",
+                                "random_seed")))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="table",
@@ -1989,6 +2076,7 @@ ClusterTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "bootstrap_range_low",
                                 "bootstrap_range_up",
                                 "bootstrap_threshold",
+                                "bootstrap_threshold_use",
                                 "random_seed_use",
                                 "random_seed")))
                         self$add(jmvcore::Image$new(
@@ -2021,6 +2109,7 @@ ClusterTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "bootstrap_range_low",
                                 "bootstrap_range_up",
                                 "bootstrap_threshold",
+                                "bootstrap_threshold_use",
                                 "random_seed_use",
                                 "random_seed",
                                 "bootstrap_plot_cut",
@@ -2032,6 +2121,7 @@ ClusterTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
+                    cache = function() private$.items[["cache"]],
                     table = function() private$.items[["table"]],
                     plot = function() private$.items[["plot"]]),
                 private = list(),
@@ -2041,6 +2131,32 @@ ClusterTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             options=options,
                             name="permutation",
                             title="Permutation Test")
+                        self$add(jmvcore::Preformatted$new(
+                            options=options,
+                            name="cache",
+                            visible=FALSE,
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "clustering_k",
+                                "clustering_dissimilarity",
+                                "clustering_method",
+                                "clustering_weighted",
+                                "clustering_lambda",
+                                "random_seed_use",
+                                "random_seed",
+                                "permutation_iter",
+                                "permutation_paired",
+                                "permutation_level",
+                                "permutation_adjust",
+                                "random_seed_use",
+                                "random_seed")))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="table",
@@ -2124,6 +2240,7 @@ ClusterTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
+                    cache = function() private$.items[["cache"]],
                     summary = function() private$.items[["summary"]],
                     network = function() private$.items[["network"]],
                     plot = function() private$.items[["plot"]]),
@@ -2134,6 +2251,29 @@ ClusterTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             options=options,
                             name="compare",
                             title="Network Comparison")
+                        self$add(jmvcore::Preformatted$new(
+                            options=options,
+                            name="cache",
+                            visible=FALSE,
+                            clearWith=list(
+                                "buildModel_variables_long_action",
+                                "buildModel_variables_long_actor",
+                                "buildModel_variables_long_time",
+                                "buildModel_variables_long_order",
+                                "buildModel_type",
+                                "buildModel_scaling",
+                                "buildModel_threshold",
+                                "buildModel_lambda",
+                                "clustering_k",
+                                "clustering_dissimilarity",
+                                "clustering_method",
+                                "clustering_weighted",
+                                "clustering_lambda",
+                                "random_seed_use",
+                                "random_seed",
+                                "compare_cluster_i",
+                                "compare_cluster_j",
+                                "compare_scaling")))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="summary",
@@ -2769,6 +2909,8 @@ ClusterTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param bootstrap_method .
 #' @param bootstrap_range_low .
 #' @param bootstrap_range_up .
+#' @param bootstrap_threshold_use Override the default threshold (the 10th
+#'   percentile of each network's edge weights).
 #' @param bootstrap_threshold .
 #' @param bootstrap_show_table .
 #' @param bootstrap_table_max_rows .
@@ -2869,13 +3011,18 @@ ClusterTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$model$mosaic} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$centrality$table} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$centrality$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$community$cache} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$community$table} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$community$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$cliques$cache} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$cliques$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$bootstrap$cache} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$bootstrap$table} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$bootstrap$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$permutation$cache} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$permutation$table} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$permutation$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$compare$cache} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$compare$summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$compare$network} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$compare$plot} \tab \tab \tab \tab \tab an image \cr
@@ -2952,6 +3099,7 @@ ClusterTNA <- function(
     bootstrap_method = "stability",
     bootstrap_range_low = 0.75,
     bootstrap_range_up = 1.25,
+    bootstrap_threshold_use = FALSE,
     bootstrap_threshold = 0.1,
     bootstrap_show_table = FALSE,
     bootstrap_table_max_rows = 20,
@@ -2996,7 +3144,7 @@ ClusterTNA <- function(
     compare_sequences_show_plot = FALSE,
     compare_sequences_sub_min = 2,
     compare_sequences_sub_max = 4,
-    compare_sequences_min_freq = 20,
+    compare_sequences_min_freq = 5,
     compare_sequences_correction = "bonferroni",
     compare_show_summary = FALSE,
     compare_show_network = FALSE,
@@ -3112,6 +3260,7 @@ ClusterTNA <- function(
         bootstrap_method = bootstrap_method,
         bootstrap_range_low = bootstrap_range_low,
         bootstrap_range_up = bootstrap_range_up,
+        bootstrap_threshold_use = bootstrap_threshold_use,
         bootstrap_threshold = bootstrap_threshold,
         bootstrap_show_table = bootstrap_show_table,
         bootstrap_table_max_rows = bootstrap_table_max_rows,

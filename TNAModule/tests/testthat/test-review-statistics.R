@@ -103,3 +103,26 @@ test_that("action labels containing arrows cannot merge distinct sequence patter
   expect_s3_class(result$compareSequences$plot$state, "tna_sequence_comparison")
   expect_equal(attr(result$compareSequences$plot$state, "freq_cols"), c("freq_G1", "freq_G2"))
 })
+
+test_that("sequence comparisons retain trailing empty states and escaped labels", {
+  invisible(lapply(c("A", 'A"\\'), function(label) {
+    data <- data.frame(actor = rep(seq_len(4), each = 4),
+                        action = rep(c(label, "", label, ""), 4),
+                        group = rep(c("G1", "G2"), each = 8))
+    result <- jtna_run("GroupTNA", data = data,
+      buildModel_variables_long_action = "action", buildModel_variables_long_actor = "actor",
+      buildModel_variables_long_group = "group", compare_sequences_show_table = TRUE,
+      compare_sequences_sub_min = 2, compare_sequences_sub_max = 2,
+      compare_sequences_min_freq = 1, random_seed_use = TRUE, random_seed = 7)
+    actual <- jtna_table(result$compareSequences$table)
+    forward <- paste0(encodeString(label, quote = '"'), '->""')
+    reverse <- paste0('""->', encodeString(label, quote = '"'))
+    expect_length(jtna_errors(result), 0L)
+    expect_setequal(actual$pattern, c(forward, reverse))
+    expect_equal(nrow(actual), 2L)
+    expect_equal(actual$length, c(2L, 2L))
+    positions <- match(c(forward, reverse), actual$pattern)
+    expect_equal(actual$freq_G1[positions], c(4L, 2L))
+    expect_equal(actual$freq_G2[positions], c(4L, 2L))
+  }))
+})
