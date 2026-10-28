@@ -16,6 +16,8 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             buildModel_scaling = "noScaling",
             buildModel_show_matrix = FALSE,
             buildModel_threshold = 900,
+            random_seed_use = FALSE,
+            random_seed = 1,
             buildModel_show_plot = TRUE,
             buildModel_plot_cut = 0.1,
             buildModel_plot_min_value = 0.05,
@@ -28,6 +30,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             buildModel_show_mosaic = FALSE,
             centrality_loops = FALSE,
             centrality_normalize = FALSE,
+            centrality_invert = TRUE,
             centrality_show_table = FALSE,
             centrality_show_plot = FALSE,
             centrality_Betweenness = TRUE,
@@ -46,6 +49,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             community_plot_layout = "circle",
             cliques_size = 2,
             cliques_threshold = 0,
+            cliques_sum_weights = FALSE,
             cliques_show_plot = FALSE,
             cliques_plot_cut = 0.1,
             cliques_plot_min_value = 0,
@@ -75,6 +79,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             permutation_iter = 1000,
             permutation_paired = FALSE,
             permutation_level = 0.05,
+            permutation_adjust = "none",
             permutation_table_max_rows = 20,
             permutation_table_show_all = FALSE,
             permutation_plot_layout = "circle",
@@ -83,7 +88,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             sequences_sort = "none",
             sequences_scale = "proportion",
             sequences_geom = "bar",
-            sequences_include_na = TRUE,
+            sequences_include_na = FALSE,
             sequences_show_n = TRUE,
             sequences_tick = 5,
             sequences_ncol = 2,
@@ -192,6 +197,15 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 buildModel_threshold,
                 default=900,
                 min=1)
+            private$..random_seed_use <- jmvcore::OptionBool$new(
+                "random_seed_use",
+                random_seed_use,
+                default=FALSE)
+            private$..random_seed <- jmvcore::OptionInteger$new(
+                "random_seed",
+                random_seed,
+                default=1,
+                min=1)
             private$..buildModel_show_plot <- jmvcore::OptionBool$new(
                 "buildModel_show_plot",
                 buildModel_show_plot,
@@ -266,6 +280,10 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "centrality_normalize",
                 centrality_normalize,
                 default=FALSE)
+            private$..centrality_invert <- jmvcore::OptionBool$new(
+                "centrality_invert",
+                centrality_invert,
+                default=TRUE)
             private$..centrality_show_table <- jmvcore::OptionBool$new(
                 "centrality_show_table",
                 centrality_show_table,
@@ -365,6 +383,10 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=0,
                 min=0,
                 max=1)
+            private$..cliques_sum_weights <- jmvcore::OptionBool$new(
+                "cliques_sum_weights",
+                cliques_sum_weights,
+                default=FALSE)
             private$..cliques_show_plot <- jmvcore::OptionBool$new(
                 "cliques_show_plot",
                 cliques_show_plot,
@@ -551,6 +573,18 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=0.05,
                 min=0,
                 max=1)
+            private$..permutation_adjust <- jmvcore::OptionList$new(
+                "permutation_adjust",
+                permutation_adjust,
+                default="none",
+                options=list(
+                    "none",
+                    "bonferroni",
+                    "holm",
+                    "hochberg",
+                    "hommel",
+                    "BH",
+                    "BY"))
             private$..permutation_table_max_rows <- jmvcore::OptionInteger$new(
                 "permutation_table_max_rows",
                 permutation_table_max_rows,
@@ -611,7 +645,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..sequences_include_na <- jmvcore::OptionBool$new(
                 "sequences_include_na",
                 sequences_include_na,
-                default=TRUE)
+                default=FALSE)
             private$..sequences_show_n <- jmvcore::OptionBool$new(
                 "sequences_show_n",
                 sequences_show_n,
@@ -739,7 +773,6 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "max",
                     "rank",
                     "zscore",
-                    "robust",
                     "log",
                     "log1p",
                     "softmax",
@@ -912,6 +945,8 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..buildModel_scaling)
             self$.addOption(private$..buildModel_show_matrix)
             self$.addOption(private$..buildModel_threshold)
+            self$.addOption(private$..random_seed_use)
+            self$.addOption(private$..random_seed)
             self$.addOption(private$..buildModel_show_plot)
             self$.addOption(private$..buildModel_plot_cut)
             self$.addOption(private$..buildModel_plot_min_value)
@@ -924,6 +959,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..buildModel_show_mosaic)
             self$.addOption(private$..centrality_loops)
             self$.addOption(private$..centrality_normalize)
+            self$.addOption(private$..centrality_invert)
             self$.addOption(private$..centrality_show_table)
             self$.addOption(private$..centrality_show_plot)
             self$.addOption(private$..centrality_Betweenness)
@@ -942,6 +978,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..community_plot_layout)
             self$.addOption(private$..cliques_size)
             self$.addOption(private$..cliques_threshold)
+            self$.addOption(private$..cliques_sum_weights)
             self$.addOption(private$..cliques_show_plot)
             self$.addOption(private$..cliques_plot_cut)
             self$.addOption(private$..cliques_plot_min_value)
@@ -971,6 +1008,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..permutation_iter)
             self$.addOption(private$..permutation_paired)
             self$.addOption(private$..permutation_level)
+            self$.addOption(private$..permutation_adjust)
             self$.addOption(private$..permutation_table_max_rows)
             self$.addOption(private$..permutation_table_show_all)
             self$.addOption(private$..permutation_plot_layout)
@@ -1046,6 +1084,8 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         buildModel_scaling = function() private$..buildModel_scaling$value,
         buildModel_show_matrix = function() private$..buildModel_show_matrix$value,
         buildModel_threshold = function() private$..buildModel_threshold$value,
+        random_seed_use = function() private$..random_seed_use$value,
+        random_seed = function() private$..random_seed$value,
         buildModel_show_plot = function() private$..buildModel_show_plot$value,
         buildModel_plot_cut = function() private$..buildModel_plot_cut$value,
         buildModel_plot_min_value = function() private$..buildModel_plot_min_value$value,
@@ -1058,6 +1098,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         buildModel_show_mosaic = function() private$..buildModel_show_mosaic$value,
         centrality_loops = function() private$..centrality_loops$value,
         centrality_normalize = function() private$..centrality_normalize$value,
+        centrality_invert = function() private$..centrality_invert$value,
         centrality_show_table = function() private$..centrality_show_table$value,
         centrality_show_plot = function() private$..centrality_show_plot$value,
         centrality_Betweenness = function() private$..centrality_Betweenness$value,
@@ -1076,6 +1117,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         community_plot_layout = function() private$..community_plot_layout$value,
         cliques_size = function() private$..cliques_size$value,
         cliques_threshold = function() private$..cliques_threshold$value,
+        cliques_sum_weights = function() private$..cliques_sum_weights$value,
         cliques_show_plot = function() private$..cliques_show_plot$value,
         cliques_plot_cut = function() private$..cliques_plot_cut$value,
         cliques_plot_min_value = function() private$..cliques_plot_min_value$value,
@@ -1105,6 +1147,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         permutation_iter = function() private$..permutation_iter$value,
         permutation_paired = function() private$..permutation_paired$value,
         permutation_level = function() private$..permutation_level$value,
+        permutation_adjust = function() private$..permutation_adjust$value,
         permutation_table_max_rows = function() private$..permutation_table_max_rows$value,
         permutation_table_show_all = function() private$..permutation_table_show_all$value,
         permutation_plot_layout = function() private$..permutation_plot_layout$value,
@@ -1179,6 +1222,8 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..buildModel_scaling = NA,
         ..buildModel_show_matrix = NA,
         ..buildModel_threshold = NA,
+        ..random_seed_use = NA,
+        ..random_seed = NA,
         ..buildModel_show_plot = NA,
         ..buildModel_plot_cut = NA,
         ..buildModel_plot_min_value = NA,
@@ -1191,6 +1236,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..buildModel_show_mosaic = NA,
         ..centrality_loops = NA,
         ..centrality_normalize = NA,
+        ..centrality_invert = NA,
         ..centrality_show_table = NA,
         ..centrality_show_plot = NA,
         ..centrality_Betweenness = NA,
@@ -1209,6 +1255,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..community_plot_layout = NA,
         ..cliques_size = NA,
         ..cliques_threshold = NA,
+        ..cliques_sum_weights = NA,
         ..cliques_show_plot = NA,
         ..cliques_plot_cut = NA,
         ..cliques_plot_min_value = NA,
@@ -1238,6 +1285,7 @@ GroupTNAOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..permutation_iter = NA,
         ..permutation_paired = NA,
         ..permutation_level = NA,
+        ..permutation_adjust = NA,
         ..permutation_table_max_rows = NA,
         ..permutation_table_show_all = NA,
         ..permutation_plot_layout = NA,
@@ -1575,6 +1623,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "buildModel_lambda",
                                 "centrality_loops",
                                 "centrality_normalize",
+                                "centrality_invert",
                                 "centrality_OutStrength",
                                 "centrality_InStrength",
                                 "centrality_ClosenessIn",
@@ -1604,6 +1653,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "buildModel_lambda",
                                 "centrality_loops",
                                 "centrality_normalize",
+                                "centrality_invert",
                                 "centrality_OutStrength",
                                 "centrality_InStrength",
                                 "centrality_ClosenessIn",
@@ -1655,7 +1705,9 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "buildModel_threshold",
                                 "buildModel_lambda",
                                 "community_methods",
-                                "community_gamma")))
+                                "community_gamma",
+                                "random_seed_use",
+                                "random_seed")))
                         self$add(jmvcore::Image$new(
                             options=options,
                             name="plot",
@@ -1676,6 +1728,8 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "buildModel_lambda",
                                 "community_methods",
                                 "community_gamma",
+                                "random_seed_use",
+                                "random_seed",
                                 "community_plot_layout")))}))$new(options=options))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
@@ -1708,6 +1762,7 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "buildModel_lambda",
                                 "cliques_size",
                                 "cliques_threshold",
+                                "cliques_sum_weights",
                                 "cliques_plot_cut",
                                 "cliques_plot_min_value",
                                 "cliques_plot_edge_label_size",
@@ -1792,7 +1847,9 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "bootstrap_method",
                                 "bootstrap_range_low",
                                 "bootstrap_range_up",
-                                "bootstrap_threshold")))
+                                "bootstrap_threshold",
+                                "random_seed_use",
+                                "random_seed")))
                         self$add(jmvcore::Image$new(
                             options=options,
                             name="plot",
@@ -1817,6 +1874,8 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "bootstrap_range_low",
                                 "bootstrap_range_up",
                                 "bootstrap_threshold",
+                                "random_seed_use",
+                                "random_seed",
                                 "bootstrap_plot_cut",
                                 "bootstrap_plot_min_value",
                                 "bootstrap_plot_edge_label_size",
@@ -1874,7 +1933,10 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "buildModel_lambda",
                                 "permutation_iter",
                                 "permutation_paired",
-                                "permutation_level")))
+                                "permutation_level",
+                                "permutation_adjust",
+                                "random_seed_use",
+                                "random_seed")))
                         self$add(jmvcore::Image$new(
                             options=options,
                             name="plot",
@@ -1896,6 +1958,9 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "permutation_iter",
                                 "permutation_paired",
                                 "permutation_level",
+                                "permutation_adjust",
+                                "random_seed_use",
+                                "random_seed",
                                 "permutation_plot_layout")))}))$new(options=options))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
@@ -2060,7 +2125,9 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "compare_sequences_sub_min",
                                 "compare_sequences_sub_max",
                                 "compare_sequences_min_freq",
-                                "compare_sequences_correction")))
+                                "compare_sequences_correction",
+                                "random_seed_use",
+                                "random_seed")))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="table",
@@ -2089,7 +2156,9 @@ GroupTNAResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "compare_sequences_sub_min",
                                 "compare_sequences_sub_max",
                                 "compare_sequences_min_freq",
-                                "compare_sequences_correction")))}))$new(options=options))
+                                "compare_sequences_correction",
+                                "random_seed_use",
+                                "random_seed")))}))$new(options=options))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
@@ -2426,6 +2495,11 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param buildModel_scaling .
 #' @param buildModel_show_matrix .
 #' @param buildModel_threshold .
+#' @param random_seed_use Fix the seed of the resampling and randomised steps
+#'   (bootstrap, permutation, stability, community detection, sequence
+#'   comparison, clustering), so results repeat exactly. Off by default, as in
+#'   tna.
+#' @param random_seed .
 #' @param buildModel_show_plot .
 #' @param buildModel_plot_cut .
 #' @param buildModel_plot_min_value .
@@ -2438,6 +2512,7 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param buildModel_show_mosaic .
 #' @param centrality_loops .
 #' @param centrality_normalize .
+#' @param centrality_invert .
 #' @param centrality_show_table .
 #' @param centrality_show_plot .
 #' @param centrality_Betweenness .
@@ -2456,6 +2531,8 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param community_plot_layout .
 #' @param cliques_size .
 #' @param cliques_threshold .
+#' @param cliques_sum_weights Keep a clique when the sum of the weights in
+#'   both directions passes the threshold, instead of each directed weight.
 #' @param cliques_show_plot .
 #' @param cliques_plot_cut .
 #' @param cliques_plot_min_value .
@@ -2483,8 +2560,12 @@ GroupTNABase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param permutation_show_text .
 #' @param permutation_show_plot .
 #' @param permutation_iter .
-#' @param permutation_paired .
+#' @param permutation_paired Pair sequences by actor and session number. Every
+#'   group must contain the same actors and session numbers; equal group sizes
+#'   alone do not establish pairs.
 #' @param permutation_level .
+#' @param permutation_adjust Multiple-testing correction applied to the edge
+#'   p-values.
 #' @param permutation_table_max_rows .
 #' @param permutation_table_show_all .
 #' @param permutation_plot_layout .
@@ -2596,6 +2677,8 @@ GroupTNA <- function(
     buildModel_scaling = "noScaling",
     buildModel_show_matrix = FALSE,
     buildModel_threshold = 900,
+    random_seed_use = FALSE,
+    random_seed = 1,
     buildModel_show_plot = TRUE,
     buildModel_plot_cut = 0.1,
     buildModel_plot_min_value = 0.05,
@@ -2608,6 +2691,7 @@ GroupTNA <- function(
     buildModel_show_mosaic = FALSE,
     centrality_loops = FALSE,
     centrality_normalize = FALSE,
+    centrality_invert = TRUE,
     centrality_show_table = FALSE,
     centrality_show_plot = FALSE,
     centrality_Betweenness = TRUE,
@@ -2626,6 +2710,7 @@ GroupTNA <- function(
     community_plot_layout = "circle",
     cliques_size = 2,
     cliques_threshold = 0,
+    cliques_sum_weights = FALSE,
     cliques_show_plot = FALSE,
     cliques_plot_cut = 0.1,
     cliques_plot_min_value = 0,
@@ -2655,6 +2740,7 @@ GroupTNA <- function(
     permutation_iter = 1000,
     permutation_paired = FALSE,
     permutation_level = 0.05,
+    permutation_adjust = "none",
     permutation_table_max_rows = 20,
     permutation_table_show_all = FALSE,
     permutation_plot_layout = "circle",
@@ -2663,7 +2749,7 @@ GroupTNA <- function(
     sequences_sort = "none",
     sequences_scale = "proportion",
     sequences_geom = "bar",
-    sequences_include_na = TRUE,
+    sequences_include_na = FALSE,
     sequences_show_n = TRUE,
     sequences_tick = 5,
     sequences_ncol = 2,
@@ -2748,6 +2834,8 @@ GroupTNA <- function(
         buildModel_scaling = buildModel_scaling,
         buildModel_show_matrix = buildModel_show_matrix,
         buildModel_threshold = buildModel_threshold,
+        random_seed_use = random_seed_use,
+        random_seed = random_seed,
         buildModel_show_plot = buildModel_show_plot,
         buildModel_plot_cut = buildModel_plot_cut,
         buildModel_plot_min_value = buildModel_plot_min_value,
@@ -2760,6 +2848,7 @@ GroupTNA <- function(
         buildModel_show_mosaic = buildModel_show_mosaic,
         centrality_loops = centrality_loops,
         centrality_normalize = centrality_normalize,
+        centrality_invert = centrality_invert,
         centrality_show_table = centrality_show_table,
         centrality_show_plot = centrality_show_plot,
         centrality_Betweenness = centrality_Betweenness,
@@ -2778,6 +2867,7 @@ GroupTNA <- function(
         community_plot_layout = community_plot_layout,
         cliques_size = cliques_size,
         cliques_threshold = cliques_threshold,
+        cliques_sum_weights = cliques_sum_weights,
         cliques_show_plot = cliques_show_plot,
         cliques_plot_cut = cliques_plot_cut,
         cliques_plot_min_value = cliques_plot_min_value,
@@ -2807,6 +2897,7 @@ GroupTNA <- function(
         permutation_iter = permutation_iter,
         permutation_paired = permutation_paired,
         permutation_level = permutation_level,
+        permutation_adjust = permutation_adjust,
         permutation_table_max_rows = permutation_table_max_rows,
         permutation_table_show_all = permutation_table_show_all,
         permutation_plot_layout = permutation_plot_layout,

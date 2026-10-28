@@ -21,25 +21,42 @@
 }
 
 # A grouped model over the prepared sequences, one network per value of
-# `groups` (one value per sequence). Scaling is applied within each group:
-# tna's grouped analyses (centralities, communities, bootstrap, comparisons)
-# reject, or silently mislabel, models scaled across groups.
+# `groups` (one value per sequence). Scaling follows tna's default
+# (across groups); tna's grouped analyses report when they cannot use it.
 .jtna_group_model <- function(prepared, groups, options, scaling = .jtna_scaling(options)) {
+  # Always pass a factor. For a character vector, tna 1.3.1 labels the
+  # networks in order of first appearance but fills them in sorted order,
+  # so the names are swapped whenever the data do not start with the
+  # alphabetically first group.
+  if (!is.factor(groups)) groups <- factor(groups)
   tna::group_model(
     x = prepared,
     group = groups,
     type = options$buildModel_type,
     scaling = scaling,
-    groupwise = length(scaling) > 0L,
     params = .jtna_params(options))
 }
 
-# Say how grouped weights were scaled, when they were.
-.jtna_scaling_notice <- function(section, options, id) {
-  if (length(.jtna_scaling(options)) == 0L) return(invisible())
-  .jtna_notice(options, section,
-    sprintf("Edge weights are scaled within each %s; tna does not analyse grouped models scaled across %ss.", id, id),
-    name = "scaling", type = jmvcore::NoticeType$INFO)
+# Run `fun` with a fixed random seed, then restore the previous random state
+# so nothing outside this call is affected. `seed = NULL` (the default, as in
+# tna) runs `fun` unseeded. Every randomised step (resampling, permutation,
+# stochastic community detection, clustering) runs through here.
+.jtna_with_seed <- function(seed, fun) {
+  if (is.null(seed)) return(fun())
+  env <- globalenv()
+  had_seed <- exists(".Random.seed", envir = env, inherits = FALSE)
+  if (had_seed) old_seed <- get(".Random.seed", envir = env, inherits = FALSE)
+  on.exit({
+    if (had_seed) assign(".Random.seed", old_seed, envir = env)
+    else rm(".Random.seed", envir = env)
+  }, add = TRUE)
+  set.seed(seed)
+  fun()
+}
+
+# The seed chosen in the panel, or NULL when "Set seed" is off.
+.jtna_seed <- function(options) {
+  if (isTRUE(options$random_seed_use)) options$random_seed
 }
 
 # A Level option's value, or `default` when nothing is selected.
@@ -133,7 +150,11 @@
   vars <- .jtna_vars(options)
   .jtna_validate(data, options)
 
-  df <- data[unlist(vars, use.names = FALSE)]
+  df <- data[unique(unlist(vars, use.names = FALSE))]
+  # Missing group membership cannot define a network. Match group_model's
+  # exclusion while keeping patterns, indices and session keys on the same
+  # observations; GroupTNA reports the omitted event count in its results.
+  if (!is.null(vars$group)) df <- df[!is.na(df[[vars$group]]), , drop = FALSE]
   text_roles <- intersect(c("action", "actor", "group"), names(vars))
   df[unlist(vars[text_roles])] <- lapply(df[unlist(vars[text_roles])], as.character)
 
@@ -142,19 +163,44 @@
     # rather than "1", "10", "2". as.numeric() warns on text values, which is
     # exactly the case tested here (they stay as they are).
     order_num <- suppressWarnings(as.numeric(as.character(df[[vars$order]])))
-    if (!anyNA(order_num)) df[[vars$order]] <- order_num
+    if (all(is.na(df[[vars$order]]) | !is.na(order_num))) df[[vars$order]] <- order_num
   }
 
   unix_time <- FALSE
   if (!is.null(vars$time)) {
+    # Keep absolute instants across timezone/DST changes; formatting a POSIX
+    # value as text loses its offset and can reverse the event order.
+    if (inherits(df[[vars$time]], "POSIXt")) df[[vars$time]] <- as.numeric(df[[vars$time]])
     unix_time <- is.numeric(df[[vars$time]])
     if (!unix_time) df[[vars$time]] <- as.character(df[[vars$time]])
   }
 
+  # prepare_data uses the action column name in an unescaped regular
+  # expression when Time is selected. Use a safe temporary name for names
+  # such as "Action (coded)", then restore the public column names below.
+  action_name <- vars$action
+  safe_action <- action_name
+  if (!is.null(vars$time) && grepl("[^[:alnum:]_]", action_name)) {
+    safe_action <- utils::tail(make.unique(c(names(df), "jtna_action"), sep = "_"), 1L)
+    df[[safe_action]] <- df[[action_name]]
+    if (!action_name %in% unlist(vars[setdiff(names(vars), "action")])) df[[action_name]] <- NULL
+  }
+
+  actor_key <- vars$actor
+  if (!is.null(vars$group) && !is.null(vars$actor)) {
+    membership <- unique(df[unique(c(vars$actor, vars$group))])
+    # Keep the usual actor ordering when each actor has only one group.
+    if (anyDuplicated(membership[[vars$actor]]) > 0L) {
+      actor_key <- unique(c(vars$actor, vars$group))
+    }
+  }
+
   args <- list(
     data = df,
-    action = vars$action,
-    actor = vars$actor,
+    action = safe_action,
+    # Actor identifiers can recur in different groups (e.g. before/after).
+    # A group must be part of the session key, not reduced to its first value.
+    actor = actor_key,
     time = vars$time,
     order = vars$order,
     time_threshold = options$buildModel_threshold,
@@ -162,8 +208,17 @@
   )
   args <- Filter(Negate(is.null), args)
 
-  tryCatch(
-    do.call(tna::prepare_data, args),
+  prepared <- tryCatch(
+    {
+      prepared <- do.call(tna::prepare_data, args)
+      if (!identical(safe_action, action_name)) {
+        prepared$long_data[[action_name]] <- prepared$long_data[[safe_action]]
+        prepared$long_data[[safe_action]] <- NULL
+        names(prepared$sequence_data) <- sub(safe_action, action_name,
+                                            names(prepared$sequence_data), fixed = TRUE)
+      }
+      prepared
+    },
     error = function(e) {
       message <- conditionMessage(e)
       if (!is.null(vars$time) && grepl("time|date|posix|format", message, ignore.case = TRUE)) {
@@ -175,6 +230,12 @@
       .jtna_reject(sprintf("The data could not be prepared for TNA: %s", message))
     }
   )
+  events <- rowSums(!is.na(prepared$sequence_data))
+  if (all(events < 2L)) {
+    .jtna_reject(paste("There are no transitions to model: every sequence has a single event.",
+                       "Use a longer session gap, or check the Actor and Time variables."))
+  }
+  prepared
 }
 
 # One value per sequence of `column` from the prepared data. prepare_data's
@@ -333,7 +394,7 @@
   df[order(-df$value, df$from, df$to), , drop = FALSE]
 }
 
-# Sequence comparison: patterns without missing values, most frequent first,
+# Sequence comparison: patterns most frequent first,
 # capped at 20 rows.
 .jtna_compare_sequences_df <- function(model, options) {
   sub_min <- options$compare_sequences_sub_min
@@ -341,17 +402,43 @@
   if (sub_min > sub_max) {
     stop("the minimum pattern length is larger than the maximum.", call. = FALSE)
   }
-  cs <- tna::compare_sequences(
+  # tna joins labels with "->" before counting patterns. Encode labels
+  # containing that delimiter so distinct sequences cannot collapse into
+  # the same pattern (e.g. c("A->B", "C") versus c("A", "B->C")).
+  labels <- model[[1L]]$labels
+  encoded <- any(grepl("->", labels, fixed = TRUE))
+  if (encoded) {
+    tokens <- sprintf("state%0*d", nchar(length(labels)), seq_along(labels))
+    model[] <- lapply(model, function(network) {
+      network$labels <- tokens
+      network
+    })
+  }
+  cs <- .jtna_with_seed(.jtna_seed(options), \() tna::compare_sequences(
     x = model,
     sub = seq.int(sub_min, sub_max),
     min_freq = options$compare_sequences_min_freq,
-    correction = options$compare_sequences_correction
-  )
-  cs <- as.data.frame(cs[!grepl("*", cs$pattern, fixed = TRUE), , drop = FALSE])
-  freq_cols <- grep("^freq_", names(cs), value = TRUE)
-  total <- rowSums(cs[freq_cols])
+    adjust = options$compare_sequences_correction
+  ))
+  # Subsetting drops tna's attributes; put them back so plot() still
+  # dispatches to tna's sequence-comparison plot.
+  keep <- attributes(cs)[c("class", "groups", "freq_cols")]
+  # tna already excludes missing-value windows. A literal '*' is a valid
+  # action label, not a missing-value marker.
+  parts <- strsplit(as.character(cs$pattern), "->", fixed = TRUE)
+  cs$length <- lengths(parts)
+  if (encoded) {
+    # Quoting every label makes the displayed boundaries unambiguous too.
+    displayed <- encodeString(labels, quote = '"')
+    cs$pattern <- vapply(parts, function(part) {
+      paste(displayed[match(part, tokens)], collapse = "->")
+    }, character(1))
+  }
+  total <- rowSums(as.data.frame(cs)[grep("^freq_", names(cs), value = TRUE)])
   cs <- cs[order(-total, cs$pattern), , drop = FALSE]
-  cs[seq_len(min(20L, nrow(cs))), , drop = FALSE]
+  cs <- cs[seq_len(min(20L, nrow(cs))), , drop = FALSE]
+  attributes(cs)[names(keep)] <- keep
+  cs
 }
 
 # Pattern discovery on the prepared sequences. `outcome` (one value per
@@ -363,11 +450,32 @@
   if (options$pattern_gap_min > options$pattern_gap_max) {
     stop("the minimum gap is larger than the maximum gap.", call. = FALSE)
   }
+  # codyna accepts lengths up to the longest sequence and gaps up to two less,
+  # and checks the gap for every pattern type. Clip the panel's ranges to
+  # what the data allow and say so; the gap only matters for gapped patterns.
+  longest <- ncol(prepared$sequence_data)
+  if (longest < 3L) {
+    stop(sprintf("pattern discovery needs a sequence of at least three events; the longest here has %d.",
+                 longest), call. = FALSE)
+  }
+  if (options$pattern_len_min > longest) {
+    stop(sprintf("the minimum length (%d) is longer than the longest sequence (%d events).",
+                 options$pattern_len_min, longest), call. = FALSE)
+  }
+  gapped <- identical(options$pattern_type, "gapped")
+  if (gapped && options$pattern_gap_min > longest - 2L) {
+    stop(sprintf("the minimum gap (%d) is too large: with sequences of at most %d events the largest gap is %d.",
+                 options$pattern_gap_min, longest, longest - 2L), call. = FALSE)
+  }
+  len_max <- min(options$pattern_len_max, longest)
+  gap_max <- min(options$pattern_gap_max, longest - 2L)
+  clipped <- c(if (len_max < options$pattern_len_max) sprintf("lengths above %d", len_max),
+               if (gapped && gap_max < options$pattern_gap_max) sprintf("gaps above %d", gap_max))
   args <- list(
     data = .jtna_sequences(prepared),
     type = options$pattern_type,
-    len = seq.int(options$pattern_len_min, options$pattern_len_max),
-    gap = seq.int(options$pattern_gap_min, options$pattern_gap_max),
+    len = seq.int(options$pattern_len_min, len_max),
+    gap = if (gapped) seq.int(options$pattern_gap_min, gap_max) else 1L,
     min_support = options$pattern_min_support,
     min_freq = options$pattern_min_count,
     outcome = outcome
@@ -378,7 +486,12 @@
     if (isTRUE(options[[paste0(f, "_use")]]) && length(value) == 1L && nzchar(value)) value
   })
   args <- c(Filter(Negate(is.null), args), Filter(Negate(is.null), chosen))
-  .jtna_plain(do.call(codyna::discover_patterns, args))
+  patterns <- .jtna_plain(do.call(codyna::discover_patterns, args))
+  if (length(clipped) > 0L) {
+    attr(patterns, "jtna_note") <- sprintf("Pattern %s were skipped: the longest sequence has %d events.",
+                                           paste(clipped, collapse = " and "), longest)
+  }
+  patterns
 }
 
 # Add one integer column per outcome count ("count_<group>") to the patterns
@@ -394,12 +507,30 @@
 # Sequence indices, one row per sequence, labelled from the prepared data's
 # own per-session metadata. `labels` maps table columns to label vectors.
 .jtna_indices_df <- function(prepared, options, labels = list()) {
+  # codyna's indices fail without a sequence of three or more events.
+  longest <- ncol(prepared$sequence_data)
+  if (longest < 3L) {
+    stop(sprintf("sequence indices need a sequence of at least three events; the longest here has %d.",
+                 longest), call. = FALSE)
+  }
   args <- list(data = .jtna_sequences(prepared), omega = options$indices_omega)
   favorable <- options$indices_favorable
   if (length(favorable) == 1L && nzchar(favorable)) args$favorable <- favorable
   indices <- .jtna_plain(do.call(codyna::sequence_indices, args))
+  indices$dominant_max_spell <- .jtna_dominant_spell(args$data, indices$dominant_state)
   id <- data.frame(sequence_id = seq_len(nrow(indices)))
   cbind(id, as.data.frame(labels, stringsAsFactors = FALSE), indices)
+}
+
+# The longest run of each sequence's dominant state. codyna 1.0.0 assigns
+# dominant_max_spell after its per-sequence loop, so every row gets the last
+# sequence's value; this recomputes it per sequence.
+.jtna_dominant_spell <- function(sequences, dominant) {
+  vapply(seq_len(nrow(sequences)), \(i) {
+    runs <- rle(unlist(sequences[i, ], use.names = FALSE))
+    hit <- !is.na(runs$values) & runs$values == dominant[i]
+    if (any(hit)) max(runs$lengths[hit]) else NA_integer_
+  }, integer(1))
 }
 
 # ---- Plots ----------------------------------------------------------------------

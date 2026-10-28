@@ -45,6 +45,13 @@ children:
             name: clustering_dissimilarity
           - type: ComboBox
             name: clustering_method
+          - type: CheckBox
+            name: clustering_weighted
+            enable: (clustering_dissimilarity:hamming)
+          - type: TextBox
+            name: clustering_lambda
+            format: number
+            enable: (clustering_dissimilarity:hamming && clustering_weighted)
           - type: TextBox
             name: clustering_k
             format: number
@@ -115,6 +122,12 @@ children:
               - type: TextBox
                 name: buildModel_threshold
                 format: number
+              - type: CheckBox
+                name: random_seed_use
+              - type: TextBox
+                name: random_seed
+                format: number
+                enable: (random_seed_use)
   # ── Network Analysis ──
   - type: Label
     label: Network Analysis
@@ -225,6 +238,8 @@ children:
               - type: CheckBox
                 name: centrality_normalize
                 label: Normalize values
+              - type: CheckBox
+                name: centrality_invert
           - type: Label
             label: Advanced Measures
             children:
@@ -330,6 +345,8 @@ children:
               - type: TextBox
                 name: cliques_threshold
                 format: number
+              - type: CheckBox
+                name: cliques_sum_weights
           - type: Label
             label: Plot Parameters
             children:
@@ -492,6 +509,8 @@ children:
               - type: TextBox
                 name: permutation_level
                 format: number
+              - type: ComboBox
+                name: permutation_adjust
               - type: CheckBox
                 name: permutation_paired
                 label: Paired test

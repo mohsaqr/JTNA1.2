@@ -73,6 +73,19 @@ options:
       default: 900
       min: 1
     
+
+    - name: random_seed_use
+      title: Set seed
+      type: Bool
+      default: false
+      description: Fix the seed of the resampling and randomised steps (bootstrap, permutation, stability, community detection, sequence comparison, clustering), so results repeat exactly. Off by default, as in tna.
+
+    - name: random_seed
+      title: Seed
+      type: Integer
+      default: 1
+      min: 1
+
     - name: buildModel_show_plot
       title: Plot
       type: Bool
@@ -173,6 +186,11 @@ options:
       title: Normalize values
       type: Bool
       default: False
+
+    - name: centrality_invert
+      title: Invert weights for distance-based measures
+      type: Bool
+      default: true
 
     - name: centrality_show_table
       title: Table
@@ -444,6 +462,12 @@ options:
       default: 0
       min: 0
       max: 1
+
+    - name: cliques_sum_weights
+      title: Threshold the summed weights
+      type: Bool
+      default: false
+      description: Keep a clique when the sum of the weights in both directions passes the threshold, instead of each directed weight.
 
     ##### PLOT
 

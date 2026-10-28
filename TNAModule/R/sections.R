@@ -18,14 +18,14 @@
 .jtna_run_matrix <- function(section, options, model, id = NULL) {
   if (!isTRUE(options$buildModel_show_matrix)) return(invisible())
   if (is.null(id)) {
-    .jtna_matrix_table(section$matrix, model$weights)
+    .jtna_matrix_table(section$matrix, model)
     .jtna_fill_table(section$inits, data.frame(state = model$labels,
                                                prob = as.numeric(model$inits)))
     return(invisible())
   }
   invisible(lapply(names(model), \(net) {
     section$matrices$addItem(key = net)
-    .jtna_matrix_table(section$matrices$get(key = net), model[[net]]$weights)
+    .jtna_matrix_table(section$matrices$get(key = net), model[[net]])
   }))
   nets <- names(model)
   inits <- data.frame(state = model[[1]]$labels)
@@ -37,15 +37,17 @@
   .jtna_fill_table(section$inits, inits)
 }
 
-# One row per "from" state, one column per "to" state.
-.jtna_matrix_table <- function(table, weights) {
-  states <- colnames(weights)
+# One row per "from" state, one column per "to" state. State names come
+# from the model's labels: tna's across-group scaling returns weight
+# matrices without dimnames.
+.jtna_matrix_table <- function(table, model) {
+  states <- model$labels
   invisible(lapply(seq_along(states), \(k) {
     table$addColumn(name = sprintf("to%d", k), title = states[k], type = "number", superTitle = "To")
   }))
-  df <- as.data.frame(unclass(weights), stringsAsFactors = FALSE)
+  df <- as.data.frame(unclass(model$weights), stringsAsFactors = FALSE)
   names(df) <- sprintf("to%d", seq_along(states))
-  .jtna_fill_table(table, cbind(from = rownames(weights), df, stringsAsFactors = FALSE))
+  .jtna_fill_table(table, cbind(from = states, df, stringsAsFactors = FALSE))
 }
 
 # The mosaic plot is defined for frequency models only.
@@ -70,7 +72,8 @@
   cent <- table$state
   if (is.null(cent)) {
     cent <- tna::centralities(x = model, loops = options$centrality_loops,
-                              normalize = options$centrality_normalize, measures = measures)
+                              normalize = options$centrality_normalize,
+                              invert = options$centrality_invert, measures = measures)
     table$setState(cent)
   }
   .jtna_fill_table(table, .jtna_centrality_df(cent, measures, id))
@@ -79,8 +82,10 @@
 .jtna_run_community <- function(section, options, model, id = NULL) {
   coms <- section$plot$state
   if (is.null(coms)) {
-    coms <- tna::communities(x = model, methods = options$community_methods,
-                             gamma = options$community_gamma)
+    coms <- .jtna_with_seed(.jtna_seed(options), \() {
+      tna::communities(x = model, methods = options$community_methods,
+                       gamma = options$community_gamma)
+    })
     section$plot$setState(coms)
   }
   .jtna_fill_table(section$table, .jtna_community_df(coms, options$community_methods, id))
@@ -89,7 +94,8 @@
 .jtna_run_cliques <- function(section, options, model) {
   if (is.null(section$plot$state)) {
     section$plot$setState(tna::cliques(x = model, size = options$cliques_size,
-                                       threshold = .jtna_cliques_threshold(options)))
+                                       threshold = .jtna_cliques_threshold(options),
+                                       sum_weights = options$cliques_sum_weights))
   }
   invisible()
 }
@@ -99,10 +105,10 @@
 .jtna_run_bootstrap <- function(section, options, model, id = NULL) {
   bs <- section$plot$state
   if (is.null(bs)) {
-    bs <- tna::bootstrap(
+    bs <- .jtna_with_seed(.jtna_seed(options), \() tna::bootstrap(
       x = model, iter = options$bootstrap_iteration, level = options$bootstrap_level,
       method = options$bootstrap_method, threshold = options$bootstrap_threshold,
-      consistency_range = c(options$bootstrap_range_low, options$bootstrap_range_up))
+      consistency_range = c(options$bootstrap_range_low, options$bootstrap_range_up)))
     section$plot$setState(bs)
   }
   table <- section$table
@@ -122,10 +128,10 @@
 .jtna_run_permutation <- function(section, options, model, id, unscaled) {
   perm <- section$plot$state
   if (is.null(perm)) {
-    perm <- tna::permutation_test(
+    perm <- .jtna_with_seed(.jtna_seed(options), \() tna::permutation_test(
       x = if (length(.jtna_scaling(options)) > 0L) unscaled() else model,
       iter = options$permutation_iter, paired = options$permutation_paired,
-      level = options$permutation_level)
+      level = options$permutation_level, adjust = options$permutation_adjust))
     section$plot$setState(perm)
   }
   table <- section$table
@@ -152,11 +158,15 @@
     section$plot$setVisible(FALSE)
     return(invisible())
   }
+  # tna builds a network from each scaled weight matrix for the network
+  # properties; z-score and log scaling can make weights negative, which
+  # those path-based properties cannot use.
+  signed <- options$compare_scaling %in% c("zscore", "log")
   state <- section$plot$state
   if (is.null(state)) {
     state <- list(
       result = tna::compare(x = model, i = match(i, names(model)), j = match(j, names(model)),
-                            scaling = options$compare_scaling, network = TRUE),
+                            scaling = options$compare_scaling, network = !signed),
       i = i, j = j)
     section$plot$setState(state)
   }
@@ -170,6 +180,11 @@
   network$setTitle(sprintf("Network Properties: %s", heading))
   network$getColumn("net_i")$setTitle(i)
   network$getColumn("net_j")$setTitle(j)
+  if (signed) {
+    network$setNote("signed", paste("Network properties are not computed with z-score or log scaling,",
+                                     "which can make weights negative."))
+    return(invisible())
+  }
   nm <- as.data.frame(state$result$network_metrics)
   .jtna_fill_table(network, data.frame(metric = as.character(nm$metric),
                                        net_i = as.numeric(nm[[2]]), net_j = as.numeric(nm[[3]])))
@@ -190,11 +205,21 @@
   invisible(lapply(prop_cols, \(pc) {
     table$addColumn(name = pc, title = sub("^prop_", "", pc), type = "number", superTitle = "Proportion")
   }))
-  table$addColumn(name = "statistic", title = "Statistic", type = "number")
+  # tna reports an effect size (older versions: a test statistic).
+  stat_cols <- intersect(c(effect_size = "effect_size", statistic = "statistic"), names(cs))
+  invisible(lapply(stat_cols, \(sc) {
+    table$addColumn(name = sc, title = if (sc == "effect_size") "Effect size" else "Statistic",
+                    type = "number")
+  }))
   table$addColumn(name = "p_value", title = "p", type = "number")
-  cs$length <- lengths(strsplit(as.character(cs$pattern), "->", fixed = TRUE))
-  if (nrow(cs) == 0L) table$setNote("empty", "No patterns reached the minimum frequency.")
-  .jtna_fill_table(table, cs)
+  rows <- as.data.frame(cs)
+  # Current results count states before decoding action labels; retain a
+  # fallback for cached sequence comparisons from older module versions.
+  if (!"length" %in% names(rows)) {
+    rows$length <- lengths(strsplit(as.character(rows$pattern), "->", fixed = TRUE))
+  }
+  if (nrow(rows) == 0L) table$setNote("empty", "No patterns reached the minimum frequency.")
+  .jtna_fill_table(table, rows)
 }
 
 # ---- Sequences ----------------------------------------------------------------
@@ -211,6 +236,7 @@
     table$setState(patterns)
   }
   .jtna_add_count_columns(table, patterns)
+  if (!is.null(attr(patterns, "jtna_note"))) table$setNote("clipped", attr(patterns, "jtna_note"))
   if (nrow(patterns) == 0L) {
     table$setNote("empty", "No patterns were found with the current settings.")
   }

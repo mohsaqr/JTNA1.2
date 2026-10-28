@@ -57,6 +57,12 @@ options:
           name: jaccard
         - title: Jaro-Winkler
           name: jw
+        - title: Damerau-Levenshtein
+          name: dl
+        - title: q-gram
+          name: qgram
+        - title: Cosine (q-gram)
+          name: cosine
 
     - name: clustering_method
       title: Clustering Method
@@ -65,14 +71,34 @@ options:
       options:
         - title: PAM
           name: pam
-        - title: Ward
+        - title: Ward (D2)
           name: ward.D2
+        - title: Ward (D)
+          name: ward.D
         - title: Complete
           name: complete
         - title: Average
           name: average
         - title: Single
           name: single
+        - title: McQuitty
+          name: mcquitty
+        - title: Median
+          name: median
+        - title: Centroid
+          name: centroid
+
+    - name: clustering_weighted
+      title: Weighted Hamming
+      type: Bool
+      default: false
+      description: Weight mismatches by position (Hamming distance only), with later positions decaying by lambda.
+
+    - name: clustering_lambda
+      title: Decay (lambda)
+      type: Number
+      default: 1
+      min: 0
 
     ### BUILD MODEL DATA
 
@@ -121,6 +147,18 @@ options:
       title: Session gap (seconds)
       type: Integer
       default: 900
+      min: 1
+
+    - name: random_seed_use
+      title: Set seed
+      type: Bool
+      default: false
+      description: Fix the seed of the resampling and randomised steps (bootstrap, permutation, stability, community detection, sequence comparison, clustering), so results repeat exactly. Off by default, as in tna.
+
+    - name: random_seed
+      title: Seed
+      type: Integer
+      default: 1
       min: 1
 
     - name: buildModel_show_plot
@@ -224,6 +262,11 @@ options:
       title: Normalize values
       type: Bool
       default: False
+
+    - name: centrality_invert
+      title: Invert weights for distance-based measures
+      type: Bool
+      default: true
 
     - name: centrality_show_table
       title: Table
@@ -363,6 +406,12 @@ options:
       default: 0
       min: 0
       max: 1
+
+    - name: cliques_sum_weights
+      title: Threshold the summed weights
+      type: Bool
+      default: false
+      description: Keep a clique when the sum of the weights in both directions passes the threshold, instead of each directed weight.
 
     ##### PLOT
 
@@ -613,6 +662,7 @@ options:
       title: Paired
       type: Bool
       default: False
+      description: Paired tests are unavailable for clusters because each sequence belongs to only one cluster. Leave this off to use an unpaired test.
 
     - name: permutation_level
       title: Level
@@ -620,6 +670,27 @@ options:
       default: 0.05
       min: 0
       max: 1
+
+    - name: permutation_adjust
+      title: Correction
+      type: List
+      default: none
+      options:
+        - title: None
+          name: none
+        - title: Bonferroni
+          name: bonferroni
+        - title: Holm
+          name: holm
+        - title: Hochberg
+          name: hochberg
+        - title: Hommel
+          name: hommel
+        - title: Benjamini-Hochberg (FDR)
+          name: BH
+        - title: Benjamini-Yekutieli
+          name: BY
+      description: Multiple-testing correction applied to the edge p-values.
 
     - name: permutation_table_max_rows
       title: Max rows
@@ -712,7 +783,7 @@ options:
     - name: sequences_include_na
       title: Include missing values
       type: Bool
-      default: true
+      default: false
 
     - name: sequences_show_n
       title: Show n in title
@@ -884,8 +955,6 @@ options:
           name: rank
         - title: Z-Score
           name: zscore
-        - title: Robust
-          name: robust
 
     - name: compare_plot_type
       title: Plot Type

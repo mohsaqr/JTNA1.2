@@ -23,10 +23,15 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       model <- private$.model()
       opts <- self$options
       res <- self$results
+      missing_group_events <- sum(is.na(self$data[[opts$buildModel_variables_long_group]]))
+      if (missing_group_events > 0L) {
+        .jtna_notice(opts, res$model,
+          sprintf("Excluded %d events with missing Group values.", missing_group_events),
+          name = "missing_group", type = jmvcore::NoticeType$WARNING)
+      }
+      .jtna_check_mosaic(res$model, opts)
       private$.section("model", "transition models", \() {
         .jtna_run_matrix(res$model, opts, model, "group")
-        .jtna_scaling_notice(res$model, opts, "group")
-        .jtna_check_mosaic(res$model, opts)
       })
       private$.section("centrality", "centrality measures",
         \() .jtna_run_centrality(res$centrality, opts, model, "group"))
@@ -36,8 +41,29 @@ GroupTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         \() .jtna_run_cliques(res$cliques, opts, model))
       private$.section("bootstrap", "bootstrap",
         \() .jtna_run_bootstrap(res$bootstrap, opts, model, "group"))
-      private$.section("permutation", "permutation test",
-        \() .jtna_run_permutation(res$permutation, opts, model, "group", private$.unscaledModel))
+      private$.section("permutation", "permutation test", \() {
+        if (isTRUE(opts$permutation_paired)) {
+          # tna pairs rows by position; equal group sizes alone do not
+          # establish that these are the same actors and sessions.
+          prepared <- private$.prepared()
+          keys <- data.frame(
+            actor = as.character(.jtna_session_values(prepared, opts$buildModel_variables_long_actor)),
+            session = .jtna_session_values(prepared, ".session_nr"),
+            stringsAsFactors = FALSE)
+          groups <- private$.groups(prepared)
+          paired_keys <- lapply(names(model), \(group) {
+            key <- keys[groups == group, , drop = FALSE]
+            rownames(key) <- NULL
+            key
+          })
+          if (!all(vapply(paired_keys, identical, logical(1), paired_keys[[1]]))) {
+            stop(paste("Paired permutation tests require matching actors and session numbers",
+                       "in every group. Use an unpaired test or provide matching sequences."),
+                 call. = FALSE)
+          }
+        }
+        .jtna_run_permutation(res$permutation, opts, model, "group", private$.unscaledModel)
+      })
       private$.section("compare", "network comparison", \() {
         groups <- names(model)
         i <- .jtna_level(opts$compare_group_i, groups[1])

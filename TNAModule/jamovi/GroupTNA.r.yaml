@@ -208,6 +208,7 @@ items:
                     - buildModel_lambda
                     - centrality_loops
                     - centrality_normalize
+                    - centrality_invert
                     - centrality_OutStrength
                     - centrality_InStrength
                     - centrality_ClosenessIn
@@ -236,6 +237,7 @@ items:
                     - buildModel_lambda
                     - centrality_loops
                     - centrality_normalize
+                    - centrality_invert
                     - centrality_OutStrength
                     - centrality_InStrength
                     - centrality_ClosenessIn
@@ -276,6 +278,8 @@ items:
                     - buildModel_lambda
                     - community_methods
                     - community_gamma
+                    - random_seed_use
+                    - random_seed
             -   name: plot
                 title: Community Plot
                 type: Image
@@ -295,6 +299,8 @@ items:
                     - buildModel_lambda
                     - community_methods
                     - community_gamma
+                    - random_seed_use
+                    - random_seed
                     - community_plot_layout
     -   name: cliques
         title: Cliques
@@ -319,6 +325,7 @@ items:
                     - buildModel_lambda
                     - cliques_size
                     - cliques_threshold
+                    - cliques_sum_weights
                     - cliques_plot_cut
                     - cliques_plot_min_value
                     - cliques_plot_edge_label_size
@@ -385,6 +392,8 @@ items:
                     - bootstrap_range_low
                     - bootstrap_range_up
                     - bootstrap_threshold
+                    - random_seed_use
+                    - random_seed
             -   name: plot
                 title: Bootstrap Network
                 type: Image
@@ -408,6 +417,8 @@ items:
                     - bootstrap_range_low
                     - bootstrap_range_up
                     - bootstrap_threshold
+                    - random_seed_use
+                    - random_seed
                     - bootstrap_plot_cut
                     - bootstrap_plot_min_value
                     - bootstrap_plot_edge_label_size
@@ -452,6 +463,9 @@ items:
                     - permutation_iter
                     - permutation_paired
                     - permutation_level
+                    - permutation_adjust
+                    - random_seed_use
+                    - random_seed
             -   name: plot
                 title: Permutation Test
                 type: Image
@@ -472,6 +486,9 @@ items:
                     - permutation_iter
                     - permutation_paired
                     - permutation_level
+                    - permutation_adjust
+                    - random_seed_use
+                    - random_seed
                     - permutation_plot_layout
     -   name: compare
         title: Network Comparison
@@ -603,6 +620,8 @@ items:
                     - compare_sequences_sub_max
                     - compare_sequences_min_freq
                     - compare_sequences_correction
+                    - random_seed_use
+                    - random_seed
             -   name: table
                 title: Sequence Pattern Comparison
                 type: Table
@@ -629,6 +648,8 @@ items:
                     - compare_sequences_sub_max
                     - compare_sequences_min_freq
                     - compare_sequences_correction
+                    - random_seed_use
+                    - random_seed
     -   name: sequences
         title: Sequences
         type: Group

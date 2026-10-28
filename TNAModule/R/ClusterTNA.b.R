@@ -23,10 +23,9 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       model <- private$.model()
       opts <- self$options
       res <- self$results
+      .jtna_check_mosaic(res$model, opts)
       private$.section("model", "cluster models", \() {
         .jtna_run_matrix(res$model, opts, model, "cluster")
-        .jtna_scaling_notice(res$model, opts, "cluster")
-        .jtna_check_mosaic(res$model, opts)
       })
       private$.section("centrality", "centrality measures",
         \() .jtna_run_centrality(res$centrality, opts, model, "cluster"))
@@ -36,8 +35,15 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         \() .jtna_run_cliques(res$cliques, opts, model))
       private$.section("bootstrap", "bootstrap",
         \() .jtna_run_bootstrap(res$bootstrap, opts, model, "cluster"))
-      private$.section("permutation", "permutation test",
-        \() .jtna_run_permutation(res$permutation, opts, model, "cluster", private$.unscaledModel))
+      private$.section("permutation", "permutation test", \() {
+        if (isTRUE(opts$permutation_paired)) {
+          stop(paste("Paired permutation tests are unavailable for clusters:",
+                     "each sequence belongs to one cluster, so matching sequence pairs",
+                     "cannot be established. Turn off Paired to use an unpaired test."),
+               call. = FALSE)
+        }
+        .jtna_run_permutation(res$permutation, opts, model, "cluster", private$.unscaledModel)
+      })
       private$.section("compare", "network comparison", \() {
         k <- length(model)
         picked <- c(opts$compare_cluster_i, opts$compare_cluster_j)
@@ -91,22 +97,30 @@ ClusterTNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           "The number of clusters (%d) must be smaller than the number of sequences (%d).",
           k, nrow(sequences)))
       }
-      clustering <- tna::cluster_sequences(
+      clustering <- .jtna_with_seed(.jtna_seed(self$options), \() tna::cluster_sequences(
         data = sequences,
         k = k,
         dissimilarity = self$options$clustering_dissimilarity,
-        method = self$options$clustering_method)
-      clusters <- paste("Cluster", clustering$assignments)
+        method = self$options$clustering_method,
+        # A disabled checkbox keeps its value when the distance changes.
+        weighted = identical(self$options$clustering_dissimilarity, "hamming") &&
+          isTRUE(self$options$clustering_weighted),
+        lambda = self$options$clustering_lambda))
+      # Levels in numeric order, so "Cluster 10" follows "Cluster 9".
+      clusters <- factor(paste("Cluster", clustering$assignments),
+                         levels = paste("Cluster", seq_len(k)))
 
       model <- .jtna_group_model(prepared, clusters, self$options)
-      attr(model, "jtna_clusters") <- clusters
+      attr(model, "jtna_clusters") <- as.character(clusters)
       cache$setState(model)
       model
     },
 
     .unscaledModel = function() {
       model <- self$results$modelCache$state
-      .jtna_group_model(private$.prepared(), attr(model, "jtna_clusters"), self$options,
+      # Preserve numeric cluster order when rebuilding for permutation tests.
+      clusters <- factor(attr(model, "jtna_clusters"), levels = names(model))
+      .jtna_group_model(private$.prepared(), clusters, self$options,
                         scaling = character(0L))
     },
 

@@ -27,6 +27,10 @@ items:
             - clustering_k
             - clustering_dissimilarity
             - clustering_method
+            - clustering_weighted
+            - clustering_lambda
+            - random_seed_use
+            - random_seed
     -   name: model
         title: Transition Models
         type: Group
@@ -47,6 +51,10 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                 template:
                     title: $key
                     type: Table
@@ -76,6 +84,10 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
             -   name: plot
                 title: Network
                 type: Image
@@ -95,6 +107,10 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - buildModel_plot_cut
                     - buildModel_plot_min_value
                     - buildModel_plot_edge_label_size
@@ -120,6 +136,10 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
             -   name: frequencies
                 title: State Frequencies
                 type: Image
@@ -139,6 +159,10 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
             -   name: mosaic
                 title: Mosaic Plot
                 type: Image
@@ -158,6 +182,10 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
     -   name: centrality
         title: Centrality
         type: Group
@@ -222,8 +250,13 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - centrality_loops
                     - centrality_normalize
+                    - centrality_invert
                     - centrality_OutStrength
                     - centrality_InStrength
                     - centrality_ClosenessIn
@@ -252,8 +285,13 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - centrality_loops
                     - centrality_normalize
+                    - centrality_invert
                     - centrality_OutStrength
                     - centrality_InStrength
                     - centrality_ClosenessIn
@@ -294,8 +332,14 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - community_methods
                     - community_gamma
+                    - random_seed_use
+                    - random_seed
             -   name: plot
                 title: Community Plot
                 type: Image
@@ -315,8 +359,14 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - community_methods
                     - community_gamma
+                    - random_seed_use
+                    - random_seed
                     - community_plot_layout
     -   name: cliques
         title: Cliques
@@ -341,8 +391,13 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - cliques_size
                     - cliques_threshold
+                    - cliques_sum_weights
                     - cliques_plot_cut
                     - cliques_plot_min_value
                     - cliques_plot_edge_label_size
@@ -405,12 +460,18 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - bootstrap_iteration
                     - bootstrap_level
                     - bootstrap_method
                     - bootstrap_range_low
                     - bootstrap_range_up
                     - bootstrap_threshold
+                    - random_seed_use
+                    - random_seed
             -   name: plot
                 title: Bootstrap Network
                 type: Image
@@ -430,12 +491,18 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - bootstrap_iteration
                     - bootstrap_level
                     - bootstrap_method
                     - bootstrap_range_low
                     - bootstrap_range_up
                     - bootstrap_threshold
+                    - random_seed_use
+                    - random_seed
                     - bootstrap_plot_cut
                     - bootstrap_plot_min_value
                     - bootstrap_plot_edge_label_size
@@ -479,9 +546,16 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - permutation_iter
                     - permutation_paired
                     - permutation_level
+                    - permutation_adjust
+                    - random_seed_use
+                    - random_seed
             -   name: plot
                 title: Permutation Test
                 type: Image
@@ -501,9 +575,16 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - permutation_iter
                     - permutation_paired
                     - permutation_level
+                    - permutation_adjust
+                    - random_seed_use
+                    - random_seed
                     - permutation_plot_layout
     -   name: compare
         title: Network Comparison
@@ -533,6 +614,10 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - compare_cluster_i
                     - compare_cluster_j
                     - compare_scaling
@@ -563,6 +648,10 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - compare_cluster_i
                     - compare_cluster_j
                     - compare_scaling
@@ -585,6 +674,10 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - compare_cluster_i
                     - compare_cluster_j
                     - compare_scaling
@@ -612,6 +705,10 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - compare_network_diff_plot_cut
                     - compare_network_diff_plot_min_value
                     - compare_network_diff_plot_edge_label_size
@@ -641,10 +738,16 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - compare_sequences_sub_min
                     - compare_sequences_sub_max
                     - compare_sequences_min_freq
                     - compare_sequences_correction
+                    - random_seed_use
+                    - random_seed
             -   name: table
                 title: Sequence Pattern Comparison
                 type: Table
@@ -669,10 +772,16 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - compare_sequences_sub_min
                     - compare_sequences_sub_max
                     - compare_sequences_min_freq
                     - compare_sequences_correction
+                    - random_seed_use
+                    - random_seed
     -   name: sequences
         title: Sequences
         type: Group
@@ -696,6 +805,10 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - sequences_show_n
                     - sequences_tick
                     - sequences_xlab
@@ -727,6 +840,10 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - sequences_show_n
                     - sequences_tick
                     - sequences_xlab
@@ -790,6 +907,10 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - pattern_type
                     - pattern_len_min
                     - pattern_len_max
@@ -909,6 +1030,10 @@ items:
                     - clustering_k
                     - clustering_dissimilarity
                     - clustering_method
+                    - clustering_weighted
+                    - clustering_lambda
+                    - random_seed_use
+                    - random_seed
                     - indices_favorable
                     - indices_omega
 ...

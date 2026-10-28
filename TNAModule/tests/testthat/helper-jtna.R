@@ -47,3 +47,26 @@ jtna_notices <- function(group) {
   # asString() wraps lines; collapse the wrapping so messages can be matched.
   vapply(items[is_notice], \(n) gsub("\\s+", " ", trimws(n$asString())), character(1))
 }
+
+# Error notices anywhere in the results (section failures), as text.
+jtna_errors <- function(results) {
+  walk <- function(el) {
+    if (inherits(el, "Notice")) {
+      if (identical(el$name, "notice_error")) return(gsub("\\s+", " ", trimws(el$asString())))
+      return(character(0))
+    }
+    if (inherits(el, "Group")) return(unlist(lapply(el$items, walk)))
+    character(0)
+  }
+  unlist(lapply(results$items, walk))
+}
+
+# Every visible image in the results.
+jtna_images <- function(results) {
+  walk <- function(el) {
+    if (inherits(el, "Image")) return(if (el$visible) list(el))
+    if (inherits(el, "Group")) return(unlist(lapply(el$items, walk), recursive = FALSE))
+    list()
+  }
+  unlist(lapply(results$items, walk), recursive = FALSE)
+}

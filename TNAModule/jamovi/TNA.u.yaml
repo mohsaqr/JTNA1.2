@@ -92,6 +92,12 @@ children:
               - type: TextBox
                 name: buildModel_threshold
                 format: number
+              - type: CheckBox
+                name: random_seed_use
+              - type: TextBox
+                name: random_seed
+                format: number
+                enable: (random_seed_use)
   - type: Label
     label: Network Analysis
     style: list-inline
@@ -200,6 +206,8 @@ children:
               - type: CheckBox
                 name: centrality_normalize
                 label: Normalize values
+              - type: CheckBox
+                name: centrality_invert
           - type: Label
             label: Advanced Measures
             children:
@@ -353,6 +361,8 @@ children:
               - type: TextBox
                 name: cliques_threshold
                 format: number
+              - type: CheckBox
+                name: cliques_sum_weights
           - type: Label
             label: Plot Parameters
             children:

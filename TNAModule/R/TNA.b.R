@@ -22,9 +22,11 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             model <- private$.model()
             opts <- self$options
             res <- self$results
+            # The mosaic image is hidden for non-frequency models. Report
+            # why even when it is the only requested model output.
+            .jtna_check_mosaic(res$model, opts)
             private$.section("model", "transition model", \() {
                 .jtna_run_matrix(res$model, opts, model)
-                .jtna_check_mosaic(res$model, opts)
             })
             private$.section("centrality", "centrality measures",
                 \() .jtna_run_centrality(res$centrality, opts, model))
@@ -95,15 +97,16 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plot <- self$results$stability$plot
             cs <- plot$state
             if (is.null(cs)) {
-                cs <- tna::estimate_cs(
+                cs <- .jtna_with_seed(.jtna_seed(self$options), \() tna::estimate_cs(
                     x = model,
                     loops = self$options$centrality_loops,
                     normalize = self$options$centrality_normalize,
+                    invert = self$options$centrality_invert,
                     measures = .jtna_stability_measures(self$options),
                     iter = self$options$centrality_stability_iteration,
                     threshold = self$options$centrality_stability_threshold,
                     certainty = self$options$centrality_stability_certainty,
-                    progressbar = FALSE)
+                    progressbar = FALSE))
                 plot$setState(cs)
             }
             .jtna_fill_table(self$results$stability$table, data.frame(
@@ -115,7 +118,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plot <- self$results$edgeBetweenness$plot
             eb <- plot$state
             if (is.null(eb)) {
-                eb <- tna::betweenness_network(x = model, directed = FALSE)
+                eb <- tna::betweenness_network(x = model)
                 plot$setState(eb)
             }
             table <- self$results$edgeBetweenness$table
@@ -167,7 +170,7 @@ TNAClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (is.null(eb)) return(FALSE)
             .jtna_draw("The edge betweenness plot", \() {
                 args <- .jtna_network_args(self$options, "edgeBetweenness_plot")
-                do.call(cograph::splot, c(list(x = eb, directed = FALSE, edge_style = 1,
+                do.call(cograph::splot, c(list(x = eb, edge_style = 1,
                     weight_digits = 0, background = "transparent"), args))
             })
         },

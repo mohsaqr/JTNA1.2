@@ -197,6 +197,7 @@ items:
                     - buildModel_lambda
                     - centrality_loops
                     - centrality_normalize
+                    - centrality_invert
                     - centrality_OutStrength
                     - centrality_InStrength
                     - centrality_ClosenessIn
@@ -224,6 +225,7 @@ items:
                     - buildModel_lambda
                     - centrality_loops
                     - centrality_normalize
+                    - centrality_invert
                     - centrality_OutStrength
                     - centrality_InStrength
                     - centrality_ClosenessIn
@@ -260,6 +262,9 @@ items:
                     - buildModel_lambda
                     - centrality_loops
                     - centrality_normalize
+                    - centrality_invert
+                    - random_seed_use
+                    - random_seed
                     - centrality_stability_iteration
                     - centrality_stability_threshold
                     - centrality_stability_certainty
@@ -284,6 +289,9 @@ items:
                     - buildModel_lambda
                     - centrality_loops
                     - centrality_normalize
+                    - centrality_invert
+                    - random_seed_use
+                    - random_seed
                     - centrality_stability_iteration
                     - centrality_stability_threshold
                     - centrality_stability_certainty
@@ -367,6 +375,8 @@ items:
                     - buildModel_lambda
                     - community_methods
                     - community_gamma
+                    - random_seed_use
+                    - random_seed
             -   name: plot
                 title: Community Plot
                 type: Image
@@ -385,6 +395,8 @@ items:
                     - buildModel_lambda
                     - community_methods
                     - community_gamma
+                    - random_seed_use
+                    - random_seed
                     - community_plot_layout
     -   name: cliques
         title: Cliques
@@ -408,6 +420,7 @@ items:
                     - buildModel_lambda
                     - cliques_size
                     - cliques_threshold
+                    - cliques_sum_weights
                     - cliques_plot_cut
                     - cliques_plot_min_value
                     - cliques_plot_edge_label_size
@@ -470,6 +483,8 @@ items:
                     - bootstrap_range_low
                     - bootstrap_range_up
                     - bootstrap_threshold
+                    - random_seed_use
+                    - random_seed
             -   name: plot
                 title: Bootstrap Network
                 type: Image
@@ -492,6 +507,8 @@ items:
                     - bootstrap_range_low
                     - bootstrap_range_up
                     - bootstrap_threshold
+                    - random_seed_use
+                    - random_seed
                     - bootstrap_plot_cut
                     - bootstrap_plot_min_value
                     - bootstrap_plot_edge_label_size

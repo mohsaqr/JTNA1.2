@@ -66,7 +66,8 @@ test_that("ClusterTNA builds the model type, scaling and lambda chosen in the pa
   expect_identical(attr(freq[[1]], "type"), "frequency")
   expect_gt(max(freq[[1]]$weights), 1)
   expect_equal(unname(rowSums(rel[[1]]$weights)), rep(1, nrow(rel[[1]]$weights)))
-  expect_equal(max(scaled[[1]]$weights), 1)
+  # Scaled across clusters (tna's default): the maximum over all clusters is 1.
+  expect_equal(max(vapply(scaled, \(m) max(m$weights), numeric(1))), 1)
   lam <- function(l) run_small("ClusterTNA", clustering_run = TRUE, buildModel_type = "attention",
                                buildModel_lambda = l)$modelCache$state[[1]]$weights
   expect_false(isTRUE(all.equal(lam(0.1), lam(5))))
@@ -185,14 +186,14 @@ test_that("GroupTNA honours lambda for attention models", {
   expect_false(isTRUE(all.equal(lam(0.1), lam(5))))
 })
 
-test_that("grouped analyses work with scaling, applied within each group", {
+test_that("grouped scaling follows tna: across groups, and tna reports what it cannot analyse", {
   g <- run_small("GroupTNA", buildModel_variables_long_group = "group", buildModel_scaling = "minmax",
-                 centrality_show_table = TRUE, community_show_table = TRUE,
                  bootstrap_show_table = TRUE, bootstrap_iteration = 10)
-  expect_match(jtna_notices(g$model), "scaled within each group")
-  expect_length(jtna_notices(g$community), 0L)
-  expect_length(jtna_notices(g$bootstrap), 0L)
-  expect_true(all(jtna_table(g$centrality$table)$state %in% unique(jtna_small()$action)))
+  prepared <- .jtna_prepare(jtna_small(), g$options)
+  ref <- tna::group_model(prepared, group = factor(.jtna_session_values(prepared, "group")),
+                          scaling = "minmax")
+  expect_equal(lapply(g$modelCache$state, \(m) m$weights), lapply(ref, \(m) m$weights))
+  expect_match(jtna_errors(g), "not supported for grouped models with globally scaled", all = FALSE)
 })
 
 # ---- LOW -----------------------------------------------------------------------
@@ -282,4 +283,34 @@ test_that("sorting an index plot groups the sequences by state", {
   expect_equal(runs_first(model, "first"), n_states)
   expect_equal(runs_first(model, "all"), n_states)
   expect_gt(runs_first(model, "none"), n_states)
+})
+
+test_that("group networks carry their own group's name when the data start with a later group", {
+  # tna 1.3.1 swaps the names for a character group vector whose first value
+  # is not alphabetically first; JTNA passes a factor.
+  d <- jtna_small()
+  d$group <- ifelse(d$group == "A", "zeta", "alpha")  # data now start with "zeta"
+  expect_identical(d$group[1], "zeta")
+  g <- run_small("GroupTNA", data = d, buildModel_variables_long_group = "group")$modelCache$state
+  expect_setequal(names(g), c("alpha", "zeta"))
+  lapply(names(g), \(grp) {
+    alone <- run_small("TNA", data = subset(d, group == grp))$modelCache$state
+    expect_equal(unname(g[[grp]]$weights), unname(alone$weights), tolerance = sqrt(.Machine$double.eps),
+                 label = grp)
+  })
+})
+
+test_that("each cluster network is built from the sequences assigned to it", {
+  d <- jtna_small(n_actor = 30)
+  r <- run_small("ClusterTNA", data = d, clustering_run = TRUE, clustering_k = 3)
+  model <- r$modelCache$state
+  clusters <- attr(model, "jtna_clusters")
+  prepared <- suppressMessages(tna::prepare_data(d, actor = "actor", action = "action"))
+  lapply(unique(clusters), \(cl) {
+    rows <- which(clusters == cl)
+    seqs <- ref_sequences(prepared)[rows, , drop = FALSE]
+    expected <- ref_relative(ref_counts(seqs, model[[cl]]$labels))
+    expect_equal(unname(model[[cl]]$weights), unname(expected), tolerance = sqrt(.Machine$double.eps),
+                 label = cl)
+  })
 })
